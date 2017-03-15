@@ -1,0 +1,54 @@
+!=======================================================================
+!> @brief Physical space configurations
+!=======================================================================
+module velocityGrid
+integer, parameter :: Nc_fundamental=2 !Number of fundamental molecular velocity
+integer, parameter :: Nc=(2*Nc_fundamental)**3 !Number of moleculer velocity in 2D-Gaussian Hermite
+integer, parameter :: Vmax=5
+integer, parameter :: power_law=3
+integer, parameter :: Nc8 = Nc/8
+!integer, parameter :: Nphi=100 !Number of discrete point in angular of polar coordinate mode(Nphi,4)=0
+!integer, parameter :: Nc=Nc_fundamental*Nphi !Number of molecular velocity in polar coordinate
+double precision, DIMENSION (1:Nc_fundamental) :: xi, weight1D !abscissae and weighting Hermite quadrature
+double precision, DIMENSION (1:Nc8) :: cx, cy, cz, w !molecular velocity and weighting
+integer, DIMENSION (1:Nc) :: oppositeX, oppositeY, oppositeZ! specular wall's normal vector in X, Y direction
+double precision, parameter :: PI=datan(1.d0)*4.d0
+double precision :: DiffFlux
+
+contains
+    subroutine setupVelocityGrid
+        integer :: l, m, n
+
+        xi(1) = dsqrt(3.d0-dsqrt(6.d0))           !fundamental abscissae
+        xi(2) = dsqrt(3.d0+dsqrt(6.d0))
+        weight1D(1) = (3.d0+dsqrt(6.d0))/12.d0    !fundamental weighting
+        weight1D(2) = (3.d0-dsqrt(6.d0))/12.d0
+
+
+        Do l=1,Nc_fundamental
+            Do m=1,Nc_fundamental
+                Do n=1,Nc_fundamental
+                    k=n+(m-1)*Nc_fundamental+(l-1)*Nc_fundamental**2
+                    cx(k) = xi(n)
+                    cy(k) = xi(m)
+                    cz(k) = xi(l)
+                    w(k) = weight1D(n)*weight1D(m)*weight1D(l)
+                End do
+            End do
+        End do  
+        
+        DiffFlux=0.d0
+        Do l=1,Nc8
+            DiffFlux=DiffFlux+cz(l)*w(l)
+        Enddo
+        DiffFlux=DiffFlux*4 !Check
+
+        !open(10,file='Test.dat',STATUS="REPLACE")
+        !write(10,*) 'Velocity space D2Q16: l, cx, cy, w, oppositeX, oppositeY'
+        !Do l=1,Nc
+        !    write(10,*) l, cx(l), cy(l), w(l), oppositeX(l), oppositeY(l)
+        !Enddo
+        !close(10)
+    end subroutine setupVelocityGrid
+
+end module velocityGrid
