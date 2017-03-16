@@ -6,7 +6,7 @@ use velocityGrid, only: PI
 implicit none
 save
 
-double precision, parameter :: Kn = 9d-5
+double precision, parameter :: Kn = 1.0d-1
 double precision, parameter :: mu = dsqrt(PI)/2.0d0/Kn
 double precision, parameter :: PressDrop=1.0d-3
 double precision, parameter :: accom = 1.d0
@@ -17,12 +17,13 @@ double precision :: mass
 
 contains
     subroutine setupFlow     
-        use physicalGrid, only: Ntotal, Nxtotal, Nytotal, Nztotal, ghostLayers
-        use velocityGrid, only: Nc, Nc8
+        use physicalGrid
+        use velocityGrid
         use mpiParams, only: f_west_snd,  f_east_snd,  f_west_rcv,  f_east_rcv, &
-                             f_suth_snd,  f_noth_snd,  f_soth_rcv,  f_noth_rcv, &
-                             f_back_snd,  f_frnt_snd,  f_back_rcv,  f_frnt_rdv
+                             f_suth_snd,  f_noth_snd,  f_suth_rcv,  f_noth_rcv, &
+                             f_back_snd,  f_frnt_snd,  f_back_rcv,  f_frnt_rcv
         implicit none
+        integer :: i, j, k, l
 
         ALLOCATE(f1(Ntotal,Nc8), f2(Ntotal,Nc8), f3(Ntotal,Nc8), f4(Ntotal,Nc8), &
                  f5(Ntotal,Nc8), f6(Ntotal,Nc8), f7(Ntotal,Nc8), f8(Ntotal,Nc8) )
@@ -54,18 +55,37 @@ contains
         allocate( f_frnt_rcv(Nc/2*Nxtotal*Nytotal*ghostLayers) ) 
 
         ! Allways initialize allocated arrays
-        f1_west_rcv = 0.d0
-        f1_east_rcv = 0.d0
-        f1_noth_rcv = 0.d0
-        f1_suth_rcv = 0.d0
-        f1_back_rcv = 0.d0
-        f1_frnt_rcv = 0.d0
-        f1_west_snd = 0.d0
-        f1_east_snd = 0.d0
-        f1_noth_snd = 0.d0
-        f1_suth_snd = 0.d0
-        f1_back_snd = 0.d0
-        f1_frnt_snd = 0.d0
+        f_west_rcv = 0.d0
+        f_east_rcv = 0.d0
+        f_noth_rcv = 0.d0
+        f_suth_rcv = 0.d0
+        f_back_rcv = 0.d0
+        f_frnt_rcv = 0.d0
+        f_west_snd = 0.d0
+        f_east_snd = 0.d0
+        f_noth_snd = 0.d0
+        f_suth_snd = 0.d0
+        f_back_snd = 0.d0
+        f_frnt_snd = 0.d0
 
+        Do k=zlg,zug
+            Do j=ylg,yug
+                 Do i=xlg,xug
+                     l=(i-xlg+1)+(j-ylg)*Nxtotal+(k-zlg)*Nxytotal
+                     if (image(i,j,k)/=solid) then
+            !           Rho(l)=PressDrop*(i/2.d0-Nx)/Nx
+                        Rho(l)= 0.d0
+                     end if
+                     f1(l,:)=w(:)*Rho(l) !Check
+                 Enddo
+            Enddo
+        Enddo
+        f2=f1
+        f3=f1
+        f4=f1
+        f5=f1
+        f6=f1
+        f7=f1
+        f8=f1
     end subroutine setupFlow
 end module flow

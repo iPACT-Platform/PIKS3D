@@ -2,6 +2,8 @@
 !> @brief Physical space configurations
 !=======================================================================
 module velocityGrid
+implicit none
+save
 integer, parameter :: Nc_fundamental=2 !Number of fundamental molecular velocity
 integer, parameter :: Nc=(2*Nc_fundamental)**3 !Number of moleculer velocity in 2D-Gaussian Hermite
 integer, parameter :: Vmax=5
@@ -17,7 +19,8 @@ double precision :: DiffFlux
 
 contains
     subroutine setupVelocityGrid
-        integer :: l, m, n
+        implicit none
+        integer :: l, m, n, k
 
         xi(1) = dsqrt(3.d0-dsqrt(6.d0))           !fundamental abscissae
         xi(2) = dsqrt(3.d0+dsqrt(6.d0))
@@ -43,12 +46,6 @@ contains
         Enddo
         DiffFlux=DiffFlux*4 !Check
 
-        !open(10,file='Test.dat',STATUS="REPLACE")
-        !write(10,*) 'Velocity space D2Q16: l, cx, cy, w, oppositeX, oppositeY'
-        !Do l=1,Nc
-        !    write(10,*) l, cx(l), cy(l), w(l), oppositeX(l), oppositeY(l)
-        !Enddo
-        !close(10)
     end subroutine setupVelocityGrid
 
 end module velocityGrid

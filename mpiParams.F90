@@ -16,26 +16,26 @@ INTEGER, PARAMETER :: TAG1 = 1, TAG2 = 2, TAG3 = 3, TAG4 = 4, TAG5=5, TAG6=6
 
 ! Communication parameters
 INTEGER :: nprocs, proc, vproc
-INTEGER, parameter :: mpi_xdim = 2
-INTEGER, parameter :: mpi_ydim = 2
+INTEGER, parameter :: mpi_xdim = 1
+INTEGER, parameter :: mpi_ydim = 1
 INTEGER, parameter :: mpi_zdim = 1
 
-INTEGER :: east, west, nuth, suth, frnt, back, MPI_COMM_VGRID
+INTEGER :: east, west, noth, suth, frnt, back, MPI_COMM_VGRID
 INTEGER, PARAMETER :: master  = 0
 INTEGER, PARAMETER :: mpi_dim = 3
 
 
 ! Information exchange buffers (x direction)
-double precision, ALLOCATABLE, DIMENSION(:) :: f_west_snd,  f1_east_snd
-double precision, ALLOCATABLE, DIMENSION(:) :: f_west_rcv,  f1_east_rcv
+double precision, ALLOCATABLE, DIMENSION(:) :: f_west_snd,  f_east_snd
+double precision, ALLOCATABLE, DIMENSION(:) :: f_west_rcv,  f_east_rcv
 
 ! Information exchange buffers (y direction)
-double precision, ALLOCATABLE, DIMENSION(:) :: f_suth_snd, f1_nrth_snd
-double precision, ALLOCATABLE, DIMENSION(:) :: f_suth_rcv, f1_nrth_rcv
+double precision, ALLOCATABLE, DIMENSION(:) :: f_suth_snd, f_noth_snd
+double precision, ALLOCATABLE, DIMENSION(:) :: f_suth_rcv, f_noth_rcv
 
 ! Information exchange buffers (z direction)
-double precision, ALLOCATABLE, DIMENSION(:) :: f_back_snd, f1_frnt_snd
-double precision, ALLOCATABLE, DIMENSION(:) :: f_back_rcv, f1_frnt_rcv
+double precision, ALLOCATABLE, DIMENSION(:) :: f_back_snd, f_frnt_snd
+double precision, ALLOCATABLE, DIMENSION(:) :: f_back_rcv, f_frnt_rcv
 
 !
 INTEGER :: mpi_group_inlet
@@ -154,13 +154,13 @@ contains
         direction = 0
         CALL MPI_CART_SHIFT(MPI_COMM_VGRID, direction, shift, west, east, MPI_ERR)
         direction = 1
-        CALL MPI_CART_SHIFT(MPI_COMM_VGRID, direction, shift, suth, nrth, MPI_ERR)
+        CALL MPI_CART_SHIFT(MPI_COMM_VGRID, direction, shift, suth, noth, MPI_ERR)
         direction = 2
         CALL MPI_CART_SHIFT(MPI_COMM_VGRID, direction, shift, back, frnt, MPI_ERR)
 
         ! Create inlet processor group
         CALL MPI_COMM_GROUP(MPI_COMM_VGRID, mpi_group_global, MPI_ERR)
-        do k = 1, mpi_ydim
+        do k = 1, mpi_zdim
            do j = 1, mpi_ydim
                inlet_rank(j, k) = (k-1)*mpi_ydim + j-1
            enddo
