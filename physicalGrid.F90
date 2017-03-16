@@ -225,82 +225,108 @@ contains
                         SELECT Case (NneighborFluid)
                             CASE (2)
                                 image(i,j,k)=WallE
-                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. k .ge. zl .and. k .le. zu) nWall=nWall+1
+                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
+                                    k .ge. zl .and. k .le. zu) nWall=nWall+1
                             CASE (3)
                                 image(i,j,k)=WallW
-                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. k .ge. zl .and. k .le. zu) nWall=nWall+1
+                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
+                                    k .ge. zl .and. k .le. zu) nWall=nWall+1
                             CASE (5)
                                 image(i,j,k)=WallN
-                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. k .ge. zl .and. k .le. zu) nWall=nWall+1
+                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
+                                    k .ge. zl .and. k .le. zu) nWall=nWall+1
                             CASE (7)
                                 image(i,j,k)=WallS
-                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. k .ge. zl .and. k .le. zu) nWall=nWall+1
+                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
+                                    k .ge. zl .and. k .le. zu) nWall=nWall+1
                             CASE (9)
                                 image(i,j,k)=WallF
-                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. k .ge. zl .and. k .le. zu) nWall=nWall+1
+                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
+                                    k .ge. zl .and. k .le. zu) nWall=nWall+1
                             CASE (11)
                                 image(i,j,k)=WallB
-                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. k .ge. zl .and. k .le. zu) nWall=nWall+1
+                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
+                                    k .ge. zl .and. k .le. zu) nWall=nWall+1
                             CASE (10)
                                 image(i,j,k)=WallEN
-                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. k .ge. zl .and. k .le. zu) nWall=nWall+1
+                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
+                                    k .ge. zl .and. k .le. zu) nWall=nWall+1
                             CASE (15)
                                 image(i,j,k)=WallWN
-                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. k .ge. zl .and. k .le. zu) nWall=nWall+1
+                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
+                                    k .ge. zl .and. k .le. zu) nWall=nWall+1
                             CASE (14)
                                 image(i,j,k)=WallES
-                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. k .ge. zl .and. k .le. zu) nWall=nWall+1
+                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
+                                    k .ge. zl .and. k .le. zu) nWall=nWall+1
                             CASE (21)
                                 image(i,j,k)=WallWS
-                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. k .ge. zl .and. k .le. zu) nWall=nWall+1
+                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
+                                    k .ge. zl .and. k .le. zu) nWall=nWall+1
                             CASE (18)
                                 image(i,j,k)=WallEF
-                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. k .ge. zl .and. k .le. zu) nWall=nWall+1
+                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
+                                    k .ge. zl .and. k .le. zu) nWall=nWall+1
                             CASE (22)
                                 image(i,j,k)=WallEB
-                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. k .ge. zl .and. k .le. zu) nWall=nWall+1
+                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
+                                    k .ge. zl .and. k .le. zu) nWall=nWall+1
                             CASE (27)
                                 image(i,j,k)=WallWF
-                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. k .ge. zl .and. k .le. zu) nWall=nWall+1
+                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
+                                    k .ge. zl .and. k .le. zu) nWall=nWall+1
                             CASE (33)
                                 image(i,j,k)=WallWB
-                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. k .ge. zl .and. k .le. zu) nWall=nWall+1
+                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
+                                    k .ge. zl .and. k .le. zu) nWall=nWall+1
                             CASE (45)
                                 image(i,j,k)=WallNF
-                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. k .ge. zl .and. k .le. zu) nWall=nWall+1
+                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
+                                    k .ge. zl .and. k .le. zu) nWall=nWall+1
                             CASE (55)
                                 image(i,j,k)=WallNB
-                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. k .ge. zl .and. k .le. zu) nWall=nWall+1
+                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
+                                    k .ge. zl .and. k .le. zu) nWall=nWall+1
                             CASE (63)
                                 image(i,j,k)=WallSF
-                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. k .ge. zl .and. k .le. zu) nWall=nWall+1
+                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
+                                    k .ge. zl .and. k .le. zu) nWall=nWall+1
                             CASE (77)
                                 image(i,j,k)=WallSB
-                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. k .ge. zl .and. k .le. zu) nWall=nWall+1
+                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
+                                    k .ge. zl .and. k .le. zu) nWall=nWall+1
                             CASE (90)
                                 image(i,j,k)=WallENF
-                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. k .ge. zl .and. k .le. zu) nWall=nWall+1
+                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
+                                    k .ge. zl .and. k .le. zu) nWall=nWall+1
                             CASE (110)
                                 image(i,j,k)=WallENB
-                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. k .ge. zl .and. k .le. zu) nWall=nWall+1
+                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
+                                    k .ge. zl .and. k .le. zu) nWall=nWall+1
                             CASE (135)
                                 image(i,j,k)=WallWNF
-                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. k .ge. zl .and. k .le. zu) nWall=nWall+1
+                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
+                                    k .ge. zl .and. k .le. zu) nWall=nWall+1
                             CASE (165)
                                 image(i,j,k)=WallWNB
-                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. k .ge. zl .and. k .le. zu) nWall=nWall+1
+                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
+                                    k .ge. zl .and. k .le. zu) nWall=nWall+1
                             CASE (126)
                                 image(i,j,k)=WallESF
-                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. k .ge. zl .and. k .le. zu) nWall=nWall+1
+                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
+                                    k .ge. zl .and. k .le. zu) nWall=nWall+1
                             CASE (154)
                                 image(i,j,k)=WallESB
-                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. k .ge. zl .and. k .le. zu) nWall=nWall+1
+                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
+                                    k .ge. zl .and. k .le. zu) nWall=nWall+1
                             CASE (189)
                                 image(i,j,k)=WallWSF
-                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. k .ge. zl .and. k .le. zu) nWall=nWall+1
+                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
+                                    k .ge. zl .and. k .le. zu) nWall=nWall+1
                             CASE (231)
                                 image(i,j,k)=WallWSB
-                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. k .ge. zl .and. k .le. zu) nWall=nWall+1                                                                                               
+                                if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
+                                    k .ge. zl .and. k .le. zu) nWall=nWall+1                                                                                               
                         END SELECT
                     Endif
                 Enddo
