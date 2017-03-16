@@ -41,7 +41,7 @@ double precision, ALLOCATABLE, DIMENSION(:) :: f_back_rcv, f_frnt_rcv
 INTEGER :: mpi_group_inlet
 INTEGER :: mpi_group_global
 INTEGER :: mpi_comm_inlet
-INTEGER :: inlet_rank(mpi_ydim, mpi_zdim)
+INTEGER :: inlet_rank(mpi_ydim*mpi_zdim)
 contains
 !-------------------------------------------------------------------------------
 ! Subroutine : setupVirtualProcessGrid
@@ -162,7 +162,7 @@ contains
         CALL MPI_COMM_GROUP(MPI_COMM_VGRID, mpi_group_global, MPI_ERR)
         do k = 1, mpi_zdim
            do j = 1, mpi_ydim
-               inlet_rank(j, k) = (k-1)*mpi_ydim + j-1
+               inlet_rank(j+(k-1)*mpi_ydim) = (k-1)*mpi_ydim + j-1
            enddo
        enddo
 
