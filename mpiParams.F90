@@ -84,8 +84,8 @@ contains
         dims(2)     = mpi_ydim
         dims(3)     = mpi_zdim
         periodic(1) = .true.
-        periodic(2) = .false.
-        periodic(2) = .false.
+        periodic(2) = .true.
+        periodic(2) = .true.
         reorder     = .true.
         
         !Create the new virtual connectivity grid
@@ -96,7 +96,6 @@ contains
         !write(*,*) "vproc = ",  vproc
 
         CALL MPI_CART_COORDS(MPI_COMM_VGRID, vproc, mpi_dim, mpi_coords, MPI_ERR)
-        !PRINT*, "After first mpi_cart_coords", proc
         
         !------- Compute the limits [(xl,xu),(yl,yu)] assigned to this processor ------
         !Partitioning in the x direction
@@ -166,7 +165,12 @@ contains
            enddo
        enddo
 
-        CALL MPI_GROUP_INCL(mpi_group_global, mpi_ydim, inlet_rank, mpi_group_inlet, MPI_ERR)
+        CALL MPI_GROUP_INCL(mpi_group_global, mpi_ydim*mpi_zdim, inlet_rank, mpi_group_inlet, MPI_ERR)
         CALL MPI_COMM_CREATE(MPI_COMM_VGRID, mpi_group_inlet, mpi_comm_inlet, MPI_ERR)
+
     end subroutine setupVirtualProcessGrid
+
+    subroutine mpiFree
+        ! DO NOTHING
+    end subroutine mpiFree
 end module mpiParams

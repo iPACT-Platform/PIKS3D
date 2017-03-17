@@ -8,8 +8,8 @@ use mpiParams
 implicit none
 
 double precision, parameter :: eps=1.d-10
-integer, parameter :: maxStep = 1000000
-integer, parameter :: interval = 1000
+integer, parameter :: maxStep = 2
+integer, parameter :: interval = 1
 integer :: iStep
 double precision :: error
 
@@ -17,7 +17,7 @@ contains
     subroutine iterate
         use MPI
         implicit none
-        integer :: k, l, i, j, shiftll, shiftuu, localid, ii, jj, kk
+        integer :: i, j, k, l, ii, jj, kk, localid
         integer :: localidMsnd, localidPsnd, localidMrcv, localidPrcv, packid
         INTEGER :: MPI_ERR
         INTEGER :: MPI_REQ_X(4), MPI_REQ_Y(4), MPI_REQ_Z(4)
@@ -26,17 +26,17 @@ contains
         double precision :: feq, RhoWall, RhoWall2, RhoWall3
         double precision, dimension(Nc8) ::  f1wZ,f2wZ,f3wZ,f4wZ,f5wZ,f6wZ,f7wZ,f8wZ
 
+        ! buffer size
         xsize = Nytotal*Nztotal*Nc/2*ghostLayers
         ysize = Nxtotal*Nztotal*Nc/2*ghostLayers
-        ysize = Nxtotal*Nytotal*Nc/2*ghostLayers
-
+        zsize = Nxtotal*Nytotal*Nc/2*ghostLayers
 
 !$OMP PARALLEL &
 !$OMP DEFAULT(SHARED) &
 !$OMP PRIVATE(l, i, k, fEq, RhoWall)
 
-        ! Start Recieving
 !$OMP SINGLE
+        ! Start Recieving
         CALL MPI_IRECV( f_east_rcv, xsize, MPI_DOUBLE_PRECISION, east,  TAG1, &
                         MPI_COMM_VGRID, MPI_REQ_X(1), MPI_ERR )
         CALL MPI_IRECV( f_west_rcv, xsize, MPI_DOUBLE_PRECISION, west,  TAG2, &
@@ -65,6 +65,9 @@ contains
 
 !$OMP END SINGLE NOWAIT
 
+!------------------------------------------------------------------------
+!           In the 1st group of direction cx<0 & cy>0 & cz>0
+!------------------------------------------------------------------------
 !$OMP DO SCHEDULE(STATIC) 
     Do l=1,Nc8
         Do i=1,Nstencil1
@@ -72,7 +75,7 @@ contains
             ii = dir1(1,i)
             jj = dir1(2,i)
             kk = dir1(3,i)
-            k = (ii-xlg+1) + (jj-1)*Nxtotal + (kk-1)*Nxytotal
+            k = (ii-xlg+1) + (jj-ylg)*Nxtotal + (kk-zlg)*Nxytotal
             ! Switch from reflected in x-direction (default) to in y-direction
             ! only for group of velocity overlapped by two reflected direction x-y
             If ((image(ii,jj-1,kk)==wallEN).OR.(image(ii,jj-1,kk)==wallENF).OR.(image(ii,jj-1,kk)==wallENB)) then
@@ -110,7 +113,7 @@ contains
             ii = dir2(1,i)
             jj = dir2(2,i)
             kk = dir2(3,i)
-            k = (ii-xlg+1) + (jj-1)*Nxtotal + (kk-1)*Nxytotal
+            k = (ii-xlg+1) + (jj-ylg)*Nxtotal + (kk-zlg)*Nxytotal
             ! Switch from reflected in x-direction (default) to in y-direction
             ! only for group of velocity overlapped by two reflected x&y-direction
             If ((image(ii,jj-1,kk)==wallWN).OR.(image(ii,jj-1,kk)==wallWNF) &
@@ -148,7 +151,7 @@ contains
             ii = dir3(1,i)
             jj = dir3(2,i)
             kk = dir3(3,i)
-            k = (ii-xlg+1) + (jj-1)*Nxtotal + (kk-1)*Nxytotal
+            k = (ii-xlg+1) + (jj-ylg)*Nxtotal + (kk-zlg)*Nxytotal
             ! Switch from reflected in x-direction (default) to in y-direction
             ! only for group of velocity overlapped by two reflected direction
             If ((image(ii,jj+1,kk)==wallWS).OR.(image(ii,jj+1,kk)==wallWSF) &
@@ -186,7 +189,7 @@ contains
             ii = dir4(1,i)
             jj = dir4(2,i)
             kk = dir4(3,i)
-            k = (ii-xlg+1) + (jj-1)*Nxtotal + (kk-1)*Nxytotal
+            k = (ii-xlg+1) + (jj-ylg)*Nxtotal + (kk-zlg)*Nxytotal
             ! Switch from reflected in x-direction (default) to in y-direction
             ! only for group of velocity overlapped by two reflected direction
             If ((image(ii,jj+1,kk)==wallES).OR.(image(ii,jj+1,kk)==wallESF) &
@@ -224,7 +227,7 @@ contains
             ii = dir5(1,i)
             jj = dir5(2,i)
             kk = dir5(3,i)
-            k = (ii-xlg+1) + (jj-1)*Nxtotal + (kk-1)*Nxytotal
+            k = (ii-xlg+1) + (jj-ylg)*Nxtotal + (kk-zlg)*Nxytotal
             ! Switch from reflected in x-direction (default) to in y-direction
             ! only for group of velocity overlapped by two reflected direction x-y
             If ((image(ii,jj-1,kk)==wallEN).OR.(image(ii,jj-1,kk)==wallENF) &
@@ -262,7 +265,7 @@ contains
             ii = dir6(1,i)
             jj = dir6(2,i)
             kk = dir6(3,i)
-            k = (ii-xlg+1) + (jj-1)*Nxtotal + (kk-1)*Nxytotal
+            k = (ii-xlg+1) + (jj-ylg)*Nxtotal + (kk-zlg)*Nxytotal
             ! Switch from reflected in x-direction (default) to in y-direction
             ! only for group of velocity overlapped by two reflected x&y-direction
             If ((image(ii,jj-1,kk)==wallWN).OR.(image(ii,jj-1,kk)==wallWNF) &
@@ -300,7 +303,7 @@ contains
             ii = dir7(1,i)
             jj = dir7(2,i)
             kk = dir7(3,i) 
-            k = (ii-xlg+1) + (jj-1)*Nxtotal + (kk-1)*Nxytotal
+            k = (ii-xlg+1) + (jj-ylg)*Nxtotal + (kk-zlg)*Nxytotal
             ! Switch from reflected in x-direction (default) to in y-direction
             ! only for group of velocity overlapped by two reflected direction
             If ((image(ii,jj+1,kk)==wallWS).OR.(image(ii,jj+1,kk)==wallWSF).OR.(image(ii,jj+1,kk)==wallWSB)) then
@@ -337,7 +340,7 @@ contains
             ii = dir8(1,i)
             jj = dir8(2,i)
             kk = dir8(3,i)
-            k = (ii-xlg+1) + (jj-1)*Nxtotal + (kk-1)*Nxytotal              
+            k = (ii-xlg+1) + (jj-ylg)*Nxtotal + (kk-zlg)*Nxytotal
             ! Switch from reflected in x-direction (default) to in y-direction
             ! only for group of velocity overlapped by two reflected direction
             If ((image(ii,jj+1,kk)==wallES).OR.(image(ii,jj+1,kk)==wallESF).OR.(image(ii,jj+1,kk)==wallESB)) then
@@ -365,28 +368,16 @@ contains
     End do
 !$OMP END DO
 
-
-        ! Wait until send and recv done
 !$OMP SINGLE
+        ! Wait until send and recv done
         CALL MPI_WAITALL(4, MPI_REQ_X, MPI_STAT, MPI_ERR)
         CALL MPI_WAITALL(4, MPI_REQ_Y, MPI_STAT, MPI_ERR)
         CALL MPI_WAITALL(4, MPI_REQ_Z, MPI_STAT, MPI_ERR)
 !$OMP END SINGLE 
 
-
-
-
-!$OMP SINGLE
-        ! pack&unpack west&east buffer
-        !shiftll = 0
-        !shiftuu = 0
-        !if(xl==xmin) shiftll = ghostLayers
-        !if(xu==xmax) shiftuu = ghostLayers
-!$OMP END SINGLE
-
 !$OMP DO 
     ! pack/unpack X dir buffer
-    do k = 1, Nztotal
+    do k = 1,Nztotal
         do j = 1, Nytotal
             do i = 1, ghostLayers
                 do l = 1, Nc8 ! dir (2,3,6,7) and (1,4,5,8)
@@ -400,9 +391,9 @@ contains
 
 
                     packid = 0*Nztotal*Nytotal*ghostLayers*Nc8 & !dir 2, 1
-                           + k*Nytotal*ghostLayers*Nc8 &
-                           + j*ghostLayers*Nc8 &
-                           + i*Nc8 &
+                           + (k-1)*Nytotal*ghostLayers*Nc8 &
+                           + (j-1)*ghostLayers*Nc8 &
+                           + (i-1)*Nc8 &
                            + l
                     f_west_snd(packid) = f2(localidMsnd, l)
                     f2(localidPrcv,l) = f_east_rcv(packid)
@@ -410,9 +401,9 @@ contains
                     f1(localidMrcv,l) = f_west_rcv(packid)
 
                     packid = 1*Nztotal*Nytotal*ghostLayers*Nc8 & !dir 3, 4
-                           + k*Nytotal*ghostLayers*Nc8 &
-                           + j*ghostLayers*Nc8 &
-                           + i*Nc8 &
+                           + (k-1)*Nytotal*ghostLayers*Nc8 &
+                           + (j-1)*ghostLayers*Nc8 &
+                           + (i-1)*Nc8 &
                            + l
                     f_west_snd(packid) = f3(localidMsnd, l)
                     f3(localidPrcv,l) = f_east_rcv(packid)
@@ -420,9 +411,9 @@ contains
                     f4(localidMrcv,l) = f_west_rcv(packid)
 
                     packid = 2*Nztotal*Nytotal*ghostLayers*Nc8 & !dir 6, 5
-                           + k*Nytotal*ghostLayers*Nc8 &
-                           + j*ghostLayers*Nc8 &
-                           + i*Nc8 &
+                           + (k-1)*Nytotal*ghostLayers*Nc8 &
+                           + (j-1)*ghostLayers*Nc8 &
+                           + (i-1)*Nc8 &
                            + l
                     f_west_snd(packid) = f6(localidMsnd, l)
                     f6(localidPrcv,l) = f_east_rcv(packid)
@@ -430,9 +421,9 @@ contains
                     f5(localidMrcv,l) = f_west_rcv(packid)
 
                     packid = 3*Nztotal*Nytotal*ghostLayers*Nc8 & !dir 7, 8
-                           + k*Nytotal*ghostLayers*Nc8 &
-                           + j*ghostLayers*Nc8 &
-                           + i*Nc8 &
+                           + (k-1)*Nytotal*ghostLayers*Nc8 &
+                           + (j-1)*ghostLayers*Nc8 &
+                           + (i-1)*Nc8 &
                            + l
                     f_west_snd(packid) = f7(localidMsnd, l)
                     f7(localidPrcv,l) = f_east_rcv(packid)
@@ -459,9 +450,9 @@ contains
                     localidPrcv = (k-1)*Nxtotal*Nytotal + (j+Nysub-1)*Nxtotal + i
 
                     packid = 0*Nztotal*ghostLayers*Nxtotal*Nc8 & !dir 3, 2
-                           + k*ghostLayers*Nxtotal*Nc8 &
-                           + j*Nxtotal*Nc8 &
-                           + i*Nc8 &
+                           + (k-1)*ghostLayers*Nxtotal*Nc8 &
+                           + (j-1)*Nxtotal*Nc8 &
+                           + (i-1)*Nc8 &
                            + l
                     f_suth_snd(packid) = f3(localidMsnd, l)
                     f3(localidPrcv,l) = f_noth_rcv(packid)
@@ -469,9 +460,9 @@ contains
                     f2(localidMrcv,l) = f_suth_rcv(packid)
 
                     packid = 1*Nztotal*ghostLayers*Nxtotal*Nc8 & !dir 4, 1
-                           + k*ghostLayers*Nxtotal*Nc8 &
-                           + j*Nxtotal*Nc8 &
-                           + i*Nc8 &
+                           + (k-1)*ghostLayers*Nxtotal*Nc8 &
+                           + (j-1)*Nxtotal*Nc8 &
+                           + (i-1)*Nc8 &
                            + l
                     f_suth_snd(packid) = f4(localidMsnd, l)
                     f4(localidPrcv,l) = f_noth_rcv(packid)
@@ -479,9 +470,9 @@ contains
                     f1(localidMrcv,l) = f_suth_rcv(packid)
 
                     packid = 2*Nztotal*ghostLayers*Nxtotal*Nc8 & !dir 7, 6
-                           + k*ghostLayers*Nxtotal*Nc8 &
-                           + j*Nxtotal*Nc8 &
-                           + i*Nc8 &
+                           + (k-1)*ghostLayers*Nxtotal*Nc8 &
+                           + (j-1)*Nxtotal*Nc8 &
+                           + (i-1)*Nc8 &
                            + l
                     f_suth_snd(packid) = f7(localidMsnd, l)
                     f7(localidPrcv,l) = f_noth_rcv(packid)
@@ -490,9 +481,9 @@ contains
 
 
                     packid = 3*Nztotal*ghostLayers*Nxtotal*Nc8 & !dir 8, 5
-                           + k*ghostLayers*Nxtotal*Nc8 &
-                           + j*Nxtotal*Nc8 &
-                           + i*Nc8 &
+                           + (k-1)*ghostLayers*Nxtotal*Nc8 &
+                           + (j-1)*Nxtotal*Nc8 &
+                           + (i-1)*Nc8 &
                            + l
                     f_suth_snd(packid) = f8(localidMsnd, l)
                     f8(localidPrcv,l) = f_noth_rcv(packid)
@@ -520,9 +511,9 @@ contains
                     localidPrcv = (k+Nzsub-1)*Nxytotal + (j-1)*Nxtotal + i
 
                     packid = 0*ghostLayers*Nytotal*Nxtotal*Nc8 & !dir 5, 1
-                           + k*Nytotal*Nxtotal*Nc8 &
-                           + j*Nxtotal*Nc8 &
-                           + i*Nc8 &
+                           + (k-1)*Nytotal*Nxtotal*Nc8 &
+                           + (j-1)*Nxtotal*Nc8 &
+                           + (i-1)*Nc8 &
                            + l
                     f_back_snd(packid) = f5(localidMsnd, l)
                     f5(localidPrcv,l) = f_frnt_rcv(packid)
@@ -530,9 +521,9 @@ contains
                     f1(localidMrcv,l) = f_back_rcv(packid)
 
                     packid = 1*ghostLayers*Nytotal*Nxtotal*Nc8 & !dir 6, 2
-                           + k*Nytotal*Nxtotal*Nc8 &
-                           + j*Nxtotal*Nc8 &
-                           + i*Nc8 &
+                           + (k-1)*Nytotal*Nxtotal*Nc8 &
+                           + (j-1)*Nxtotal*Nc8 &
+                           + (i-1)*Nc8 &
                            + l
                     f_back_snd(packid) = f6(localidMsnd, l)
                     f6(localidPrcv,l) = f_frnt_rcv(packid)
@@ -540,9 +531,9 @@ contains
                     f2(localidMrcv,l) = f_back_rcv(packid) 
 
                     packid = 2*ghostLayers*Nytotal*Nxtotal*Nc8 & !dir 7, 3
-                           + k*Nytotal*Nxtotal*Nc8 &
-                           + j*Nxtotal*Nc8 &
-                           + i*Nc8 &
+                           + (k-1)*Nytotal*Nxtotal*Nc8 &
+                           + (j-1)*Nxtotal*Nc8 &
+                           + (i-1)*Nc8 &
                            + l
                     f_back_snd(packid) = f7(localidMsnd, l)
                     f7(localidPrcv,l) = f_frnt_rcv(packid)
@@ -550,9 +541,9 @@ contains
                     f3(localidMrcv,l) = f_back_rcv(packid) 
 
                     packid = 3*ghostLayers*Nytotal*Nxtotal*Nc8 & !dir 8, 4
-                           + k*Nytotal*Nxtotal*Nc8 &
-                           + j*Nxtotal*Nc8 &
-                           + i*Nc8 &
+                           + (k-1)*Nytotal*Nxtotal*Nc8 &
+                           + (j-1)*Nxtotal*Nc8 &
+                           + (i-1)*Nc8 &
                            + l
                     f_back_snd(packid) = f8(localidMsnd, l)
                     f8(localidPrcv,l) = f_frnt_rcv(packid)
@@ -1671,68 +1662,68 @@ contains
 !$OMP END DO            
     endif
 
+!!----------------------------------------------------
+!!> Symmetric BC
+!!----------------------------------------------------
+!    if(yl==ymin) then ! south sym BC
+!!$OMP DO
+!        Do k=zl,zu
+!            Do i=xl,xu
+!                l = (k-zlg)*Nxytotal + ghostLayers*Nxtotal + i-xlg+1
+!                f2(l,:)=f3(l,:)
+!                f1(l,:)=f4(l,:)
+!                f6(l,:)=f7(l,:)
+!                f5(l,:)=f8(l,:)
+!            enddo
+!        End do
+!!$OMP END DO 
+!    endif
+
+!    if(yu==ymax) then ! north sym BC
+!!$OMP DO
+!        Do k=zl,zu
+!            Do i=xl,xu
+!                l = (k-zlg)*Nxytotal + (ghostLayers+Nysub-1)*Nxtotal + i-xlg+1
+!                f3(l,:)=f2(l,:)
+!                f4(l,:)=f1(l,:)
+!                f7(l,:)=f6(l,:)
+!                f8(l,:)=f5(l,:)
+!            End do
+!        End do
+!!$OMP END DO
+!    endif
+
+!    if(zl==zmin) then ! back sym BC
+!!$OMP DO
+!        Do j=yl,yu
+!            Do i=xl,xu
+!                l = ghostLayers*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
+!                f1(l,:)=f5(l,:)
+!                f2(l,:)=f6(l,:)
+!                f3(l,:)=f7(l,:)
+!                f4(l,:)=f8(l,:)
+!            enddo
+!        End do
+!!$OMP END DO 
+!    endif
+
+!    if(zu==zmax) then ! front sym BC
+!!$OMP DO
+!        Do j=yl,yu
+!            Do i=xl,xu
+!                l = (ghostLayers+Nzsub-1)*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
+!                f5(l,:)=f1(l,:)
+!                f6(l,:)=f2(l,:)
+!                f7(l,:)=f3(l,:)
+!                f8(l,:)=f4(l,:)
+!            End do
+!        End do
+!!$OMP END DO
+!    endif
+
 !----------------------------------------------------
-!> Symmetric BC
+!> Update Macro
 !----------------------------------------------------
-    if(yl==ymin) then ! south sym BC
-!$OMP DO
-        Do k=zl,zu
-            Do i=xl,xu
-                l = (k-zlg)*Nxytotal + ghostLayers*Nxtotal + i-xlg+1
-                f2(l,:)=f3(l,:)
-                f1(l,:)=f4(l,:)
-                f6(l,:)=f7(l,:)
-                f5(l,:)=f8(l,:)
-            enddo
-        End do
-!$OMP END DO 
-    endif
-
-    if(yu==ymax) then ! north sym BC
-!$OMP DO
-        Do k=zl,zu
-            Do i=xl,xu
-                l = (k-zlg)*Nxytotal + (ghostLayers+Nysub-1)*Nxtotal + i-xlg+1
-                f4(l,:)=f1(l,:)
-                f3(l,:)=f2(l,:)
-                f8(l,:)=f5(l,:)
-                f7(l,:)=f6(l,:)
-            End do
-        End do
-!$OMP END DO
-    endif
-
-    if(zl==zmin) then ! back sym BC
-!$OMP DO
-        Do j=yl,yu
-            Do i=xl,xu
-                l = ghostLayers*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
-                f1(l,:)=f5(l,:)
-                f2(l,:)=f6(l,:)
-                f3(l,:)=f7(l,:)
-                f4(l,:)=f8(l,:)
-            enddo
-        End do
-!$OMP END DO 
-    endif
-
-    if(zu==zmax) then ! front sym BC
-!$OMP DO
-        Do j=yl,yu
-            Do i=xl,xu
-                l = (ghostLayers+Nzsub-1)*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
-                f5(l,:)=f1(l,:)
-                f6(l,:)=f2(l,:)
-                f7(l,:)=f3(l,:)
-                f8(l,:)=f4(l,:)
-            End do
-        End do
-!$OMP END DO
-    endif
-
-        !----------------------------------------------------
-        !> Update Macro
-        !----------------------------------------------------
 !$OMP DO SCHEDULE(STATIC) 
     Do k=1,Ntotal
         Rho(k)=0.d0
@@ -1750,7 +1741,6 @@ contains
 !$OMP END PARALLEL  
     end subroutine iterate
    
-
 
     subroutine chkConverge
         use MPI
@@ -1835,12 +1825,18 @@ contains
             ! debug
             massLocal = (massInner + massSuth + massNoth + massFrnt + massBack &
                 + massSB + massSF + massNB + massNF)*sqrt(1.d0/2.d0)*4.d0/PressDrop
+                !+ massSB + massSF + massNB + massNF)*dsqrt(1.d0/2.d0)*4.d0/1.d0
 
             ! reduction
             call MPI_ALLREDUCE(massLocal, mass2, 1, MPI_DOUBLE_PRECISION, MPI_SUM, &
                                mpi_comm_inlet, MPI_ERR)
 
-            error=dabs(1.d0-mass2/mass)/(interval)
+            !PRINT*, "mass = ", mass
+            !DEBUG
+            !error=dabs(1.d0-mass2/mass)/(interval)
+            !error=dabs(1.d0-mass2/mass)/(interval)
+            error=1.d0
+
             mass=mass2
             if (proc == master) then           
                 permeability=mass*Kn*sqrt(4.d0/PI)  
@@ -1849,7 +1845,7 @@ contains
                 write(22,'(4ES15.6, 1I15)') Kn, mass, permeability, error, iStep
                 close(22)
             endif
-        endif
+        endif ! xl==xmin
         !bcast error so every process in WORLD can stop
         CALL MPI_BCAST(error, 1, MPI_DOUBLE_PRECISION, master, MPI_COMM_VGRID, MPI_ERR)
     end subroutine chkConverge

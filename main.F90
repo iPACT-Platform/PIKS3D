@@ -43,6 +43,7 @@ CALL saveFlowField
 
 ! Free memory, close MPI environment and end program
 CALL memFree
+CALL mpiFree
 CALL MPI_BARRIER(MPI_COMM_WORLD, MPI_ERR)
 CALL MPI_FINALIZE(MPI_ERR)
 

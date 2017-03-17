@@ -15,7 +15,7 @@ integer, parameter :: translate=0
 
 ! NX and NY is the global grid size
 !integer, parameter :: Nx = 533, Ny = 428 !Brea stone
-integer, parameter :: Ny=400
+integer, parameter :: Ny=10
 integer, parameter :: Nx=Ny+2*fluidlayer
 integer, parameter :: Nz=Ny
 
@@ -108,29 +108,29 @@ contains
         enddo
 
         !read digital image, NOTE that all raw image dimension are NY^3. 
-        Open(200,file='shale400^3.raw',status='OLD',form='unformatted',ACCESS="STREAM")
-        Do k=1,Nz
-            Do j=1,Ny
-                Do i=fluidlayer+1,Ny+fluidlayer  
-                    read(200) ctemp       
-                    !l=(i-translate+ghostLayer)+(j-translate+ghostLayer-1)*Nxtotal+(k-translate+ghostLayer-1)*Nxytotal
-                    if ((k>=1+translate).AND.(k<=Nz+translate).AND.(j>=1+translate).AND.(j<=Ny+translate).AND.&
-                        & (i>=fluidlayer+1+translate).AND.(i<=Nx-fluidlayer+translate)) then
-                        if (ichar(ctemp)==0) then
-                            array3D(i,j,k) = fluid
-                            array3Dg(i,j,k) = fluid
-                        else if (ichar(ctemp)==1) then
-                            array3D(i,j,k) = solid
-                            array3Dg(i,j,k) = solid
-                        else 
-                            write(*,*) "invalid image data file"
-                            stop 0
-                        endif
-                    endif
-                Enddo  
-            Enddo
-        Enddo
-        Close(200)
+        !Open(200,file='shale400^3.raw',status='OLD',form='unformatted',ACCESS="STREAM")
+        !Do k=1,Nz
+        !    Do j=1,Ny
+        !        Do i=fluidlayer+1,Ny+fluidlayer  
+        !            read(200) ctemp       
+        !            !l=(i-translate+ghostLayer)+(j-translate+ghostLayer-1)*Nxtotal+(k-translate+ghostLayer-1)*Nxytotal
+        !            if ((k>=1+translate).AND.(k<=Nz+translate).AND.(j>=1+translate).AND.(j<=Ny+translate).AND.&
+        !                & (i>=fluidlayer+1+translate).AND.(i<=Nx-fluidlayer+translate)) then
+        !                if (ichar(ctemp)==0) then
+        !                    array3D(i,j,k) = fluid
+        !                    array3Dg(i,j,k) = fluid
+        !                else if (ichar(ctemp)==1) then
+        !                    array3D(i,j,k) = solid
+        !                    array3Dg(i,j,k) = solid
+        !                else 
+        !                    write(*,*) "invalid image data file"
+        !                    stop 0
+        !                endif
+        !            endif
+        !        Enddo  
+        !    Enddo
+        !Enddo
+        !Close(200)
 
         ! drill the small pores (change array3Dg)
         do k=1,Nz
@@ -176,10 +176,10 @@ contains
         bzu = zug
 
         if(xl == xmin) bxl = xl !if most west block(processor)
-        if(xu == xmax) bxu = xu !if most east block(processor)
         if(yl == ymin) byl = yl !if most south block
-        if(yu == ymax) byu = yu !if most north block
         if(zl == zmin) bzl = zl !if most back  block
+        if(xu == xmax) bxu = xu !if most east block(processor)
+        if(yu == ymax) byu = yu !if most north block
         if(zu == zmax) bzu = zu !if most front block
         image(bxl:bxu, byl:byu, bzl:bzu) = array3Dg(bxl:bxu, byl:byu, bzl:bzu)
 
@@ -201,7 +201,6 @@ contains
 
         ! set wall points type based on sournding point type(f/s)
         nWall=0 ! count the wall points
-        !print*, bxl, bxu, byl, byu
         Do k=bzl,bzu
             Do j=byl,byu
                 Do i=bxl,bxu
@@ -210,11 +209,6 @@ contains
                     !localid = (j-ylg)*Nxtotal + i-xlg+1
                     If (array3D(i,j,k)==solid) then
                         NneighborFluid=1 !(1-2-3-4 in D2Q9 corresponding to 2-3-5-7)
-                        ! found bug here, array index out of bound of array2D
-                        !If (image(localid+1)==fluid)  NneighborFluid=NneighborFluid*2 
-                        !If (image(localid+Nxtotal)==fluid)  NneighborFluid=NneighborFluid*3
-                        !If (image(localid-1)==fluid)  NneighborFluid=NneighborFluid*5 
-                        !If (image(localid-Nxtotal)==fluid)  NneighborFluid=NneighborFluid*7
                         If (array3Dg(i+1, j, k)==fluid)  NneighborFluid=NneighborFluid*2   !Check neighbor on the East(2)
                         If (array3Dg(i-1, j, k)==fluid)  NneighborFluid=NneighborFluid*3   !Check neighbor on the North(3)
                         If (array3Dg(i, j+1, k)==fluid)  NneighborFluid=NneighborFluid*5   !Check neighbor on the West(5)
@@ -459,8 +453,6 @@ contains
 
         !BUG FOUND
         !Direction 1
-        !bound
-
         bxl = xl
         byl = yl
         bzl = zl
@@ -571,7 +563,7 @@ contains
         bzu = zu
         if(xl == xmin) bxl = xl+1 !if most west block(processor)
         if(yu == ymax) byu = yu-1 !if most south block
-        if(zl == zmin) bzl = zl+1!if most back  block
+        if(zl == zmin) bzl = zl+1 !if most back  block
         Nstencil4=0
         Do k=bzl,bzu
             Do j=byu,byl,-1
@@ -597,8 +589,6 @@ contains
         End do
 
         !Direction 5
-        !bound
-
         bxl = xl
         byl = yl
         bzl = zl
@@ -736,7 +726,7 @@ contains
 
         !construct the deferencial coefficients
         ALLOCATE(coef1(Nstencil1,9),coef2(Nstencil2,9),coef3(Nstencil3,9),coef4(Nstencil4,9))
-        ALLOCATE(coef1(Nstencil5,9),coef6(Nstencil6,9),coef7(Nstencil7,9),coef8(Nstencil8,9))
+        ALLOCATE(coef5(Nstencil5,9),coef6(Nstencil6,9),coef7(Nstencil7,9),coef8(Nstencil8,9))
         
         Do i=1,Nstencil1
             ii=dir1(1,i) 
