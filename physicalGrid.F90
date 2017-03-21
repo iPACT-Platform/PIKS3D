@@ -15,7 +15,7 @@ integer, parameter :: translate=0
 
 ! NX and NY is the global grid size
 !integer, parameter :: Nx = 533, Ny = 428 !Brea stone
-integer, parameter :: Ny=10
+integer, parameter :: Ny=30
 integer, parameter :: Nx=Ny+2*fluidlayer
 integer, parameter :: Nz=Ny
 
@@ -106,6 +106,9 @@ contains
                 enddo
             enddo
         enddo
+
+        array3D (xmin+14:xmax-14,ymin+10:ymax-10,zmin+10:zmax-10) = solid
+        array3Dg(xmin+14:xmax-14,ymin+10:ymax-10,zmin+10:zmax-10) = solid
 
         !read digital image, NOTE that all raw image dimension are NY^3. 
         !Open(200,file='shale400^3.raw',status='OLD',form='unformatted',ACCESS="STREAM")

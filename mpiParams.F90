@@ -84,8 +84,8 @@ contains
         dims(2)     = mpi_ydim
         dims(3)     = mpi_zdim
         periodic(1) = .true.
-        periodic(2) = .true.
-        periodic(2) = .true.
+        periodic(2) = .false.
+        periodic(2) = .false.
         reorder     = .true.
         
         !Create the new virtual connectivity grid

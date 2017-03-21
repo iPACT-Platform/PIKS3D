@@ -8,7 +8,7 @@ use mpiParams
 implicit none
 
 double precision, parameter :: eps=1.d-10
-integer, parameter :: maxStep = 2
+integer, parameter :: maxStep = 3
 integer, parameter :: interval = 1
 integer :: iStep
 double precision :: error
@@ -24,7 +24,7 @@ contains
         INTEGER :: MPI_STAT(MPI_STATUS_SIZE,6)
         integer :: xsize, ysize, zsize
         double precision :: feq, RhoWall, RhoWall2, RhoWall3
-        double precision, dimension(Nc8) ::  f1wZ,f2wZ,f3wZ,f4wZ,f5wZ,f6wZ,f7wZ,f8wZ
+        double precision, dimension(Nc8) :: f1wZ,f2wZ,f3wZ,f4wZ,f5wZ,f6wZ,f7wZ,f8wZ
 
         ! buffer size
         xsize = Nytotal*Nztotal*Nc/2*ghostLayers
@@ -37,17 +37,17 @@ contains
 
 !$OMP SINGLE
         ! Start Recieving
-        CALL MPI_IRECV( f_east_rcv, xsize, MPI_DOUBLE_PRECISION, east,  TAG1, &
+        CALL MPI_IRECV( f_east_rcv, xsize, MPI_DOUBLE_PRECISION, east, TAG1, &
                         MPI_COMM_VGRID, MPI_REQ_X(1), MPI_ERR )
-        CALL MPI_IRECV( f_west_rcv, xsize, MPI_DOUBLE_PRECISION, west,  TAG2, &
+        CALL MPI_IRECV( f_west_rcv, xsize, MPI_DOUBLE_PRECISION, west, TAG2, &
                         MPI_COMM_VGRID, MPI_REQ_X(2), MPI_ERR )
-        CALL MPI_IRECV( f_noth_rcv, ysize, MPI_DOUBLE_PRECISION, noth,  TAG3, &
+        CALL MPI_IRECV( f_noth_rcv, ysize, MPI_DOUBLE_PRECISION, noth, TAG3, &
                         MPI_COMM_VGRID, MPI_REQ_Y(1), MPI_ERR )
-        CALL MPI_IRECV( f_suth_rcv, ysize, MPI_DOUBLE_PRECISION, suth,  TAG4, &
+        CALL MPI_IRECV( f_suth_rcv, ysize, MPI_DOUBLE_PRECISION, suth, TAG4, &
                         MPI_COMM_VGRID, MPI_REQ_Y(2), MPI_ERR )     
-        CALL MPI_IRECV( f_frnt_rcv, zsize, MPI_DOUBLE_PRECISION, frnt,  TAG5, &
+        CALL MPI_IRECV( f_frnt_rcv, zsize, MPI_DOUBLE_PRECISION, frnt, TAG5, &
                         MPI_COMM_VGRID, MPI_REQ_Z(1), MPI_ERR )
-        CALL MPI_IRECV( f_back_rcv, zsize, MPI_DOUBLE_PRECISION, back,  TAG6, &
+        CALL MPI_IRECV( f_back_rcv, zsize, MPI_DOUBLE_PRECISION, back, TAG6, &
                         MPI_COMM_VGRID, MPI_REQ_Z(2), MPI_ERR )   
         ! Start Sending
         CALL MPI_ISEND( f_west_snd, xsize, MPI_DOUBLE_PRECISION, west, TAG1, &
@@ -78,7 +78,8 @@ contains
             k = (ii-xlg+1) + (jj-ylg)*Nxtotal + (kk-zlg)*Nxytotal
             ! Switch from reflected in x-direction (default) to in y-direction
             ! only for group of velocity overlapped by two reflected direction x-y
-            If ((image(ii,jj-1,kk)==wallEN).OR.(image(ii,jj-1,kk)==wallENF).OR.(image(ii,jj-1,kk)==wallENB)) then
+            If ((image(ii,jj-1,kk)==wallEN).OR.(image(ii,jj-1,kk)==wallENF) &
+            .OR.(image(ii,jj-1,kk)==wallENB)) then
                 f1(k-Nxtotal,l)=f1w(which_corner(ii,jj-1,kk),l)
             End if
             ! Switch from reflected in x/y-direction to in z-direction
@@ -306,7 +307,8 @@ contains
             k = (ii-xlg+1) + (jj-ylg)*Nxtotal + (kk-zlg)*Nxytotal
             ! Switch from reflected in x-direction (default) to in y-direction
             ! only for group of velocity overlapped by two reflected direction
-            If ((image(ii,jj+1,kk)==wallWS).OR.(image(ii,jj+1,kk)==wallWSF).OR.(image(ii,jj+1,kk)==wallWSB)) then
+            If ((image(ii,jj+1,kk)==wallWS).OR.(image(ii,jj+1,kk)==wallWSF) &
+            .OR.(image(ii,jj+1,kk)==wallWSB)) then
                 f7(k+Nxtotal,l)=f7w(which_corner(ii,jj+1,kk),l)
             End if
             ! Switch from reflected in x/y-direction to in z-direction
@@ -343,7 +345,8 @@ contains
             k = (ii-xlg+1) + (jj-ylg)*Nxtotal + (kk-zlg)*Nxytotal
             ! Switch from reflected in x-direction (default) to in y-direction
             ! only for group of velocity overlapped by two reflected direction
-            If ((image(ii,jj+1,kk)==wallES).OR.(image(ii,jj+1,kk)==wallESF).OR.(image(ii,jj+1,kk)==wallESB)) then
+            If ((image(ii,jj+1,kk)==wallES).OR.(image(ii,jj+1,kk)==wallESF) &
+            .OR.(image(ii,jj+1,kk)==wallESB)) then
                 f8(k+Nxtotal,l)=f8w(which_corner(ii,jj+1,kk),l)
             End if
             ! Switch from reflected in x/y-direction to in z-direction
@@ -446,8 +449,8 @@ contains
                     localidMsnd = (k-1)*Nxtotal*Nytotal + (j+ghostLayers-1)*Nxtotal + i
                     localidMrcv = (k-1)*Nxtotal*Nytotal + (j-1)*Nxtotal + i
                     !for dir: (2,1,6,5)
-                    localidPsnd = (k-1)*Nxtotal*Nytotal + (j+Nysub+ghostLayers-1)*Nxtotal + i
-                    localidPrcv = (k-1)*Nxtotal*Nytotal + (j+Nysub-1)*Nxtotal + i
+                    localidPsnd = (k-1)*Nxtotal*Nytotal + (j+Nysub-1)*Nxtotal + i
+                    localidPrcv = (k-1)*Nxtotal*Nytotal + (j+Nysub+ghostLayers-1)*Nxtotal + i
 
                     packid = 0*Nztotal*ghostLayers*Nxtotal*Nc8 & !dir 3, 2
                            + (k-1)*ghostLayers*Nxtotal*Nc8 &
@@ -504,11 +507,11 @@ contains
                 do l = 1, Nc8 ! dir (5,6,7,8) and (1,2,3,4)
                     ! pack order, 
                     !for dir: (5,6,7,8)
-                    localidMsnd = (k+ghostLayers-1)*Nxytotal + (j-1)*Nxtotal + i
-                    localidMrcv = (k-1)*Nxytotal + (j-1)*Nxtotal + i
+                    localidMsnd = (k+ghostLayers-1)*Nytotal*Nxtotal + (j-1)*Nxtotal + i
+                    localidMrcv = (k-1)*Nytotal*Nxtotal + (j-1)*Nxtotal + i
                     !for dir: (1,2,3,4)
-                    localidPsnd = (k+Nzsub+ghostLayers-1)*Nxytotal + (j-1)*Nxtotal + i
-                    localidPrcv = (k+Nzsub-1)*Nxytotal + (j-1)*Nxtotal + i
+                    localidPsnd = (k+Nzsub-1)*Nytotal*Nxtotal + (j-1)*Nxtotal + i
+                    localidPrcv = (k+Nzsub+ghostLayers-1)*Nytotal*Nxtotal + (j-1)*Nxtotal + i
 
                     packid = 0*ghostLayers*Nytotal*Nxtotal*Nc8 & !dir 5, 1
                            + (k-1)*Nytotal*Nxtotal*Nc8 &
@@ -1662,64 +1665,61 @@ contains
 !$OMP END DO            
     endif
 
-!!----------------------------------------------------
-!!> Symmetric BC
-!!----------------------------------------------------
-!    if(yl==ymin) then ! south sym BC
-!!$OMP DO
-!        Do k=zl,zu
-!            Do i=xl,xu
-!                l = (k-zlg)*Nxytotal + ghostLayers*Nxtotal + i-xlg+1
-!                f2(l,:)=f3(l,:)
-!                f1(l,:)=f4(l,:)
-!                f6(l,:)=f7(l,:)
-!                f5(l,:)=f8(l,:)
-!            enddo
-!        End do
-!!$OMP END DO 
-!    endif
-
-!    if(yu==ymax) then ! north sym BC
-!!$OMP DO
-!        Do k=zl,zu
-!            Do i=xl,xu
-!                l = (k-zlg)*Nxytotal + (ghostLayers+Nysub-1)*Nxtotal + i-xlg+1
-!                f3(l,:)=f2(l,:)
-!                f4(l,:)=f1(l,:)
-!                f7(l,:)=f6(l,:)
-!                f8(l,:)=f5(l,:)
-!            End do
-!        End do
-!!$OMP END DO
-!    endif
-
-!    if(zl==zmin) then ! back sym BC
-!!$OMP DO
-!        Do j=yl,yu
-!            Do i=xl,xu
-!                l = ghostLayers*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
-!                f1(l,:)=f5(l,:)
-!                f2(l,:)=f6(l,:)
-!                f3(l,:)=f7(l,:)
-!                f4(l,:)=f8(l,:)
-!            enddo
-!        End do
-!!$OMP END DO 
-!    endif
-
-!    if(zu==zmax) then ! front sym BC
-!!$OMP DO
-!        Do j=yl,yu
-!            Do i=xl,xu
-!                l = (ghostLayers+Nzsub-1)*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
-!                f5(l,:)=f1(l,:)
-!                f6(l,:)=f2(l,:)
-!                f7(l,:)=f3(l,:)
-!                f8(l,:)=f4(l,:)
-!            End do
-!        End do
-!!$OMP END DO
-!    endif
+!----------------------------------------------------
+!> Symmetric BC
+!----------------------------------------------------
+    if(yl==ymin) then ! south sym BC
+!$OMP DO
+        Do k=zl,zu
+            Do i=xl,xu
+                l = (k-zlg)*Nxytotal + ghostLayers*Nxtotal + i-xlg+1
+                f2(l,:)=f3(l,:)
+                f1(l,:)=f4(l,:)
+                f6(l,:)=f7(l,:)
+                f5(l,:)=f8(l,:)
+            enddo
+        End do
+!$OMP END DO 
+    endif
+    if(yu==ymax) then ! north sym BC
+!$OMP DO
+        Do k=zl,zu
+            Do i=xl,xu
+                l = (k-zlg)*Nxytotal + (ghostLayers+Nysub-1)*Nxtotal + i-xlg+1
+                f3(l,:)=f2(l,:)
+                f4(l,:)=f1(l,:)
+                f7(l,:)=f6(l,:)
+                f8(l,:)=f5(l,:)
+            End do
+        End do
+!$OMP END DO
+    endif
+    if(zl==zmin) then ! back sym BC
+!$OMP DO
+        Do j=yl,yu
+            Do i=xl,xu
+                l = ghostLayers*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
+                f1(l,:)=f5(l,:)
+                f2(l,:)=f6(l,:)
+                f3(l,:)=f7(l,:)
+                f4(l,:)=f8(l,:)
+            enddo
+        End do
+!$OMP END DO 
+    endif
+    if(zu==zmax) then ! front sym BC
+!$OMP DO
+        Do j=yl,yu
+            Do i=xl,xu
+                l = (ghostLayers+Nzsub-1)*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
+                f5(l,:)=f1(l,:)
+                f6(l,:)=f2(l,:)
+                f7(l,:)=f3(l,:)
+                f8(l,:)=f4(l,:)
+            End do
+        End do
+!$OMP END DO
+    endif
 
 !----------------------------------------------------
 !> Update Macro
@@ -1735,7 +1735,34 @@ contains
             Ux(k)=Ux(k)+cx(l)*(f1(k,l)-f2(k,l)-f3(k,l)+f4(k,l)+f5(k,l)-f6(k,l)-f7(k,l)+f8(k,l))
             Uy(k)=Uy(k)+cy(l)*(f1(k,l)+f2(k,l)-f3(k,l)-f4(k,l)+f5(k,l)+f6(k,l)-f7(k,l)-f8(k,l))
             Uz(k)=Uz(k)+cz(l)*(f1(k,l)+f2(k,l)+f3(k,l)+f4(k,l)-f5(k,l)-f6(k,l)-f7(k,l)-f8(k,l))
+        if(k == (10-zlg)*Nxytotal + (11-ylg)*Nxtotal + (xl+3-xlg+1) .and. l == 1) then
+            print*, "10, 11, 8"
+            print*, "f1 = ", f1(k, l)
+            print*, "f2 = ", f2(k, l)
+            print*, "f3 = ", f3(k, l)
+            print*, "f4 = ", f4(k, l)
+            print*, "f5 = ", f5(k, l)
+            print*, "f6 = ", f6(k, l)
+            print*, "f7 = ", f7(k, l)
+            print*, "f8 = ", f8(k, l)
+            print*, "Ux(k) =", Ux(k)
+        endif
+        if(k == (10-zlg)*Nxytotal + (20-ylg)*Nxtotal + (xl+3-xlg+1) .and. l == 1) then
+            print*, "10, 19, 8"
+            print*, "f1 = ", f1(k, l)
+            print*, "f2 = ", f2(k, l)
+            print*, "f3 = ", f3(k, l)
+            print*, "f4 = ", f4(k, l)
+            print*, "f5 = ", f5(k, l)
+            print*, "f6 = ", f6(k, l)
+            print*, "f7 = ", f7(k, l)
+            print*, "f8 = ", f8(k, l)
+            print*, "Ux(k) =", Ux(k)
+
+        endif
         End do
+
+
     End do
 !$OMP END DO 
 !$OMP END PARALLEL  
@@ -1853,19 +1880,21 @@ contains
     subroutine saveFlowField
         integer :: j, i, k, l
         character(13) fname
+        character(9) ztitle
         write(fname, '(A, I0.3, A)') 'Field_', proc, '.dat'
+        write(ztitle, '(A, I0.3,A)') '"proc', proc, '"'
         open(20,file=fname,STATUS="REPLACE")
         write(20,*) ' TITLE=" Field"'
         write(20,*) ' VARIABLES=x,y,z,flag,Rho,Ux,Uy,Uz'
-        write(20,'(A,I0.3,A,I,A,I,A,I,A)') ' ZONE T=proc', proc, ', I=', Nxsub,', J=', Nysub, ', K=', Nzsub, ' F=POINT'
+        write(20,'(A,A,A,I,A,I,A,I,A)') ' ZONE T=', ztitle, ', I=', Nxsub,', J=', Nysub, ', K=', Nzsub, ' F=POINT'
         Do k=zl,zu
             Do j=yl,yu
                 Do i=xl,xu
                     l= (k-zlg)*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
                     If (image(i,j,k)==fluid) then
-                        write(20,'(4I10,4ES15.6)') i, j, k, image(i,j,k), Rho(l)+1.d0, Ux(l), Uy(l), Uz(l)
+                        write(20,'(4I10,4ES15.6)') i, j, k, 0, Rho(l)+1.d0, Ux(l), Uy(l), Uz(l)
                     else
-                        write(20,'(4I10,4ES15.6)') i, j, k, image(i,j,k), 0.d0, 0.d0, 0.d0, 0.d0
+                        write(20,'(4I10,4ES15.6)') i, j, k, 1, 0.d0, 0.d0, 0.d0, 0.d0
                     Endif   
                 Enddo
             Enddo
@@ -1873,13 +1902,72 @@ contains
         close(20)
     end subroutine saveFlowField
 
+
+    SUBROUTINE saveFlowFieldVTK
+        IMPLICIT NONE
+        INTEGER :: i, j, k, l,MPI_ERR, IO_ERR
+        character(13) fname
+
+        write(fname, '(A, I0.3, A)') 'Field_', proc, '.vtk'
+        OPEN(UNIT = 12, FILE = fname, STATUS = "NEW", POSITION = "APPEND", &
+          IOSTAT = IO_ERR)
+        IF ( IO_ERR == 0 ) THEN
+            WRITE(12,'(A)')"# vtk DataFile Version 2.0"
+            WRITE(12,'(A)')"DVM MPI"
+            WRITE(12,'(A)')"ASCII"
+            WRITE(12,*)
+            WRITE(12,'(A)')"DATASET STRUCTURED_POINTS"
+            WRITE(12,*)"DIMENSIONS",Nxsub,Nysub,Nzsub
+            WRITE(12,*)"ORIGIN",xl,yl,zl
+            WRITE(12,*)"SPACING",1,1,1
+            WRITE(12,*)
+            WRITE(12,*)"POINT_DATA",Nxsub*Nysub*Nzsub
+            WRITE(12,*)
+            WRITE(12,'(A)')"SCALARS Rho double"
+            WRITE(12,'(A)')"LOOKUP_TABLE default"
+            DO k = zl, zu
+                DO j = yl, yu
+                    DO i = xl, xu
+                        l= (k-zlg)*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
+                        If (image(i,j,k)==fluid) then
+                            write(12,'(ES15.6)') Rho(l)+1.d0
+                        else
+                            write(12,'(ES15.6)') 0.d0
+                        Endif   
+                    END DO
+                END DO
+            END DO
+            WRITE(12,*)
+            WRITE(12,'(A)')"VECTORS Velocity double"
+            DO k = zl, zu
+               DO j = yl, yu
+                  DO i = xl, xu
+                     l= (k-zlg)*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
+                     If (image(i,j,k)==fluid) then
+                         write(12,'(3ES15.6)') Ux(l), Uy(l), Uz(l)
+                     else
+                         write(12,'(3ES15.6)') 0.d0, 0.d0, 0.d0
+                     Endif  
+                  END DO
+               END DO
+            END DO
+            CLOSE(UNIT = 12)
+        ELSE
+            CALL memFree
+            CALL MPI_FINALIZE(MPI_ERR)
+            STOP "Error: Unable to open output vtk file."
+        END IF
+
+        RETURN
+    END SUBROUTINE saveFlowFieldVTK
+
     subroutine memFree
         deallocate (array3D, array3Dg)
         deallocate (image, which_corner, vecWall)
         deallocate (dir1, dir2, dir3, dir4, dir5, dir6, dir7, dir8)
         deallocate (coef1, coef2, coef3, coef4, coef5, coef6, coef7, coef8)
         deallocate (f1,f2,f3,f4,f5,f6,f7,f8)
-        deallocate (f1w,f2w,f3w,f4w,f5w,f6w,f7w,f8w)
+        !deallocate (f1w,f2w,f3w,f4w,f5w,f6w,f7w,f8w)
         deallocate (Rho, Ux, Uy, Uz)
         deallocate (f_west_snd, f_west_rcv, f_east_snd, f_east_rcv)
         deallocate (f_noth_snd, f_noth_rcv, f_suth_snd, f_suth_rcv)
