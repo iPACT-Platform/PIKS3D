@@ -7,8 +7,8 @@ FC=ifort
 #CFLAGS= -c -g -fpe-all=0 -fpe0 -check -debug -traceback
 #LFLAGS=    -fopenmp
 #CFLAGS= -c -fopenmp
-LFLAGS= -traceback
-CFLAGS= -c -traceback
+LFLAGS= -g
+CFLAGS= -c -g
 
 # Intel Fortran setting
 

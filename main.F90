@@ -4,6 +4,7 @@ USE flow
 USE MPIParams
 USE MPI ! this is system mpi
 USE solver
+USE physicalGrid
 IMPLICIT NONE
 
 ! Local variables
