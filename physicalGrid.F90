@@ -368,14 +368,17 @@ contains
                         CASE (WallWN)
                             nWall=nWall+1
                             vecWall(nWall)=localid
+                            nCorner=nCorner+1
                             which_corner(i,j,k)=nCorner
                         CASE (WallES)
                             nWall=nWall+1
                             vecWall(nWall)=localid
+                            nCorner=nCorner+1
                             which_corner(i,j,k)=nCorner
                         CASE (WallWS)
                             nWall=nWall+1
                             vecWall(nWall)=localid
+                            nCorner=nCorner+1
                             which_corner(i,j,k)=nCorner
                         CASE (WallEF)
                             nWall=nWall+1
@@ -385,14 +388,17 @@ contains
                         CASE (WallEB)
                             nWall=nWall+1
                             vecWall(nWall)=localid
+                            nCorner=nCorner+1
                             which_corner(i,j,k)=nCorner
                         CASE (WallWF)
                             nWall=nWall+1
                             vecWall(nWall)=localid
+                            nCorner=nCorner+1
                             which_corner(i,j,k)=nCorner
                         CASE (WallWB)
                             nWall=nWall+1
                             vecWall(nWall)=localid
+                            nCorner=nCorner+1
                             which_corner(i,j,k)=nCorner                        
                         CASE (WallNF)
                             nWall=nWall+1
@@ -402,14 +408,17 @@ contains
                         CASE (WallNB)
                             nWall=nWall+1
                             vecWall(nWall)=localid
+                            nCorner=nCorner+1
                             which_corner(i,j,k)=nCorner
                         CASE (WallSF)
                             nWall=nWall+1
                             vecWall(nWall)=localid
+                            nCorner=nCorner+1
                             which_corner(i,j,k)=nCorner
                         CASE (WallSB)
                             nWall=nWall+1
                             vecWall(nWall)=localid
+                            nCorner=nCorner+1
                             which_corner(i,j,k)=nCorner  
                         ! +++                          
                         CASE (WallENF)
@@ -420,14 +429,17 @@ contains
                         CASE (WallENB)
                             nWall=nWall+1
                             vecWall(nWall)=localid
+                            nCorner=nCorner+1
                             which_corner(i,j,k)=nCorner
                         CASE (WallWNF)
                             nWall=nWall+1
                             vecWall(nWall)=localid
+                            nCorner=nCorner+1
                             which_corner(i,j,k)=nCorner
                         CASE (WallWNB)
                             nWall=nWall+1
                             vecWall(nWall)=localid
+                            nCorner=nCorner+1
                             which_corner(i,j,k)=nCorner                        
                         CASE (WallESF)
                             nWall=nWall+1
@@ -437,14 +449,17 @@ contains
                         CASE (WallESB)
                             nWall=nWall+1
                             vecWall(nWall)=localid
+                            nCorner=nCorner+1
                             which_corner(i,j,k)=nCorner
                         CASE (WallWSF)
                             nWall=nWall+1
                             vecWall(nWall)=localid
+                            nCorner=nCorner+1
                             which_corner(i,j,k)=nCorner
                         CASE (WallWSB)
                             nWall=nWall+1
                             vecWall(nWall)=localid
+                            nCorner=nCorner+1
                             which_corner(i,j,k)=nCorner     
                     END SELECT
                 Enddo

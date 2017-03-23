@@ -8,8 +8,8 @@ use mpiParams
 implicit none
 
 double precision, parameter :: eps=1.d-10
-integer, parameter :: maxStep = 3
-integer, parameter :: interval = 1
+integer, parameter :: maxStep = 100
+integer, parameter :: interval = 10
 integer :: iStep
 double precision :: error
 
@@ -25,10 +25,6 @@ contains
         integer :: xsize, ysize, zsize
         double precision :: feq, RhoWall, RhoWall2, RhoWall3
         double precision, dimension(Nc8) :: f1wZ,f2wZ,f3wZ,f4wZ,f5wZ,f6wZ,f7wZ,f8wZ
-
-
-        ! if(iStep == 3) print*, "f4(problem)=", f4(30854,1)
-
 
         ! buffer size
         xsize = Nytotal*Nztotal*Nc/2*ghostLayers
@@ -104,19 +100,6 @@ contains
             &        + cz(l)*coef1(i,8)*f1(k-Nxytotal,l) &
             &        + cz(l)*coef1(i,9)*f1(k-2*Nxytotal,l) &
             & )/(0.5d0*mu+cx(l)*coef1(i,1)+cy(l)*coef1(i,4)+cz(l)*coef1(i,7))
-
-            if(istep == 3 .and. ii==24 .and. jj==12 .and. kk==21 .and. l==1) then
-            !     print*, "(z,y,x) = (21,12,24)"
-            !     print*, "f1=", f1(k,l)          
-            !     print*, "f1(k-1,l) =",          f1(k-1,l)
-            !     print*, "f1(k-2,l) =",          f1(k-2,l)
-            !     print*, "f1(k-Nxtotal,l) =",    f1(k-Nxtotal,l)
-            !     print*, "f1(k-2*Nxtotal,l) =",  f1(k-2*Nxtotal,l)
-            !     print*, "f1(k-Nxytotal,l) =",   f1(k-Nxytotal,l)
-            !     print*, "f1(k-2*Nxytotal,l) =", f1(k-2*Nxytotal,l)
-            !     print*, coef1(i,:)
-                ! if(iStep == 3) print*, "f1(reflect)=", f1w(which_corner(ii,jj,kk-1),l)
-            endif
         End do
     End do
 !$OMP END DO NOWAIT 
@@ -232,21 +215,6 @@ contains
             &        + cz(l)*coef4(i,8)*f4(k-Nxytotal,l) &
             &        + cz(l)*coef4(i,9)*f4(k-2*Nxytotal,l) &
             & )/(0.5d0*mu+cx(l)*coef4(i,1)-cy(l)*coef4(i,4)+cz(l)*coef4(i,7))
-
-            if(istep == 3 .and. ii==24 .and. jj==19 .and. kk==21 .and. l==1) then
-            !     print*, "(z,y,x) = (21,19,24)"
-            !     print*, "f4=", f4(k,l)
-            !     print*, "f4(k-1,l) =",          f4(k-1,l)
-            !     print*, "f4(k-2,l) =",          f4(k-2,l)
-            !     print*, "f4(k+Nxtotal,l) =",    f4(k+Nxtotal,l)
-            !     print*, "f4(k+2*Nxtotal,l) =",  f4(k+2*Nxtotal,l)
-            !     print*, "f4(k-Nxytotal,l) =",   f4(k-Nxytotal,l)
-            !     print*, "f4(k-2*Nxytotal,l) =", f4(k-2*Nxytotal,l)
-            !     print*, coef1(i,:)                
-                ! if(iStep == 3) print*, "f4(problem)=", f4(30854,1)
-                ! if(iStep == 3) print*, "f4(reflect)=", f4w(which_corner(ii,jj,kk-1),l)
-            endif
-
         End do
     End do
 !$OMP END DO NOWAIT
@@ -920,14 +888,8 @@ contains
                     ! Store z
                     f1w(j,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f5w(j,l)
-                    ! if(ii==24 .and. jj==12 .and. kk==20 .and. l==1 .and. iStep==2) then
-                    !     print*, "f1w = ", f1w(j,l)
-                    ! endif
                     f4w(j,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f8w(j,l)
-                    ! if(ii==24 .and. jj==19 .and. kk==20 .and. l==1 .and. iStep==2) then
-                    !     print*, "f4w = ", f4w(j,l)
-                    ! endif
                 Enddo
 
             CASE (wallWF)
@@ -1773,33 +1735,6 @@ contains
             Ux(k)=Ux(k)+cx(l)*(f1(k,l)-f2(k,l)-f3(k,l)+f4(k,l)+f5(k,l)-f6(k,l)-f7(k,l)+f8(k,l))
             Uy(k)=Uy(k)+cy(l)*(f1(k,l)+f2(k,l)-f3(k,l)-f4(k,l)+f5(k,l)+f6(k,l)-f7(k,l)-f8(k,l))
             Uz(k)=Uz(k)+cz(l)*(f1(k,l)+f2(k,l)+f3(k,l)+f4(k,l)-f5(k,l)-f6(k,l)-f7(k,l)-f8(k,l))
-
-            if(iStep==2) then
-                if(k == (21-zlg)*Nxytotal + (12-ylg)*Nxtotal + (24-xlg+1) .and. l == 1) then
-                    print*, "21, 12, 24"
-                    print*, "f1 = ", f1(k, l)
-                    print*, "f2 = ", f2(k, l)
-                    print*, "f3 = ", f3(k, l)
-                    print*, "f4 = ", f4(k, l)
-                    print*, "f5 = ", f5(k, l)
-                    print*, "f6 = ", f6(k, l)
-                    print*, "f7 = ", f7(k, l)
-                    print*, "f8 = ", f8(k, l)
-                    !print*, "Ux(k) =", Ux(k)
-                endif
-                if(k == (21-zlg)*Nxytotal + (19-ylg)*Nxtotal + (24-xlg+1) .and. l == 1) then
-                    print*, "21, 19, 24"
-                    print*, "f1 = ", f1(k, l)
-                    print*, "f2 = ", f2(k, l)
-                    print*, "f3 = ", f3(k, l)
-                    print*, "f4 = ", f4(k, l)
-                    print*, "f5 = ", f5(k, l)
-                    print*, "f6 = ", f6(k, l)
-                    print*, "f7 = ", f7(k, l)
-                    print*, "f8 = ", f8(k, l)
-                    !print*, "Ux(k) =", Ux(k)
-                endif
-            endif
         End do
 
 
