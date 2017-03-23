@@ -1774,7 +1774,7 @@ contains
             Uy(k)=Uy(k)+cy(l)*(f1(k,l)+f2(k,l)-f3(k,l)-f4(k,l)+f5(k,l)+f6(k,l)-f7(k,l)-f8(k,l))
             Uz(k)=Uz(k)+cz(l)*(f1(k,l)+f2(k,l)+f3(k,l)+f4(k,l)-f5(k,l)-f6(k,l)-f7(k,l)-f8(k,l))
 
-            if(iStep==3) then
+            if(iStep==2) then
                 if(k == (21-zlg)*Nxytotal + (12-ylg)*Nxtotal + (24-xlg+1) .and. l == 1) then
                     print*, "21, 12, 24"
                     print*, "f1 = ", f1(k, l)
