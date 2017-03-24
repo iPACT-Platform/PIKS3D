@@ -30,11 +30,7 @@ integer, parameter :: ymax = Ny
 integer, parameter :: zmin = 1
 integer, parameter :: zmax = Nz
 
-! solid region parameters
-integer, parameter :: obstR = floor((Nx-1)*((1.d0-porosity)*3.d0/4.d0/(datan(1.d0)*4.d0))**(1.d0/3.d0))
-integer, parameter :: obstX = ghostLayers+Ny-2   !Check
-integer, parameter :: obstY = ghostLayers-1      !Check
-integer, parameter :: obstZ = ghostLayers-1      !Check
+
 
 ! need to be determined from mpi cood
 integer :: Nxtotal, Nytotal, Nztotal, Nxytotal, Nxsub, Nysub, Nzsub, Ntotal
@@ -81,6 +77,14 @@ contains
         integer :: ii, jj, kk
         integer :: nCorner
         character(kind=1) :: ctemp
+
+        ! solid region parameters
+        integer, parameter :: obstR = floor((Nx-1)*((1.d0-porosity)*3.d0/4.d0/(datan(1.d0)*4.d0))**(1.d0/3.d0))
+        integer, parameter :: obstX = ghostLayers+Ny-2   !Check
+        integer, parameter :: obstY = ghostLayers-1      !Check
+        integer, parameter :: obstZ = ghostLayers-1      !Check
+
+        print*, "obstR =", obstR
 
         ! set the extend and sizes
         Nxtotal = xug - xlg + 1
