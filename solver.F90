@@ -1838,7 +1838,6 @@ module solver
             !PRINT*, "mass = ", mass
             !DEBUG
             error=dabs(1.d0-mass2/mass)/(interval)
-            error=1.d0
 
             mass=mass2
             if (proc == master) then           
