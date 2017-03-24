@@ -10,7 +10,7 @@ SAVE
 integer :: xl, xu, yl, yu, zl, zu
 integer :: xlg, xug, ylg, yug, zlg, zug
 integer, parameter :: ghostLayers = 2
-integer, parameter :: fluidlayer=0
+integer, parameter :: fluidlayer=4
 integer, parameter :: translate=0
 double precision, parameter :: porosity=0.75d0
 
@@ -19,8 +19,11 @@ double precision, parameter :: Ref_L= 2.d0
 
 ! NX and NY is the global grid size
 !integer, parameter :: Nx = 533, Ny = 428 !Brea stone
-integer, parameter :: Ny=201
-integer, parameter :: Nx=(Ny-1)*2 + 1
+!integer, parameter :: Ny=201
+!integer, parameter :: Nx=(Ny-1)*2 + 1
+!integer, parameter :: Nz=Ny
+integer, parameter :: Ny=300
+integer, parameter :: Nx=Ny+2*fluidlayer
 integer, parameter :: Nz=Ny
 
 integer, parameter :: xmin = 1
@@ -141,59 +144,82 @@ contains
         !array3D (xmin+5:xmax-23,ymin+3:ymax-15,zmin+10:zmax-10) = solid
         !array3Dg(xmin+5:xmax-23,ymin+3:ymax-15,zmin+10:zmax-10) = solid
 
+        !-----------------------------------------------------------------
         !read digital image, NOTE that all raw image dimension are NY^3. 
-        !Open(200,file='BeadPack300^3.raw',status='OLD',form='unformatted',ACCESS="STREAM")
-        !Do k=1,Nz
-        !    Do j=1,Ny
-        !        Do i=fluidlayer+1,Ny+fluidlayer  
-        !            read(200) ctemp       
-        !            !l=(i-translate+ghostLayer)+(j-translate+ghostLayer-1)*Nxtotal+(k-translate+ghostLayer-1)*Nxytotal
-        !            if ((k>=1+translate).AND.(k<=Nz+translate).AND.(j>=1+translate).AND.(j<=Ny+translate).AND.&
-        !                & (i>=fluidlayer+1+translate).AND.(i<=Nx-fluidlayer+translate)) then
-        !                if (ichar(ctemp)==0) then
-        !                    array3D(i,j,k) = fluid
-        !                    array3Dg(i,j,k) = fluid
-        !                else if (ichar(ctemp)==1) then
-        !                    array3D(i,j,k) = solid
-        !                    array3Dg(i,j,k) = solid
-        !                else 
-        !                    write(*,*) "invalid image data file"
-        !                    stop 0
-        !                endif
-        !            endif
-        !        Enddo  
-        !    Enddo
-        !Enddo
-        !Close(200)
+        !-----------------------------------------------------------------
+        Open(200,file='BeadPack300^3.raw',status='OLD',form='unformatted',ACCESS="STREAM")
+        Do k=1,Nz
+            Do j=1,Ny
+                Do i=fluidlayer+1,Ny+fluidlayer  
+                    read(200) ctemp       
+                    !l=(i-translate+ghostLayer)+(j-translate+ghostLayer-1)*Nxtotal+(k-translate+ghostLayer-1)*Nxytotal
+                    if ((k>=1+translate).AND.(k<=Nz+translate).AND.(j>=1+translate).AND.(j<=Ny+translate).AND.&
+                        & (i>=fluidlayer+1+translate).AND.(i<=Nx-fluidlayer+translate)) then
+                        if (ichar(ctemp)==0) then
+                            array3D(i,j,k) = fluid
+                            array3Dg(i,j,k) = fluid
+                        else if (ichar(ctemp)==1) then
+                            array3D(i,j,k) = solid
+                            array3Dg(i,j,k) = solid
+                        else 
+                            write(*,*) "invalid image data file"
+                            stop 0
+                        endif
+                    endif
+                Enddo  
+            Enddo
+        Enddo
+        Close(200)
 
 
 
+        !-----------------------------------------------------------------
         ! drill the small pores (change array3Dg)
-        !do k=1,Nz
-        !    do j=1,Ny
-        !        do i=2,Nx-1
-        !            if(array3Dg(i,j,k) == fluid) then
-        !                if ((array3Dg(i+1,j,k) /=fluid .and. array3Dg(i-1,j,k) /= fluid) .or. &
-        !                    (array3Dg(i,j+1,k) /=fluid .and. array3Dg(i,j-1,k) /= fluid) .or. &
-        !                    (array3Dg(i,j,k+1) /=fluid .and. array3Dg(i,j,k-1) /= fluid))then
-        !                    if (j==Ny) then
-        !                        if (k==Nz) then
-        !                            array3Dg(i:i+1,j-1:j,k-1:k) = fluid
-        !                        else
-        !                            array3Dg(i:i+1,j-1:j,k:k+1) = fluid
-        !                        endif
-        !                    else if (k==Nz) then
-        !                        array3Dg(i:i+1,j:j+1,k-1:k) = fluid
-        !                    else
-        !                        array3Dg(i:i+1,j:j+1,k:k+1) = fluid
-        !                    endif
-        !                endif
-        !            endif !fluid
-        !        enddo !i
-        !    enddo !j
-        !enddo !k
+        !-----------------------------------------------------------------
+        do k=1,Nz
+            do j=1,Ny
+                do i=2,Nx-1
+                    if(array3Dg(i,j,k) == fluid) then
+                        if ((array3Dg(i+1,j,k) /=fluid .and. array3Dg(i-1,j,k) /= fluid) .or. &
+                            (array3Dg(i,j+1,k) /=fluid .and. array3Dg(i,j-1,k) /= fluid) .or. &
+                            (array3Dg(i,j,k+1) /=fluid .and. array3Dg(i,j,k-1) /= fluid))then
+                            if (j==Ny) then
+                                if (k==Nz) then
+                                    array3Dg(i:i+1,j-1:j,k-1:k) = fluid
+                                else
+                                    array3Dg(i:i+1,j-1:j,k:k+1) = fluid
+                                endif
+                            else if (k==Nz) then
+                                array3Dg(i:i+1,j:j+1,k-1:k) = fluid
+                            else
+                                array3Dg(i:i+1,j:j+1,k:k+1) = fluid
+                            endif
+                        endif
+                    endif !fluid
+                enddo !i
+            enddo !j
+        enddo !k
 
-        ! reset array3D, since array3Dg has now been drilled        
+        !-----------------------------------------------------------------
+        ! 1-layer-thickness wall 
+        !-----------------------------------------------------------------
+        Do k=1,Nz
+          Do j=1,Ny
+            Do i=1,Nx
+              If (array3Dg(i,j,k)==solid) then
+                If(   ((array3Dg(i+1,j,k)==fluid).AND.(array3Dg(i-1,j,k)==fluid)) &
+                  .OR.((array3Dg(i,j+1,k)==fluid).AND.(array3Dg(i,j-1,k)==fluid))&
+                  .OR.((array3Dg(i,j,k+1)==fluid).AND.(array3Dg(i,j,k-1)==fluid))) then
+                    array3Dg(l)=fluid
+                Endif       
+              Endif
+            Enddo
+          Enddo
+        Enddo  
+
+        !-----------------------------------------------------------------
+        ! reset array3D, since array3Dg has now been cleaned
+        !-----------------------------------------------------------------
         do k = zmin, zmax
             do j = ymin, ymax
                 do i = xmin, xmax
