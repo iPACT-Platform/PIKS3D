@@ -128,7 +128,7 @@ contains
                 Do i=xmin,xmax
                     If (((i-obstX)**2 + (j-obstY)**2 + (k-obstZ)**2)  &
                         < ((obstR+1.d-6)**2) ) then  !3D sphere
-                        array3Dg(ii,jj,kk) = solid
+                        array3Dg(i,j,k) = solid
                     Endif
                 Enddo
             Enddo
