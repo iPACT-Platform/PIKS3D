@@ -6,9 +6,9 @@ module solver
 
     implicit none
 
-    double precision, parameter :: eps=1.d-10
-    integer, parameter :: maxStep = 1000
-    integer, parameter :: interval = 100
+    double precision, parameter :: eps=1.d-8
+    integer, parameter :: maxStep = 10000
+    integer, parameter :: interval = 200
     integer :: iStep
     double precision :: error
 
