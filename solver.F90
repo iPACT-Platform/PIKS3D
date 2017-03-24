@@ -1,19 +1,18 @@
 module solver
+    use flow
+    use velocityGrid
+    use physicalGrid
+    use mpiParams
 
-use flow
-use velocityGrid
-use physicalGrid
-use mpiParams
+    implicit none
 
-implicit none
+    double precision, parameter :: eps=1.d-10
+    integer, parameter :: maxStep = 1000
+    integer, parameter :: interval = 100
+    integer :: iStep
+    double precision :: error
 
-double precision, parameter :: eps=1.d-10
-integer, parameter :: maxStep = 100
-integer, parameter :: interval = 10
-integer :: iStep
-double precision :: error
-
-contains
+    contains
     subroutine iterate
         use MPI
         implicit none
@@ -1829,7 +1828,7 @@ contains
 
             ! debug
             massLocal = (massInner + massSuth + massNoth + massFrnt + massBack &
-                + massSB + massSF + massNB + massNF)*sqrt(1.d0/2.d0)*4.d0/PressDrop
+                + massSB + massSF + massNB + massNF)*dsqrt(1.d0/2.d0)/PressDrop/(1.d0/Ref_L)**2
                 !+ massSB + massSF + massNB + massNF)*dsqrt(1.d0/2.d0)*4.d0/1.d0
 
             ! reduction
@@ -1838,8 +1837,7 @@ contains
 
             !PRINT*, "mass = ", mass
             !DEBUG
-            !error=dabs(1.d0-mass2/mass)/(interval)
-            !error=dabs(1.d0-mass2/mass)/(interval)
+            error=dabs(1.d0-mass2/mass)/(interval)
             error=1.d0
 
             mass=mass2
