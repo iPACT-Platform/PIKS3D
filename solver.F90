@@ -17,13 +17,13 @@ contains
     subroutine iterate
         use MPI
         implicit none
-        integer :: i, j, k, l, ii, jj, kk, localid
+        integer :: i, j, k, l, ii, jj, kk
         integer :: localidMsnd, localidPsnd, localidMrcv, localidPrcv, packid
         INTEGER :: MPI_ERR
         INTEGER :: MPI_REQ_X(4), MPI_REQ_Y(4), MPI_REQ_Z(4)
         INTEGER :: MPI_STAT(MPI_STATUS_SIZE,6)
         integer :: xsize, ysize, zsize
-        double precision :: feq, RhoWall, RhoWall2, RhoWall3
+        double precision :: fEq, RhoWall, RhoWall2, RhoWall3
         double precision, dimension(Nc8) :: f1wZ,f2wZ,f3wZ,f4wZ,f5wZ,f6wZ,f7wZ,f8wZ
 
         ! buffer size
@@ -33,7 +33,10 @@ contains
 
 !$OMP PARALLEL &
 !$OMP DEFAULT(SHARED) &
-!$OMP PRIVATE(l, i, k, fEq, RhoWall)
+!$OMP PRIVATE(l, i, j, k, ii, jj, kk, fEq, RhoWall, RhoWall2, RhoWall3)&
+!$OMP PRIVATE(f1wZ,f2wZ,f3wZ,f4wZ,f5wZ,f6wZ,f7wZ,f8wZ)&
+!$OMP PRIVATE(localidPsnd, localidPrcv, localidMsnd, localidMrcv, packid)
+
 
 !$OMP SINGLE
         ! Start Recieving
