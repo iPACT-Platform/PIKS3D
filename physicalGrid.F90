@@ -10,13 +10,17 @@ SAVE
 integer :: xl, xu, yl, yu, zl, zu
 integer :: xlg, xug, ylg, yug, zlg, zug
 integer, parameter :: ghostLayers = 2
-integer, parameter :: fluidlayer=4
+integer, parameter :: fluidlayer=0
 integer, parameter :: translate=0
+double precision, parameter :: porosity=0.75d0
+
+!1.d0 for reference length L=Lx=Ly or 2.d0 for L=Lx=2Ly
+double precision, parameter :: Ref_L= 2.d0 
 
 ! NX and NY is the global grid size
 !integer, parameter :: Nx = 533, Ny = 428 !Brea stone
-integer, parameter :: Ny=30
-integer, parameter :: Nx=Ny+2*fluidlayer
+integer, parameter :: Ny=201
+integer, parameter :: Nx=(Ny-1)*2 + 1
 integer, parameter :: Nz=Ny
 
 integer, parameter :: xmin = 1
@@ -26,11 +30,17 @@ integer, parameter :: ymax = Ny
 integer, parameter :: zmin = 1
 integer, parameter :: zmax = Nz
 
+! solid region parameters
+integer, parameter :: obstR = floor((Nx-1)*((1.d0-porosity)*3.d0/4.d0/(datan(1.d0)*4.d0))**(1.d0/3.d0))
+integer, parameter :: obstX = ghostLayers+Ny-2   !Check
+integer, parameter :: obstY = ghostLayers-1      !Check
+integer, parameter :: obstZ = ghostLayers-1      !Check
+
 ! need to be determined from mpi cood
 integer :: Nxtotal, Nytotal, Nztotal, Nxytotal, Nxsub, Nysub, Nzsub, Ntotal
 
-double precision, parameter :: ds =  1.0d0/(Nx-1)
-integer, parameter :: column=fluidlayer/2 ! layer to extract flow rate
+double precision :: ds = 1.d0/(Nx-1-2*fluidlayer) !uniform grid spacing in physical space
+integer, parameter :: column= 2 ! layer to extract flow rate
 
 ! raw and extended flag array
 integer, dimension (:,:,:), allocatable :: array3D, array3Dg ! globle image
@@ -100,18 +110,35 @@ contains
         do k=zmin-ghostLayers,zmax+ghostLayers
             do j=ymin-ghostLayers,ymax+ghostLayers
                 do i=xmin-ghostLayers,xmax+ghostLayers
-                    if(k<zmin .or. k>zmax .or. j<ymin .or. j>ymax .or. i<xmin .or. i>xmax) then
+                    if(k<zmin .or. k>zmax .or. j<ymin &
+                        .or. j>ymax .or. i<xmin .or. i>xmax) then
                         array3Dg(i,j,k) = ghost
                     endif
                 enddo
             enddo
         enddo
 
-        array3D (xmin+14:xmax-14,ymin+10:ymax-10,zmin+10:zmax-10) = solid
-        array3Dg(xmin+14:xmax-14,ymin+10:ymax-10,zmin+10:zmax-10) = solid
+        ! create solid region by equation
+        Do k=zmin,zmax
+            Do j=ymin,ymax
+                Do i=xmin,xmax
+                    If (((i-obstX)**2 + (j-obstY)**2 + (k-obstZ)**2)  &
+                        < ((obstR+1.d-6)**2) ) then  !3D sphere
+                        array3Dg(ii,jj,kk) = solid
+                    Endif
+                Enddo
+            Enddo
+        Enddo
+
+        !array3D (xmin+14:xmax-14,ymin+10:ymax-10,zmin+10:zmax-10) = solid
+        !array3Dg(xmin+14:xmax-14,ymin+10:ymax-10,zmin+10:zmax-10) = solid
+
+
+        !array3D (xmin+5:xmax-23,ymin+3:ymax-15,zmin+10:zmax-10) = solid
+        !array3Dg(xmin+5:xmax-23,ymin+3:ymax-15,zmin+10:zmax-10) = solid
 
         !read digital image, NOTE that all raw image dimension are NY^3. 
-        !Open(200,file='shale400^3.raw',status='OLD',form='unformatted',ACCESS="STREAM")
+        !Open(200,file='BeadPack300^3.raw',status='OLD',form='unformatted',ACCESS="STREAM")
         !Do k=1,Nz
         !    Do j=1,Ny
         !        Do i=fluidlayer+1,Ny+fluidlayer  
@@ -135,30 +162,32 @@ contains
         !Enddo
         !Close(200)
 
+
+
         ! drill the small pores (change array3Dg)
-        do k=1,Nz
-            do j=1,Ny
-                do i=2,Nx-1
-                    if(array3Dg(i,j,k) == fluid) then
-                        if ((array3Dg(i+1,j,k) /=fluid .and. array3Dg(i-1,j,k) /= fluid) .or. &
-                            (array3Dg(i,j+1,k) /=fluid .and. array3Dg(i,j-1,k) /= fluid) .or. &
-                            (array3Dg(i,j,k+1) /=fluid .and. array3Dg(i,j,k-1) /= fluid))then
-                            if (j==Ny) then
-                                if (k==Nz) then
-                                    array3Dg(i:i+1,j-1:j,k-1:k) = fluid
-                                else
-                                    array3Dg(i:i+1,j-1:j,k:k+1) = fluid
-                                endif
-                            else if (k==Nz) then
-                                array3Dg(i:i+1,j:j+1,k-1:k) = fluid
-                            else
-                                array3Dg(i:i+1,j:j+1,k:k+1) = fluid
-                            endif
-                        endif
-                    endif !fluid
-                enddo !i
-            enddo !j
-        enddo !k
+        !do k=1,Nz
+        !    do j=1,Ny
+        !        do i=2,Nx-1
+        !            if(array3Dg(i,j,k) == fluid) then
+        !                if ((array3Dg(i+1,j,k) /=fluid .and. array3Dg(i-1,j,k) /= fluid) .or. &
+        !                    (array3Dg(i,j+1,k) /=fluid .and. array3Dg(i,j-1,k) /= fluid) .or. &
+        !                    (array3Dg(i,j,k+1) /=fluid .and. array3Dg(i,j,k-1) /= fluid))then
+        !                    if (j==Ny) then
+        !                        if (k==Nz) then
+        !                            array3Dg(i:i+1,j-1:j,k-1:k) = fluid
+        !                        else
+        !                            array3Dg(i:i+1,j-1:j,k:k+1) = fluid
+        !                        endif
+        !                    else if (k==Nz) then
+        !                        array3Dg(i:i+1,j:j+1,k-1:k) = fluid
+        !                    else
+        !                        array3Dg(i:i+1,j:j+1,k:k+1) = fluid
+        !                    endif
+        !                endif
+        !            endif !fluid
+        !        enddo !i
+        !    enddo !j
+        !enddo !k
 
         ! reset array3D, since array3Dg has now been drilled        
         do k = zmin, zmax
@@ -466,8 +495,10 @@ contains
             Enddo
         Enddo
 
-        ALLOCATE(f1w(nCorner, Nc8),f2w(nCorner, Nc8),f3w(nCorner, Nc8),f4w(nCorner, Nc8))
-        ALLOCATE(f5w(nCorner, Nc8),f6w(nCorner, Nc8),f7w(nCorner, Nc8),f8w(nCorner, Nc8))
+        ALLOCATE(f1w(nCorner, Nc8),f2w(nCorner, Nc8),&
+                 f3w(nCorner, Nc8),f4w(nCorner, Nc8))
+        ALLOCATE(f5w(nCorner, Nc8),f6w(nCorner, Nc8),&
+                 f7w(nCorner, Nc8),f8w(nCorner, Nc8))
 
         !BUG FOUND
         !Direction 1
@@ -715,9 +746,9 @@ contains
         bxu = xu
         byu = yu
         bzu = zu
-        if(xl == xmin) bxl = xl+1 !if most west block(processor)
-        if(yu == ymax) byu = yu-1 !if most south block
-        if(zu == zmax) bzu = zu-1!if most back  block
+        if(xl == xmin) bxl = xl+1
+        if(yu == ymax) byu = yu-1
+        if(zu == zmax) bzu = zu-1
         Nstencil8=0
         Do k=bzu,bzl,-1
             Do j=byu,byl,-1
@@ -743,8 +774,10 @@ contains
         End do
 
         !construct the deferencial coefficients
-        ALLOCATE(coef1(Nstencil1,9),coef2(Nstencil2,9),coef3(Nstencil3,9),coef4(Nstencil4,9))
-        ALLOCATE(coef5(Nstencil5,9),coef6(Nstencil6,9),coef7(Nstencil7,9),coef8(Nstencil8,9))
+        ALLOCATE(coef1(Nstencil1,9),coef2(Nstencil2,9),&
+            coef3(Nstencil3,9),coef4(Nstencil4,9))
+        ALLOCATE(coef5(Nstencil5,9),coef6(Nstencil6,9),&
+            coef7(Nstencil7,9),coef8(Nstencil8,9))
         
         Do i=1,Nstencil1
             ii=dir1(1,i) 
