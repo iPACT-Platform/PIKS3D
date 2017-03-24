@@ -210,7 +210,7 @@ contains
                 If(   ((array3Dg(i+1,j,k)==fluid).AND.(array3Dg(i-1,j,k)==fluid)) &
                   .OR.((array3Dg(i,j+1,k)==fluid).AND.(array3Dg(i,j-1,k)==fluid))&
                   .OR.((array3Dg(i,j,k+1)==fluid).AND.(array3Dg(i,j,k-1)==fluid))) then
-                    array3Dg(l)=fluid
+                    array3Dg(i,j,k)=fluid
                 Endif       
               Endif
             Enddo
