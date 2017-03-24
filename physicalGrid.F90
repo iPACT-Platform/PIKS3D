@@ -218,6 +218,37 @@ contains
         Enddo  
 
         !-----------------------------------------------------------------
+        ! revoving wall node that near the communication boundary
+        !-----------------------------------------------------------------
+        !                      |                                        
+        !       # # # # # # O *|*                                       
+        !       # # # # # # O *|*                                       
+        !       * # # # # # O *|*                                       
+        !       * * O O O O * *|*                                       
+        !       * * * * * * * *|*                                       
+        !                                                                
+        ! NOTE: O type wall points need to be change to fluid
+        !       Same role apply to Y/Z commu. boundary
+        !-----------------------------------------------------------------
+        do k=zl,zu
+          do j=yl,yu
+            do i=xl,xu
+              if(array3Dg(i,j,k) == solid) then
+                if ( (k==(zl+1) .and. array3Dg(i,j,k-1)==fluid) &
+                .or. (k==(zu-1) .and. array3Dg(i,j,k+1)==fluid) &
+                .or. (j==(yl+1) .and. array3Dg(i,j-1,k)==fluid) &
+                .or. (j==(yu-1) .and. array3Dg(i,j+1,k)==fluid) &
+                .or. (i==(xl+1) .and. array3Dg(i-1,j,k)==fluid) &
+                .or. (i==(xu-1) .and. array3Dg(i+1,j,k)==fluid) ) then
+                  array3Dg(i,j,k) = fluid
+                endif
+              endif
+            enddo
+          enddo
+        enddo
+
+
+        !-----------------------------------------------------------------
         ! reset array3D, since array3Dg has now been cleaned
         !-----------------------------------------------------------------
         do k = zmin, zmax
