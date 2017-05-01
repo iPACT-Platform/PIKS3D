@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 2.8)
+project(mpi_dvm Fortran)
+set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -O3")
+message("CMAKE_Fortran_FLAGS_RELEASE is ${CMAKE_Fortran_FLAGS_RELEASE}")
+file(GLOB_RECURSE sources  src/*.F90)
+add_executable(dvm3d.x ${sources})

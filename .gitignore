@@ -5,3 +5,8 @@
 *.out
 *.swp
 *.vtk
+CMakeLists.txt
+build
+debug
+run
+pdata
