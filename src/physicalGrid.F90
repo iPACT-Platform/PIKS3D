@@ -4,41 +4,37 @@
 module physicalGrid
 IMPLICIT NONE
 SAVE
-
+!--------------------------------------------------------------------
 ! Domain size
-
-integer :: xl, xu, yl, yu, zl, zu
-integer :: xlg, xug, ylg, yug, zlg, zug
-integer, parameter :: ghostLayers = 2
-integer, parameter :: fluidlayer=4
-integer, parameter :: translate=0
-double precision, parameter :: porosity=0.75d0
-
+!domain defination, to be read from NML: velocityNml
+!--------------------------------------------------------------------
+! Total domain size (the raw image dimension with possible repeation)
+integer :: Nx, Ny, Nz
+! image file name
+character(len=40):: imageFileName
+! wall extrapolation order, 1, 2(default), 3(mixed)
+integer :: wallExtOrder
+! number of fluid layer to be added at inlet and outlet
+integer :: fluidlayer
 !1.d0 for reference length L=Lx=Ly or 2.d0 for L=Lx=2Ly
-double precision, parameter :: Ref_L= 2.d0 
-
-! NX and NY is the global grid size
-!integer, parameter :: Nx = 533, Ny = 428 !Brea stone
-!integer, parameter :: Ny=201
-!integer, parameter :: Nx=(Ny-1)*2 + 1
-!integer, parameter :: Nz=Ny
-integer, parameter :: Ny=300
-integer, parameter :: Nx=Ny+2*fluidlayer
-integer, parameter :: Nz=Ny
-
-integer, parameter :: xmin = 1
-integer, parameter :: xmax = Nx
-integer, parameter :: ymin = 1
-integer, parameter :: ymax = Ny
-integer, parameter :: zmin = 1
-integer, parameter :: zmax = Nz
+double precision:: Ref_L
 
 
+! will be set by mpiParams
+integer :: xl, xu, yl, yu, zl, zu, xlg, xug, ylg, yug, zlg, zug
+! will be set in this module's init func.
+integer :: xmin, xmax, ymin, ymax, zmin, zmax
+integer :: block_repx, block_repy, block_repz
+integer :: Nx_base, Ny_base, Nz_base
+
+integer, parameter :: ghostLayers = 2
+integer, parameter :: translate = 0
+integer, parameter :: IMAGEFILE = 20
 
 ! need to be determined from mpi cood
 integer :: Nxtotal, Nytotal, Nztotal, Nxytotal, Nxsub, Nysub, Nzsub, Ntotal
-
-double precision :: ds = 1.d0/(Nx-1-2*fluidlayer) !uniform grid spacing in physical space
+!uniform grid spacing in physical space, will be set in init func.
+double precision :: ds
 integer, parameter :: column= 2 ! layer to extract flow rate
 
 ! raw and extended flag array
@@ -47,7 +43,8 @@ integer, dimension (:,:,:), allocatable :: image, which_corner! local image
 
 ! grid point flags and wall type id
 integer, parameter:: fluid = 0, solid = 1, ghost=4
-integer, parameter:: wallE = 20, wallW = 21, wallN = 22, wallS = 23, wallF = 24, wallB = 25 !(1-side wall )
+integer, parameter:: wallE = 20, wallW = 21, wallN = 22, wallS = 23, &
+    wallF = 24, wallB = 25 !(1-side wall )
 integer, parameter:: wallEN = 30, wallWN = 31, wallES = 32, wallWS = 33 !(2-side wall)
 integer, parameter:: wallNF = 40, wallNB = 41, wallSF = 42, wallSB = 43 !(2-side wall)
 integer, parameter:: wallEF = 50, wallEB = 51, wallWF = 52, wallWB = 53 !(2-side wall)
@@ -63,9 +60,12 @@ double precision :: real_porosity
 integer :: nWall 
 
 integer, DIMENSION(:), ALLOCATABLE :: vecWall
-integer, DIMENSION(:,:), ALLOCATABLE :: dir1, dir2, dir3, dir4, dir5, dir6, dir7, dir8! dir1(i) is the ith 
-double precision, DIMENSION(:,:), ALLOCATABLE :: coef1, coef2, coef3, coef4, coef5, coef6, coef7, coef8
-double precision, DIMENSION(:,:), ALLOCATABLE :: f1w,f2w,f3w,f4w,f5w,f6w,f7w,f8w
+integer, DIMENSION(:,:), ALLOCATABLE :: dir1, dir2, &
+    dir3, dir4, dir5, dir6, dir7, dir8
+double precision, DIMENSION(:,:), ALLOCATABLE :: coef1, coef2, coef3, coef4, &
+    coef5, coef6, coef7, coef8
+double precision, DIMENSION(:,:), ALLOCATABLE :: f1w,f2w,f3w,f4w, &
+    f5w,f6w,f7w,f8w
 
 contains 
     ! should be called after calling MPIParams::setupVirtualProcessGrid
@@ -82,12 +82,15 @@ contains
         character(kind=1) :: ctemp
 
         ! solid region parameters
-        integer, parameter :: obstR = floor((Nx-1)*((1.d0-porosity)*3.d0/4.d0/(datan(1.d0)*4.d0))**(1.d0/3.d0))
-        integer, parameter :: obstX = ghostLayers+Ny-2   !Check
-        integer, parameter :: obstY = ghostLayers-1      !Check
-        integer, parameter :: obstZ = ghostLayers-1      !Check
+        ! integer, parameter :: obstR = floor((Nx-1)*((1.d0-porosity)*3.d0/4.d0/(datan(1.d0)*4.d0))**(1.d0/3.d0))
+        ! integer, parameter :: obstX = ghostLayers+Ny-2   !Check
+        ! integer, parameter :: obstY = ghostLayers-1      !Check
+        ! integer, parameter :: obstZ = ghostLayers-1      !Check
 
-        print*, "obstR =", obstR
+        ! print*, "obstR =", obstR
+        ! debug
+        print *, Nx, Ny, Nz
+        ds = 1.d0/(Nx-1-2*fluidlayer) 
 
         ! set the extend and sizes
         Nxtotal = xug - xlg + 1
@@ -113,54 +116,24 @@ contains
         array3D  = fluid ! set all to fluid first (fluidLayers are fluid)
         array3Dg = fluid ! set to ghost, then set inner ridge
 
-        ! set ghost
-        do k=zmin-ghostLayers,zmax+ghostLayers
-            do j=ymin-ghostLayers,ymax+ghostLayers
-                do i=xmin-ghostLayers,xmax+ghostLayers
-                    if(k<zmin .or. k>zmax .or. j<ymin &
-                        .or. j>ymax .or. i<xmin .or. i>xmax) then
-                        array3Dg(i,j,k) = ghost
-                    endif
-                enddo
-            enddo
-        enddo
-
-        ! create solid region by equation
-        Do k=zmin,zmax
-            Do j=ymin,ymax
-                Do i=xmin,xmax
-                    If (((i-obstX)**2 + (j-obstY)**2 + (k-obstZ)**2)  &
-                        < ((obstR+1.d-6)**2) ) then  !3D sphere
-                        array3Dg(i,j,k) = solid
-                    Endif
-                Enddo
-            Enddo
-        Enddo
-
-        !array3D (xmin+14:xmax-14,ymin+10:ymax-10,zmin+10:zmax-10) = solid
-        !array3Dg(xmin+14:xmax-14,ymin+10:ymax-10,zmin+10:zmax-10) = solid
-
-
-        !array3D (xmin+5:xmax-23,ymin+3:ymax-15,zmin+10:zmax-10) = solid
-        !array3Dg(xmin+5:xmax-23,ymin+3:ymax-15,zmin+10:zmax-10) = solid
-
         !-----------------------------------------------------------------
-        !read digital image, NOTE that all raw image dimension are NY^3. 
+        !read base digital image, NOTE that all raw image dimension are NY^3. 
         !-----------------------------------------------------------------
-        Open(200,file='BeadPack300^3.raw',status='OLD',form='unformatted',ACCESS="STREAM")
-        Do k=1,Nz
-            Do j=1,Ny
-                Do i=fluidlayer+1,Ny+fluidlayer  
-                    read(200) ctemp       
+        Open(IMAGEFILE,file=imageFileName,status='OLD', &
+            form='unformatted',ACCESS="STREAM")
+        Do k=1,Nz_base
+            Do j=1,Ny_base
+                Do i=fluidlayer+1,Nx_base-fluidlayer ! may need to be modified 
+                    read(IMAGEFILE) ctemp       
                     !l=(i-translate+ghostLayer)+(j-translate+ghostLayer-1)*Nxtotal+(k-translate+ghostLayer-1)*Nxytotal
-                    if ((k>=1+translate).AND.(k<=Nz+translate).AND.(j>=1+translate).AND.(j<=Ny+translate).AND.&
-                        & (i>=fluidlayer+1+translate).AND.(i<=Nx-fluidlayer+translate)) then
+                    if ((k>=1+translate).AND.(k<=Nz_base+translate) &
+                        .AND.(j>=1+translate).AND.(j<=Ny_base+translate) &
+                        .AND.(i>=fluidlayer+1+translate) &
+                        .AND.(i<=Nx_base-fluidlayer+translate) ) then
                         if (ichar(ctemp)==0) then
                             array3D(i,j,k) = fluid
-                            array3Dg(i,j,k) = fluid
                         else if (ichar(ctemp)==1) then
                             array3D(i,j,k) = solid
-                            array3Dg(i,j,k) = solid
                         else 
                             write(*,*) "invalid image data file"
                             stop 0
@@ -169,9 +142,41 @@ contains
                 Enddo  
             Enddo
         Enddo
-        Close(200)
+        Close(IMAGEFILE)
 
-
+        !-----------------------------------------------------------------
+        !repeat the base block for weak scaling efficiency study. 
+        !-----------------------------------------------------------------
+        do k = 0, block_repz-1
+        do j = 0, block_repy-1
+        do i = 0, block_repx-1
+            do kk =1, Nz_base
+                do jj = 1, Ny_base
+                    do ii = 1, Nx_base
+                        array3D(i*Nx_base+ii, j*Ny_base+jj, k*Nz_base+kk) &
+                            = array3D(ii, jj, kk)
+                    enddo
+                enddo
+            enddo
+        enddo
+        enddo
+        enddo
+        
+        !-----------------------------------------------------------------   
+        ! set ghost and inner of array3Dg
+        !-----------------------------------------------------------------
+        do k=zmin-ghostLayers,zmax+ghostLayers
+            do j=ymin-ghostLayers,ymax+ghostLayers
+                do i=xmin-ghostLayers,xmax+ghostLayers
+                    if(k<zmin .or. k>zmax .or. j<ymin .or. &
+                       j>ymax .or. i<xmin .or. i>xmax) then ! ghost layers
+                        array3Dg(i,j,k) = ghost
+                    else ! inner region
+                        array3Dg(i,j,k) = array3D(i,j,k)
+                    endif
+                enddo
+            enddo
+        enddo
 
         !-----------------------------------------------------------------
         ! drill the small pores (change array3Dg)
@@ -180,9 +185,12 @@ contains
             do j=1,Ny
                 do i=2,Nx-1
                     if(array3Dg(i,j,k) == fluid) then
-                        if ((array3Dg(i+1,j,k) /=fluid .and. array3Dg(i-1,j,k) /= fluid) .or. &
-                            (array3Dg(i,j+1,k) /=fluid .and. array3Dg(i,j-1,k) /= fluid) .or. &
-                            (array3Dg(i,j,k+1) /=fluid .and. array3Dg(i,j,k-1) /= fluid))then
+                        if ((array3Dg(i+1,j,k) /=fluid .and. &
+                             array3Dg(i-1,j,k) /= fluid) .or. &
+                            (array3Dg(i,j+1,k) /=fluid .and. &
+                             array3Dg(i,j-1,k) /= fluid) .or. &
+                            (array3Dg(i,j,k+1) /=fluid .and. &
+                             array3Dg(i,j,k-1) /= fluid) ) then
                             if (j==Ny) then
                                 if (k==Nz) then
                                     array3Dg(i:i+1,j-1:j,k-1:k) = fluid
@@ -201,7 +209,7 @@ contains
         enddo !k
 
         !-----------------------------------------------------------------
-        ! 1-layer-thickness wall 
+        ! Remove 1-layer-thickness wall 
         !-----------------------------------------------------------------
         Do k=1,Nz
           Do j=1,Ny
@@ -228,7 +236,7 @@ contains
         !       * * * * * * * *|*                                       
         !                                                                
         ! NOTE: O type wall points need to be change to fluid
-        !       Same role apply to Y/Z commu. boundary
+        !       The same role applys to Y/Z commu. boundary
         !-----------------------------------------------------------------
         do k=zl,zu
           do j=yl,yu
@@ -284,7 +292,8 @@ contains
                         ! test if boundary processor, here the ghost flag doesn't means 
                         ! the communication boundary, but only means the true global 
                         ! outter boarder.
-                        If ((i<xmin).OR.(i>xmax).OR.(j<ymin).OR.(j>ymax).OR.(k<zmin).OR.(k>zmax)) then 
+                        If ((i<xmin).OR.(i>xmax).OR.(j<ymin).OR.(j>ymax) &
+                            .OR.(k<zmin).OR.(k>zmax)) then 
                             image(i,j,k) = ghost
                         End if
                     Enddo

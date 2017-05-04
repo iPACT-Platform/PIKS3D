@@ -10,15 +10,14 @@ MODULE mpiParams
 IMPLICIT NONE
 SAVE
 
+!domain decomposition defs, to be read from NML: mpiNml
+integer :: mpi_xdim, mpi_ydim, mpi_zdim
 
 ! Constant tags used in the mpi exchanges
 INTEGER, PARAMETER :: TAG1 = 1, TAG2 = 2, TAG3 = 3, TAG4 = 4, TAG5=5, TAG6=6
 
 ! Communication parameters
 INTEGER :: nprocs, proc, vproc
-INTEGER, parameter :: mpi_xdim = 1
-INTEGER, parameter :: mpi_ydim = 1
-INTEGER, parameter :: mpi_zdim = 1
 
 INTEGER :: east, west, noth, suth, frnt, back, MPI_COMM_VGRID
 INTEGER, PARAMETER :: master  = 0
@@ -41,7 +40,7 @@ double precision, ALLOCATABLE, DIMENSION(:) :: f_back_rcv, f_frnt_rcv
 INTEGER :: mpi_group_inlet
 INTEGER :: mpi_group_global
 INTEGER :: mpi_comm_inlet
-INTEGER :: inlet_rank(mpi_ydim*mpi_zdim)
+INTEGER, allocatable, dimension(:):: inlet_rank
 contains
 !-------------------------------------------------------------------------------
 ! Subroutine : setupVirtualProcessGrid
@@ -156,6 +155,8 @@ contains
         CALL MPI_CART_SHIFT(MPI_COMM_VGRID, direction, shift, suth, noth, MPI_ERR)
         direction = 2
         CALL MPI_CART_SHIFT(MPI_COMM_VGRID, direction, shift, back, frnt, MPI_ERR)
+
+        allocate(inlet_rank(mpi_ydim*mpi_zdim))
 
         ! Create inlet processor group
         CALL MPI_COMM_GROUP(MPI_COMM_VGRID, mpi_group_global, MPI_ERR)

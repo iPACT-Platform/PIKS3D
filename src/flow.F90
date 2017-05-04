@@ -6,10 +6,15 @@ use velocityGrid, only: PI
 implicit none
 save
 
-double precision, parameter :: Kn = 1.0d0
-double precision, parameter :: mu = dsqrt(PI/2.d0)/Kn
-double precision, parameter :: PressDrop=1.0d-1
-double precision, parameter :: accom = 1.d0
+! flow parameters, to be read from NML: flowNml
+double precision :: Kn, pressDrop, accom
+
+double precision :: mu
+
+! double precision, parameter :: Kn = 1.0d0
+! double precision, parameter :: mu = dsqrt(PI/2.d0)/Kn
+! double precision, parameter :: PressDrop=1.0d-1
+! double precision, parameter :: accom = 1.d0
 
 double precision, DIMENSION(:,:), ALLOCATABLE :: f1,f2,f3,f4,f5,f6,f7,f8
 double precision, DIMENSION(:), ALLOCATABLE :: Rho, Ux, Uy, Uz
@@ -30,12 +35,13 @@ contains
 
         ALLOCATE(Rho(Ntotal), Ux(Ntotal), Uy(Ntotal), Uz(Ntotal))
 
+        mu = dsqrt(PI/2.d0)/Kn
+
         f1=0.d0
         Rho = 0.d0
         Ux = 0.d0
         Uy = 0.d0
         Uz = 0.d0
-
         mass = 1.d0
 
         ! Buffer for exchange data only half domain of the velocity
@@ -73,7 +79,7 @@ contains
                  Do i=xlg,xug
                      l=(i-xlg+1)+(j-ylg)*Nxtotal+(k-zlg)*Nxytotal
                      if (image(i,j,k)/=solid) then
-            !           Rho(l)=PressDrop*(i/2.d0-Nx)/Nx
+            !           Rho(l)=pressDrop*(i/2.d0-Nx)/Nx
                         Rho(l)= 0.d0
                      end if
                      f1(l,:)=w(:)*Rho(l) !Check

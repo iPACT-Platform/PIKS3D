@@ -2,19 +2,27 @@
 !> @brief Physical space configurations
 !=======================================================================
 module velocityGrid
+use gaussHermite
+
 implicit none
 save
-integer, parameter :: Nc_fundamental=2 !Number of fundamental molecular velocity
-integer, parameter :: Nc=(2*Nc_fundamental)**3 !Number of moleculer velocity in 2D-Gaussian Hermite
-integer, parameter :: Vmax=5
-integer, parameter :: power_law=3
-integer, parameter :: Nc8 = Nc/8
-!integer, parameter :: Nphi=100 !Number of discrete point in angular of polar coordinate mode(Nphi,4)=0
-!integer, parameter :: Nc=Nc_fundamental*Nphi !Number of molecular velocity in polar coordinate
-double precision, DIMENSION (1:Nc_fundamental) :: xi, weight1D !abscissae and weighting Hermite quadrature
-double precision, DIMENSION (1:Nc8) :: cx, cy, cz, w !molecular velocity and weighting
-integer, DIMENSION (1:Nc) :: oppositeX, oppositeY, oppositeZ! specular wall's normal vector in X, Y direction
+
+!Number of fundamental molecular velocity, to be read from NML: velocityNml
+integer :: Nc_fundamental
+logical :: halfRange
+
+!Number of moleculer velocity in 2D-Gaussian Hermite
+integer :: Nc, Nc8
+!abscissae and weighting Hermite quadrature, dimension(Nc_fundamental)
+double precision, dimension (:), allocatable :: xi, weight1D 
+!molecular velocity and weighting, dimension(Nc)
+double precision, dimension (:), allocatable :: cx, cy, cz, w
+!specular wall's normal vector in X, Y direction, dimension(Nc)
+integer, dimension (:), allocatable :: oppositeX, oppositeY, oppositeZ
+!constant PI
 double precision, parameter :: PI=datan(1.d0)*4.d0
+
+!half range flux of discrete velocity grid 
 double precision :: DiffFlux
 
 contains
@@ -22,12 +30,64 @@ contains
         implicit none
         integer :: l, m, n, k
 
-        xi(1) = dsqrt(3.d0-dsqrt(6.d0))           !fundamental abscissae
-        xi(2) = dsqrt(3.d0+dsqrt(6.d0))
-        weight1D(1) = (3.d0+dsqrt(6.d0))/12.d0    !fundamental weighting
-        weight1D(2) = (3.d0-dsqrt(6.d0))/12.d0
+        ! Nc_fundamental has been initialized from the NML
+        allocate(xi(Nc_fundamental))
+        allocate(weight1D(Nc_fundamental))
 
+        if(.not. halfRange) then
+            select case (Nc_fundamental)
+                case(2)
+                    xi = xi2
+                    weight1D = wi2
+                case(4)
+                    xi = xi4
+                    weight1D = wi4
+                case(8)
+                    xi = xi8
+                    weight1D = wi8
+                case(12)
+                    xi = xi12
+                    weight1D = wi12
+                case(16)
+                    xi = xi16
+                    weight1D = wi16
+                case default
+                    print*, "Nc_fundamental xi/wi for ", Nc_fundamental, &
+                     "has not been provided"
+                    deallocate(xi)
+                    deallocate(weight1D)
+            end select
+        else
+            select case (Nc_fundamental)
+                case(2)
+                    xi = hxi2
+                    weight1D = hwi2
+                case(4)
+                    xi = hxi4
+                    weight1D = hwi4
+                case(8)
+                    xi = hxi8
+                    weight1D = hwi8
+                case(12)
+                    xi = hxi12
+                    weight1D = hwi12
+                case(16)
+                    xi = hxi16
+                    weight1D = hwi16
+                case default
+                    print*, "Nc_fundamental xi/wi for ", Nc_fundamental, &
+                     "has not been provided"
+                    deallocate(xi)
+                    deallocate(weight1D)
+            end select
+        endif
 
+        Nc=(2*Nc_fundamental)**3
+        Nc8 = Nc/8
+
+        allocate(cx(Nc), cy(Nc), cz(Nc), w(Nc))
+        allocate(oppositeX(Nc), oppositeY(Nc), oppositeZ(Nc))
+        
         Do l=1,Nc_fundamental
             Do m=1,Nc_fundamental
                 Do n=1,Nc_fundamental

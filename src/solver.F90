@@ -6,16 +6,23 @@ module solver
 
     implicit none
 
-    double precision, parameter :: eps=1.d-8
-    integer, parameter :: maxStep = 10000
-    integer, parameter :: interval = 200
+    ! to be read from NML: solverNml
+    double precision :: eps
+    integer :: maxStep
+    integer :: chkConvergeStep
+    integer :: saveStep
+    logical :: saveLast
+    integer :: saveFormat ! 1 (default) for vti, 2 for tecplot, 3 for vtk
+
     integer :: iStep
     double precision :: error
+    double precision :: permeability
 
     contains
     subroutine iterate
-        use MPI
         implicit none
+        include "mpif.h"
+
         integer :: i, j, k, l, ii, jj, kk
         integer :: localidMsnd, localidPsnd, localidMrcv, localidPrcv, packid
         INTEGER :: MPI_ERR
@@ -1747,11 +1754,11 @@ module solver
    
 
     subroutine chkConverge
-        use MPI
         implicit none
+        include "mpif.h"
+
 
         ! local vars
-        double precision :: permeability
         integer :: byl, byu, bzl, bzu, k, j, i, l, MPI_ERR
         double precision :: massInner, massNoth, massSuth, massFrnt, massBack
         double precision :: massNF, massNB, massSF, massSB
@@ -1828,7 +1835,8 @@ module solver
 
             ! debug
             massLocal = (massInner + massSuth + massNoth + massFrnt + massBack &
-                + massSB + massSF + massNB + massNF)*dsqrt(1.d0/2.d0)/PressDrop/(1.d0/Ref_L)**2
+                + massSB + massSF + massNB + massNF) &
+                *dsqrt(1.d0/2.d0)/PressDrop/(1.d0/Ref_L)**2
                 !+ massSB + massSF + massNB + massNF)*dsqrt(1.d0/2.d0)*4.d0/1.d0
 
             ! reduction
@@ -1837,15 +1845,15 @@ module solver
 
             !PRINT*, "mass = ", mass
             !DEBUG
-            error=dabs(1.d0-mass2/mass)/(interval)
+            error=dabs(1.d0-mass2/mass)/(chkConvergeStep)
 
             mass=mass2
             if (proc == master) then           
                 permeability=mass*Kn*sqrt(4.d0/PI)  
                 write(*,"( 1I10, 3ES15.6)")  iStep,  mass,  permeability, error
-                open(22,file='Results.dat', position="append")
-                write(22,'(4ES15.6, 1I15)') Kn, mass, permeability, error, iStep
-                close(22)
+                ! open(22,file='Results.dat', position="append")
+                ! write(22,'(4ES15.6, 1I15)') Kn, mass, permeability, error, iStep
+                ! close(22)
             endif
         endif ! xl==xmin
         !bcast error so every process in WORLD can stop
@@ -1884,7 +1892,7 @@ module solver
         character(13) fname
 
         write(fname, '(A, I0.3, A)') 'Field_', proc, '.vtk'
-        OPEN(UNIT = 12, FILE = fname, STATUS = "NEW", POSITION = "APPEND", &
+        OPEN(UNIT = 12, FILE = fname, STATUS = "REPLACE", POSITION = "APPEND", &
           IOSTAT = IO_ERR)
         IF ( IO_ERR == 0 ) THEN
             WRITE(12,'(A)')"# vtk DataFile Version 2.0"
@@ -1935,6 +1943,86 @@ module solver
 
         RETURN
     END SUBROUTINE saveFlowFieldVTK
+
+    SUBROUTINE saveFlowFieldVTI
+        INTEGER :: i, j, k, l,MPI_ERR, IO_ERR
+        character(13) fname
+        integer :: exl, exu, eyl, eyu, ezl, ezu
+        integer :: wexl, wexu, weyl, weyu, wezl, wezu
+        wexl = xmin - 1
+        wexu = xmax
+        weyl = ymin - 1
+        weyu = ymax
+        wezl = zmin - 1
+        wezu = zmax
+        exl = xl - 1
+        exu = xu
+        eyl = yl - 1
+        eyu = yu
+        ezl = zl - 1
+        ezu = zu
+
+        write(fname, '(A, I0.3, A)') 'Field_', proc, '.vti'
+        OPEN(UNIT = 13, FILE = fname, STATUS = "REPLACE", POSITION = "APPEND", &
+          IOSTAT = IO_ERR)
+        IF ( IO_ERR == 0 ) THEN
+            WRITE(13,'(A)') '<?xml version="1.0"?>'
+            WRITE(13,'(A)') '<VTKFile type="ImageData">'
+            WRITE(13,'(A, 6I4, A)') '<ImageData WholeExtent="', exl, exu, & 
+                eyl, eyu, ezl, ezu, ' " Origin="0 0 0" Spacing="1 1 1">'
+            WRITE(13, '(A, 6I4, A)') '<Piece Extent="', exl, exu, eyl, eyu, &
+                ezl, ezu, '">'
+            WRITE(13, '(A)') '<CellData Scalars="flag Rho" Vectors ="U">'
+            WRITE(13, '(A)') '<DataArray type="Int32" Name="flag" format="ascii">'
+            DO k = zl, zu
+                DO j = yl, yu
+                    DO i = xl, xu
+                        write(13,'(I)') image(i,j,k)
+                    END DO
+                END DO
+            END DO
+            WRITE(13, '(A)') '</DataArray>'
+            WRITE(13, '(A)') '<DataArray type="Float32" Name="Rho" format="ascii">'
+            DO k = zl, zu
+                DO j = yl, yu
+                    DO i = xl, xu
+                        l= (k-zlg)*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
+                        If (image(i,j,k)==fluid) then
+                            write(13,'(ES15.6)') Rho(l)+1.d0
+                        else
+                            write(13,'(ES15.6)') 0.d0
+                        Endif   
+                    END DO
+                END DO
+            END DO
+            WRITE(13, '(A)') '</DataArray>'
+            WRITE(13, '(A)') '<DataArray type="Float32" Name="U" format="ascii" &
+                & NumberOfComponents="3">'
+            DO k = zl, zu
+               DO j = yl, yu
+                  DO i = xl, xu
+                     l= (k-zlg)*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
+                     If (image(i,j,k)==fluid) then
+                         write(13,'(3ES15.6)') Ux(l), Uy(l), Uz(l)
+                     else
+                         write(13,'(3ES15.6)') 0.d0, 0.d0, 0.d0
+                     Endif  
+                  END DO
+               END DO
+            END DO
+            WRITE(13, '(A)') '</DataArray>'
+            WRITE(13, '(A)') '</CellData>'
+            WRITE(13, '(A)') '</Piece>'
+            WRITE(13, '(A)') '</ImageData>'
+            WRITE(13, '(A)') '</VTKFile>'
+            CLOSE(UNIT = 13)
+        ELSE
+            CALL memFree
+            CALL MPI_FINALIZE(MPI_ERR)
+            STOP "Error: Unable to open output vti file."
+        END IF
+    END SUBROUTINE saveFlowFieldVTI
+
 
     subroutine memFree
         deallocate (array3D, array3Dg)
