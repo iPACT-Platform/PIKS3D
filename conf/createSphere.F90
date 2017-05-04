@@ -1,8 +1,8 @@
 program main
 implicit none
-integer, parameter :: NX = 600
-integer, parameter :: NY = 300
-integer, parameter :: NZ = 300
+integer, parameter :: NX = 200
+integer, parameter :: NY = 100
+integer, parameter :: NZ = 100
 double precision, parameter :: porosity = 0.75d0
 integer, parameter :: obstR = floor((NX-1)*((1.d0-porosity)*3.d0/4.d0/(datan(1.d0)*4.d0))**(1.d0/3.d0))
 double precision, parameter :: obstX = (NX+1)/2.d0
@@ -30,7 +30,7 @@ do k = 1, NZ
     enddo
 enddo
 
-open(unit=11, file = 'singleSphere.raw', status='new', &
+open(unit=11, file = 'singleSphere.raw', status='replace', &
     form='unformatted', action='write', access='stream', &
     iostat=openstatus)
 

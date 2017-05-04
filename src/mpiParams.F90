@@ -36,6 +36,8 @@ double precision, ALLOCATABLE, DIMENSION(:) :: f_suth_rcv, f_noth_rcv
 double precision, ALLOCATABLE, DIMENSION(:) :: f_back_snd, f_frnt_snd
 double precision, ALLOCATABLE, DIMENSION(:) :: f_back_rcv, f_frnt_rcv
 
+! gather the sub-domain extent for writing .pvti file
+integer, allocatable, dimension(:,:) :: sub_ext
 !
 INTEGER :: mpi_group_inlet
 INTEGER :: mpi_group_global
@@ -65,8 +67,8 @@ contains
         use physicalGrid, only : xl, xlg, xmax, xmin, xu, xug, &
                                  yl, ylg, ymax, ymin, yu, yug, &
                                  zl, zlg, zmax, zmin, zu, zug, ghostLayers
-        use MPI
         IMPLICIT NONE
+        include "mpif.h"
         
         !Local variables
         INTEGER :: complete, direction, partial, shift
@@ -75,6 +77,7 @@ contains
         LOGICAL, DIMENSION(1:mpi_dim) :: periodic
         LOGICAL :: reorder
         INTEGER :: j, k
+        integer, dimension(6) :: my_ext
         
         !Initialize data for domain partitioning. Defaults are:
         !Partitioning is periodic in all dimensions (periodic = .true.)
@@ -123,18 +126,16 @@ contains
 
 
         !  Partitioning in the y direction
-         complete = (zmax - zmin) / dims(3)
-         partial  = (zmax - zmin) - complete*dims(3)
-         IF(mpi_coords(3) + 1 <= partial) THEN
-           zl = zmin + (complete + 1)*mpi_coords(3)
-           zu = zmin + (complete + 1)*(mpi_coords(3) + 1) - 1
-         ELSE
-           zl = zmin + complete*mpi_coords(3) + partial
-           zu = zmin + complete*(mpi_coords(3) + 1) + partial - 1
-         END IF
-         IF(MOD(mpi_coords(3) + 1,dims(3)) == 0) zu = zu + 1
-
-
+        complete = (zmax - zmin) / dims(3)
+        partial  = (zmax - zmin) - complete*dims(3)
+        IF(mpi_coords(3) + 1 <= partial) THEN
+          zl = zmin + (complete + 1)*mpi_coords(3)
+          zu = zmin + (complete + 1)*(mpi_coords(3) + 1) - 1
+        ELSE
+          zl = zmin + complete*mpi_coords(3) + partial
+          zu = zmin + complete*(mpi_coords(3) + 1) + partial - 1
+        END IF
+        IF(MOD(mpi_coords(3) + 1,dims(3)) == 0) zu = zu + 1
         
         !Ghost layers
         xlg = xl - ghostLayers
@@ -143,6 +144,19 @@ contains
         yug = yu + ghostLayers
         zlg = zl - ghostLayers
         zug = zu + ghostLayers
+
+
+        my_ext(1) = xl
+        my_ext(2) = xu
+        my_ext(3) = yl
+        my_ext(4) = yu
+        my_ext(5) = zl
+        my_ext(6) = zu
+
+         !gahter sub-domain extnet to sub_ext
+        allocate(sub_ext(6,nprocs))
+
+        CALL MPI_GATHER(my_ext, 6, MPI_INT, sub_ext, 6, MPI_INT, master, MPI_COMM_WORLD, MPI_ERR)
 
         !------- Determine neighbours of this processor -------------------------------
         !MPI_CART counts dimensions using 0-based arithmetic so that

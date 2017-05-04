@@ -5,6 +5,7 @@ USE flow
 USE MPIParams
 USE solver
 USE physicalGrid
+use output
 IMPLICIT NONE
 include "mpif.h"
 
@@ -39,7 +40,7 @@ startTime = MPI_Wtime()
 ! Main iteration loop
 DO iStep = 1, MaxStep
 ! Save data if required
-    print*, "Before iterate"
+    ! print*, "Before iterate"
     CALL iterate
     !if(proc==master) PRINT*, "STEP: ", iStep
     IF ( MOD(iStep,chkConvergeStep) == 0 ) CALL chkConverge
@@ -68,23 +69,23 @@ if(proc==master) then
 endif
 
 ! Save final data
-!IF ( saveLast ) then 
-    !SELECT CASE (saveFormat)
-        !CASE (1) 
-            !call saveFlowFieldVTI
-        !CASE (2)
-            !call saveFlowField
-        !CASE (3)
-            !call saveFlowFieldVTK
-    !END SELECT
-!endif
+IF ( saveLast ) then 
+    SELECT CASE (saveFormat)
+        CASE (1) 
+            call saveFlowFieldVTI
+        CASE (2)
+            call saveFlowField
+        CASE (3)
+            call saveFlowFieldVTK
+    END SELECT
+endif
 
 ! Free memory, close MPI environment and end program
-!CALL memFree
+CALL memFree
 CALL mpiFree
-PRINT*, "BEFORE BARRIER"
+! PRINT*, "BEFORE BARRIER"
 CALL MPI_BARRIER(MPI_COMM_WORLD, MPI_ERR)
-PRINT*, "BEFORE FINALIZE"
+! PRINT*, "BEFORE FINALIZE"
 CALL MPI_FINALIZE(MPI_ERR)
-PRINT*, "BEFORE ENDPROGRAM"
+! PRINT*, "BEFORE ENDPROGRAM"
 END PROGRAM
