@@ -34,8 +34,8 @@ if test $# -gt 0; then
     # current working case
     alias crun='cd $CRUN'
     alias cpdata='cd $CPDATA'
-    alias mb='make -C $BUILD'
-    alias md='make -C $DEBUG'
+    alias mb='make -j 6 -C $BUILD'
+    alias md='make -j 6 -C $DEBUG'
 else
     echo "Usage: source ... ccase"
 fi

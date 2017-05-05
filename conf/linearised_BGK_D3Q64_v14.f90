@@ -160,10 +160,11 @@ ALLOCATE(inlet(Ny*Nz),outlet(Ny*Nz))
 !           Fundamental molecular velocity
 !------------------------------------------------------------------------
 !Gaussian Hermite 4th order
-xi(1) = sqrt(3.d0-sqrt(6.d0))           !fundamdntal abscissae
-xi(2) = sqrt(3.d0+sqrt(6.d0))
-weight1D(1) = (3.d0+sqrt(6.d0))/12.d0    !fundamental weighting
-weight1D(2) = (3.d0-sqrt(6.d0))/12.d0
+!NOTE: already begin to change
+xi(1) = dsqrt(3.d0-dsqrt(6.d0))/dsqrt(2.d0)           !fundamdntal abscissae
+xi(2) = dsqrt(3.d0+dsqrt(6.d0))/dsqrt(2.d0)
+weight1D(1) = (3.d0+dsqrt(6.d0))/12.d0    !fundamental weighting
+weight1D(2) = (3.d0-dsqrt(6.d0))/12.d0
 
 !Gaussian Hermite 6th order
  ! xi(1) = 0.4360774119276165086792d0*dsqrt(2.d0)         !fundamental abscissae
@@ -2103,7 +2104,7 @@ Do WHILE ((error>eps).AND.(iteration1<iteration_max))
                 f1(Neighbour(9,k),l)=f7(Neighbour(9,k),l)
             End if
 
-            fEq=w(l)*(Rho(k)+1.d0*(cx(l)*Ux(k)+cy(l)*Uy(k)+cz(l)*Uz(k)))
+            fEq=w(l)*(Rho(k)+2.d0*(cx(l)*Ux(k)+cy(l)*Uy(k)+cz(l)*Uz(k)))
             f1(k,l)=(mu*(fEq-0.5d0*f1(k,l)) &
             &        + cx(l)*coef1(i,2)*f1(Neighbour(1,k),l) &
             &        + cx(l)*coef1(i,3)*f1(Neighbour(2,k),l) &
@@ -2138,7 +2139,7 @@ Do WHILE ((error>eps).AND.(iteration1<iteration_max))
                 f2(Neighbour(9,k),l)=f8(Neighbour(9,k),l)
             End if
 
-            fEq=w(l)*(Rho(k)+1.d0*(-cx(l)*Ux(k)+cy(l)*Uy(k)+cz(l)*Uz(k)))
+            fEq=w(l)*(Rho(k)+2.d0*(-cx(l)*Ux(k)+cy(l)*Uy(k)+cz(l)*Uz(k)))
             f2(k,l)=(mu*(fEq-0.5d0*f2(k,l)) &
             &        - cx(l)*coef2(i,2)*f2(Neighbour(3,k),l) &
             &        - cx(l)*coef2(i,3)*f2(Neighbour(4,k),l) &
@@ -2173,7 +2174,7 @@ Do WHILE ((error>eps).AND.(iteration1<iteration_max))
                 f3(Neighbour(9,k),l)=f5(Neighbour(9,k),l)
             End if
 
-            fEq=w(l)*(Rho(k)+1.d0*(-cx(l)*Ux(k)-cy(l)*Uy(k)+cz(l)*Uz(k)))
+            fEq=w(l)*(Rho(k)+2.d0*(-cx(l)*Ux(k)-cy(l)*Uy(k)+cz(l)*Uz(k)))
             f3(k,l)=(mu*(fEq-0.5d0*f3(k,l)) &
             &        - cx(l)*coef3(i,2)*f3(Neighbour(3,k),l) &
             &        - cx(l)*coef3(i,3)*f3(Neighbour(4,k),l) &
@@ -2208,7 +2209,7 @@ Do WHILE ((error>eps).AND.(iteration1<iteration_max))
                 f4(Neighbour(9,k),l)=f6(Neighbour(9,k),l)
             End if
 
-            fEq=w(l)*(Rho(k)+1.d0*(cx(l)*Ux(k)-cy(l)*Uy(k)+cz(l)*Uz(k)))
+            fEq=w(l)*(Rho(k)+2.d0*(cx(l)*Ux(k)-cy(l)*Uy(k)+cz(l)*Uz(k)))
             f4(k,l)=(mu*(fEq-0.5d0*f4(k,l)) &
             &        + cx(l)*coef4(i,2)*f4(Neighbour(1,k),l) &
             &        + cx(l)*coef4(i,3)*f4(Neighbour(2,k),l) &
@@ -2243,7 +2244,7 @@ Do WHILE ((error>eps).AND.(iteration1<iteration_max))
                 f5(Neighbour(11,k),l)=f3(Neighbour(11,k),l)
             End if
 
-            fEq=w(l)*(Rho(k)+1.d0*(cx(l)*Ux(k)+cy(l)*Uy(k)-cz(l)*Uz(k)))
+            fEq=w(l)*(Rho(k)+2.d0*(cx(l)*Ux(k)+cy(l)*Uy(k)-cz(l)*Uz(k)))
             f5(k,l)=(mu*(fEq-0.5d0*f5(k,l)) &
             &        + cx(l)*coef5(i,2)*f5(Neighbour(1,k),l) &
             &        + cx(l)*coef5(i,3)*f5(Neighbour(2,k),l) &
@@ -2278,7 +2279,7 @@ Do WHILE ((error>eps).AND.(iteration1<iteration_max))
                 f6(Neighbour(11,k),l)=f4(Neighbour(11,k),l)
             End if
 
-            fEq=w(l)*(Rho(k)+1.d0*(-cx(l)*Ux(k)+cy(l)*Uy(k)-cz(l)*Uz(k)))
+            fEq=w(l)*(Rho(k)+2.d0*(-cx(l)*Ux(k)+cy(l)*Uy(k)-cz(l)*Uz(k)))
             f6(k,l)=(mu*(fEq-0.5d0*f6(k,l)) &
             &        - cx(l)*coef6(i,2)*f6(Neighbour(3,k),l) &
             &        - cx(l)*coef6(i,3)*f6(Neighbour(4,k),l) &
@@ -2313,7 +2314,7 @@ Do WHILE ((error>eps).AND.(iteration1<iteration_max))
                 f7(Neighbour(11,k),l)=f1(Neighbour(11,k),l)
             End if
 
-            fEq=w(l)*(Rho(k)+1.d0*(-cx(l)*Ux(k)-cy(l)*Uy(k)-cz(l)*Uz(k)))
+            fEq=w(l)*(Rho(k)+2.d0*(-cx(l)*Ux(k)-cy(l)*Uy(k)-cz(l)*Uz(k)))
             f7(k,l)=(mu*(fEq-0.5d0*f7(k,l)) &
             &        - cx(l)*coef7(i,2)*f7(Neighbour(3,k),l) &
             &        - cx(l)*coef7(i,3)*f7(Neighbour(4,k),l) &
@@ -2348,7 +2349,7 @@ Do WHILE ((error>eps).AND.(iteration1<iteration_max))
                 f8(Neighbour(11,k),l)=f2(Neighbour(11,k),l)
             End if
 
-            fEq=w(l)*(Rho(k)+1.d0*(cx(l)*Ux(k)-cy(l)*Uy(k)-cz(l)*Uz(k)))
+            fEq=w(l)*(Rho(k)+2.d0*(cx(l)*Ux(k)-cy(l)*Uy(k)-cz(l)*Uz(k)))
             f8(k,l)=(mu*(fEq-0.5d0*f8(k,l)) &
             &        + cx(l)*coef8(i,2)*f8(Neighbour(1,k),l) &
             &        + cx(l)*coef8(i,3)*f8(Neighbour(2,k),l) &
@@ -3647,7 +3648,7 @@ End do
         &      +Ux(location(column+(ghostLayer+Ny-1)*Nxtotal+ghostLayer*Nxytotal)) &
         &      +Ux(location(column+ghostLayer*Nxtotal+(ghostLayer+Nz-1)*Nxytotal)) &
         &      +Ux(location(column+(ghostLayer+Ny-1)*Nxtotal+(ghostLayer+Nz-1)*Nxytotal)) &
-        & ))*sqrt(1.d0/2.d0)/PressDrop/(1.d0/Ref_L)**2
+        & ))/PressDrop/(1.d0/Ref_L)**2
         error=abs(1.d0-mass2/mass)/(interval)
         mass=mass2
         permeability=mass*Kn*sqrt(4.d0/pi)
