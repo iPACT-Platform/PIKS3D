@@ -50,6 +50,19 @@ integer, parameter:: wallNF = 40, wallNB = 41, wallSF = 42, wallSB = 43 !(2-side
 integer, parameter:: wallEF = 50, wallEB = 51, wallWF = 52, wallWB = 53 !(2-side wall)
 integer, parameter:: wallENF = 60, wallWNF = 61, wallWSF = 62, wallESF = 63 !(3-side wall)
 integer, parameter:: wallENB = 70, wallWNB = 71, wallWSB = 72, wallESB = 73 !(3-side wall)
+integer, parameter:: allWallLabels(26) = (/&
+    wallE, wallW, wallN, wallS, wallF, wallB, &
+    WallEN, wallWN, wallES, wallWS, &
+    wallNF, wallNB, wallSF, wallSB, &
+    wallEF, wallEB, wallWF, wallWB, &
+    wallENF, wallWNF, wallWSF, wallESF, &
+    wallENB, wallWNB, wallWSB, wallESB /)
+integer, parameter:: onlyCornerLabels(20) = (/ &
+    WallEN, wallWN, wallES, wallWS, &
+    wallNF, wallNB, wallSF, wallSB, &
+    wallEF, wallEB, wallWF, wallWB, &
+    wallENF, wallWNF, wallWSF, wallESF, &
+    wallENB, wallWNB, wallWSB, wallESB /)
 
 integer :: Nstencil1, Nstencil2, Nstencil3, Nstencil4 !(group 1-4)
 integer :: Nstencil5, Nstencil6, Nstencil7, Nstencil8 !(group 5-8)
@@ -81,15 +94,6 @@ contains
         integer :: nCorner
         character(kind=1) :: ctemp
 
-        ! solid region parameters
-        ! integer, parameter :: obstR = floor((Nx-1)*((1.d0-porosity)*3.d0/4.d0/(datan(1.d0)*4.d0))**(1.d0/3.d0))
-        ! integer, parameter :: obstX = ghostLayers+Ny-2   !Check
-        ! integer, parameter :: obstY = ghostLayers-1      !Check
-        ! integer, parameter :: obstZ = ghostLayers-1      !Check
-
-        ! print*, "obstR =", obstR
-        ! debug
-        print *, Nx, Ny, Nz
         ds = 1.d0/(Nx-1-2*fluidlayer) 
 
         ! set the extend and sizes
@@ -227,6 +231,8 @@ contains
 
         !-----------------------------------------------------------------
         ! revoving wall node that near the communication boundary
+        ! NOTE: 2017-5-4
+        !   the which_corner bug has been found, so no need now
         !-----------------------------------------------------------------
         !                      |                                        
         !       # # # # # # O *|*                                       
@@ -238,22 +244,22 @@ contains
         ! NOTE: O type wall points need to be change to fluid
         !       The same role applys to Y/Z commu. boundary
         !-----------------------------------------------------------------
-        do k=zl,zu
-          do j=yl,yu
-            do i=xl,xu
-              if(array3Dg(i,j,k) == solid) then
-                if ( (k==(zl+1) .and. array3Dg(i,j,k-1)==fluid) &
-                .or. (k==(zu-1) .and. array3Dg(i,j,k+1)==fluid) &
-                .or. (j==(yl+1) .and. array3Dg(i,j-1,k)==fluid) &
-                .or. (j==(yu-1) .and. array3Dg(i,j+1,k)==fluid) &
-                .or. (i==(xl+1) .and. array3Dg(i-1,j,k)==fluid) &
-                .or. (i==(xu-1) .and. array3Dg(i+1,j,k)==fluid) ) then
-                  array3Dg(i,j,k) = fluid
-                endif
-              endif
-            enddo
-          enddo
-        enddo
+        ! do k=zl,zu
+        !   do j=yl,yu
+        !     do i=xl,xu
+        !       if(array3Dg(i,j,k) == solid) then
+        !         if ( (k==(zl+1) .and. array3Dg(i,j,k-1)==fluid) &
+        !         .or. (k==(zu-1) .and. array3Dg(i,j,k+1)==fluid) &
+        !         .or. (j==(yl+1) .and. array3Dg(i,j-1,k)==fluid) &
+        !         .or. (j==(yu-1) .and. array3Dg(i,j+1,k)==fluid) &
+        !         .or. (i==(xl+1) .and. array3Dg(i-1,j,k)==fluid) &
+        !         .or. (i==(xu-1) .and. array3Dg(i+1,j,k)==fluid) ) then
+        !           array3Dg(i,j,k) = fluid
+        !         endif
+        !       endif
+        !     enddo
+        !   enddo
+        ! enddo
 
 
         !-----------------------------------------------------------------
@@ -431,153 +437,49 @@ contains
 
         PRINT*, "nWall = ", nWall
 
-        ! Create wall-type vectors
-        !vecWall(walli) mark the global id of the walli'th wall in the image 
+        ! Create wall-type vectors and record the location of corner points
+        ! while the which_corner(i,j,k) array
+        ! NOTE: 2017-05-04
+        !   Bug found here
+        !   Only non-corner wall nodes in ghost layers are not counted
+        !
+        !vecWall(walli) mark the global id of the walli'th wall in the image
         ALLOCATE(vecWall(nWall))
+
         nWall=0
         nCorner=0
-        Do k=zl, zu
-            Do j=yl, yu
-                Do i=xl, xu
+        do k=zlg, zug
+            do j=ylg, yug
+                do i=xlg, xug
                     localid = (k-zlg)*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
-                    SELECT Case (image(i,j,k))
-                        CASE (WallE)
+                    if(any(allWallLabels(:) == image(i,j,k))) then
+                        if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
+                           k .ge. zl .and. k .le. zu) then
                             nWall=nWall+1
-                            vecWall(nWall)=localid
-                        CASE (WallW)
-                            nWall=nWall+1
-                            vecWall(nWall)=localid
-                        CASE (WallN)
-                            nWall=nWall+1
-                            vecWall(nWall)=localid
-                        CASE (WallS)
-                            nWall=nWall+1
-                            vecWall(nWall)=localid
-                        CASE (WallF)
-                            nWall=nWall+1
-                            vecWall(nWall)=localid
-                        CASE (WallB)
-                            nWall=nWall+1
-                            vecWall(nWall)=localid
-                        CASE (WallEN)
-                            nWall=nWall+1
-                            vecWall(nWall)=localid
+                            vecWall(nWall) = localid
+                        endif
+                        if(any(onlyCornerLabels(:) == image(i,j,k))) then
                             nCorner=nCorner+1
                             which_corner(i,j,k)=nCorner
-                        CASE (WallWN)
-                            nWall=nWall+1
-                            vecWall(nWall)=localid
-                            nCorner=nCorner+1
-                            which_corner(i,j,k)=nCorner
-                        CASE (WallES)
-                            nWall=nWall+1
-                            vecWall(nWall)=localid
-                            nCorner=nCorner+1
-                            which_corner(i,j,k)=nCorner
-                        CASE (WallWS)
-                            nWall=nWall+1
-                            vecWall(nWall)=localid
-                            nCorner=nCorner+1
-                            which_corner(i,j,k)=nCorner
-                        CASE (WallEF)
-                            nWall=nWall+1
-                            vecWall(nWall)=localid
-                            nCorner=nCorner+1
-                            which_corner(i,j,k)=nCorner
-                        CASE (WallEB)
-                            nWall=nWall+1
-                            vecWall(nWall)=localid
-                            nCorner=nCorner+1
-                            which_corner(i,j,k)=nCorner
-                        CASE (WallWF)
-                            nWall=nWall+1
-                            vecWall(nWall)=localid
-                            nCorner=nCorner+1
-                            which_corner(i,j,k)=nCorner
-                        CASE (WallWB)
-                            nWall=nWall+1
-                            vecWall(nWall)=localid
-                            nCorner=nCorner+1
-                            which_corner(i,j,k)=nCorner                        
-                        CASE (WallNF)
-                            nWall=nWall+1
-                            vecWall(nWall)=localid
-                            nCorner=nCorner+1
-                            which_corner(i,j,k)=nCorner
-                        CASE (WallNB)
-                            nWall=nWall+1
-                            vecWall(nWall)=localid
-                            nCorner=nCorner+1
-                            which_corner(i,j,k)=nCorner
-                        CASE (WallSF)
-                            nWall=nWall+1
-                            vecWall(nWall)=localid
-                            nCorner=nCorner+1
-                            which_corner(i,j,k)=nCorner
-                        CASE (WallSB)
-                            nWall=nWall+1
-                            vecWall(nWall)=localid
-                            nCorner=nCorner+1
-                            which_corner(i,j,k)=nCorner  
-                        ! +++                          
-                        CASE (WallENF)
-                            nWall=nWall+1
-                            vecWall(nWall)=localid
-                            nCorner=nCorner+1
-                            which_corner(i,j,k)=nCorner
-                        CASE (WallENB)
-                            nWall=nWall+1
-                            vecWall(nWall)=localid
-                            nCorner=nCorner+1
-                            which_corner(i,j,k)=nCorner
-                        CASE (WallWNF)
-                            nWall=nWall+1
-                            vecWall(nWall)=localid
-                            nCorner=nCorner+1
-                            which_corner(i,j,k)=nCorner
-                        CASE (WallWNB)
-                            nWall=nWall+1
-                            vecWall(nWall)=localid
-                            nCorner=nCorner+1
-                            which_corner(i,j,k)=nCorner                        
-                        CASE (WallESF)
-                            nWall=nWall+1
-                            vecWall(nWall)=localid
-                            nCorner=nCorner+1
-                            which_corner(i,j,k)=nCorner
-                        CASE (WallESB)
-                            nWall=nWall+1
-                            vecWall(nWall)=localid
-                            nCorner=nCorner+1
-                            which_corner(i,j,k)=nCorner
-                        CASE (WallWSF)
-                            nWall=nWall+1
-                            vecWall(nWall)=localid
-                            nCorner=nCorner+1
-                            which_corner(i,j,k)=nCorner
-                        CASE (WallWSB)
-                            nWall=nWall+1
-                            vecWall(nWall)=localid
-                            nCorner=nCorner+1
-                            which_corner(i,j,k)=nCorner     
-                    END SELECT
-                Enddo
-            Enddo
-        Enddo
+                        endif
+                    endif
+                enddo
+            enddo
+        enddo                           
 
         ALLOCATE(f1w(nCorner, Nc8),f2w(nCorner, Nc8),&
                  f3w(nCorner, Nc8),f4w(nCorner, Nc8))
         ALLOCATE(f5w(nCorner, Nc8),f6w(nCorner, Nc8),&
                  f7w(nCorner, Nc8),f8w(nCorner, Nc8))
 
-        !BUG FOUND
-        !Direction 1
         bxl = xl
         byl = yl
         bzl = zl
         bxu = xu
         byu = yu
         bzu = zu
+
+        !Direction 1
         if(xl == xmin) bxl = xl+1 !if most west block(processor)
         if(yl == ymin) byl = yl+1 !if most south block
         if(zl == zmin) bzl = zl+1!if most back  block
@@ -606,12 +508,6 @@ contains
         End do
 
         !Direction 2
-        bxl = xl
-        byl = yl
-        bzl = zl
-        bxu = xu
-        byu = yu
-        bzu = zu
         if(xu == xmax) bxu = xu-1 !if most west block(processor)
         if(yl == ymin) byl = yl+1 !if most south block
         if(zl == zmin) bzl = zl+1!if most back  block
@@ -640,12 +536,6 @@ contains
         End do
 
         !Direction 3
-        bxl = xl
-        byl = yl
-        bzl = zl
-        bxu = xu
-        byu = yu
-        bzu = zu
         if(xu == xmax) bxu = xu-1 !if most west block(processor)
         if(yu == ymax) byu = yu-1 !if most south block
         if(zl == zmin) bzl = zl+1!if most back  block
@@ -674,12 +564,6 @@ contains
         End do
 
         !Direction 4
-        bxl = xl
-        byl = yl
-        bzl = zl
-        bxu = xu
-        byu = yu
-        bzu = zu
         if(xl == xmin) bxl = xl+1 !if most west block(processor)
         if(yu == ymax) byu = yu-1 !if most south block
         if(zl == zmin) bzl = zl+1 !if most back  block
@@ -708,12 +592,6 @@ contains
         End do
 
         !Direction 5
-        bxl = xl
-        byl = yl
-        bzl = zl
-        bxu = xu
-        byu = yu
-        bzu = zu
         if(xl == xmin) bxl = xl+1 !if most west block(processor)
         if(yl == ymin) byl = yl+1 !if most south block
         if(zu == zmax) bzu = zu-1!if most back  block
@@ -742,12 +620,6 @@ contains
         End do
 
         !Direction 6
-        bxl = xl
-        byl = yl
-        bzl = zl
-        bxu = xu
-        byu = yu
-        bzu = zu
         if(xu == xmax) bxu = xu-1 !if most west block(processor)
         if(yl == ymin) byl = yl+1 !if most south block
         if(zu == zmax) bzu = zu-1!if most back  block
@@ -776,12 +648,6 @@ contains
         End do
 
         !Direction 7
-        bxl = xl
-        byl = yl
-        bzl = zl
-        bxu = xu
-        byu = yu
-        bzu = zu
         if(xu == xmax) bxu = xu-1 !if most west block(processor)
         if(yu == ymax) byu = yu-1 !if most south block
         if(zu == zmax) bzu = zu-1!if most back  block
@@ -810,12 +676,6 @@ contains
         End do
 
         !Direction 8
-        bxl = xl
-        byl = yl
-        bzl = zl
-        bxu = xu
-        byu = yu
-        bzu = zu
         if(xl == xmin) bxl = xl+1
         if(yu == ymax) byu = yu-1
         if(zu == zmax) bzu = zu-1
