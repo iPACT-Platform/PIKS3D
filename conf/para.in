@@ -1,0 +1,35 @@
+&physicalNml
+imageFileName = 'singleSphere.raw'
+Nx = 200
+Ny = 100
+Nz = 100
+wallExtOrder = 2
+fluidLayer = 0
+Ref_L = 2.d0
+/
+
+&velocityNml
+Nc_fundamental = 4
+halfRange = T
+/
+
+&mpiNml
+mpi_xdim = 2
+mpi_ydim = 2
+mpi_zdim = 2
+/
+
+&solverNml
+maxStep = 1000
+chkConvergeStep = 10
+saveStep = 5000000
+eps = 1.0d-8
+saveLast = T
+saveFormat = 1
+/
+
+&flowNml
+Kn = 1.0d0
+pressDrop = 1.0d-3
+accom = 1.d0
+/
