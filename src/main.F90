@@ -34,6 +34,7 @@ CALL setupPhysicalGrid
 ! allocate flow data array and initialize
 CALL setupFlow
 
+
 ! set error
 error = 1.D0
 startTime = MPI_Wtime()
@@ -83,9 +84,6 @@ endif
 ! Free memory, close MPI environment and end program
 CALL memFree
 CALL mpiFree
-! PRINT*, "BEFORE BARRIER"
 CALL MPI_BARRIER(MPI_COMM_WORLD, MPI_ERR)
-! PRINT*, "BEFORE FINALIZE"
 CALL MPI_FINALIZE(MPI_ERR)
-! PRINT*, "BEFORE ENDPROGRAM"
 END PROGRAM

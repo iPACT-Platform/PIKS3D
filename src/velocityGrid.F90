@@ -85,7 +85,7 @@ contains
         Nc=(2*Nc_fundamental)**3
         Nc8 = Nc/8
 
-        allocate(cx(Nc), cy(Nc), cz(Nc), w(Nc))
+        allocate(cx(Nc8), cy(Nc8), cz(Nc8), w(Nc8))
         allocate(oppositeX(Nc), oppositeY(Nc), oppositeZ(Nc))
         
         Do l=1,Nc_fundamental
