@@ -472,14 +472,14 @@ contains
         ALLOCATE(f5w(nCorner, Nc8),f6w(nCorner, Nc8),&
                  f7w(nCorner, Nc8),f8w(nCorner, Nc8))
 
+
+        !Direction 1
         bxl = xl
         byl = yl
         bzl = zl
         bxu = xu
         byu = yu
         bzu = zu
-
-        !Direction 1
         if(xl == xmin) bxl = xl+1 !if most west block(processor)
         if(yl == ymin) byl = yl+1 !if most south block
         if(zl == zmin) bzl = zl+1!if most back  block
@@ -508,6 +508,12 @@ contains
         End do
 
         !Direction 2
+        bxl = xl
+        byl = yl
+        bzl = zl
+        bxu = xu
+        byu = yu
+        bzu = zu
         if(xu == xmax) bxu = xu-1 !if most west block(processor)
         if(yl == ymin) byl = yl+1 !if most south block
         if(zl == zmin) bzl = zl+1!if most back  block
@@ -536,6 +542,12 @@ contains
         End do
 
         !Direction 3
+        bxl = xl
+        byl = yl
+        bzl = zl
+        bxu = xu
+        byu = yu
+        bzu = zu
         if(xu == xmax) bxu = xu-1 !if most west block(processor)
         if(yu == ymax) byu = yu-1 !if most south block
         if(zl == zmin) bzl = zl+1!if most back  block
@@ -564,6 +576,12 @@ contains
         End do
 
         !Direction 4
+        bxl = xl
+        byl = yl
+        bzl = zl
+        bxu = xu
+        byu = yu
+        bzu = zu
         if(xl == xmin) bxl = xl+1 !if most west block(processor)
         if(yu == ymax) byu = yu-1 !if most south block
         if(zl == zmin) bzl = zl+1 !if most back  block
@@ -592,6 +610,12 @@ contains
         End do
 
         !Direction 5
+        bxl = xl
+        byl = yl
+        bzl = zl
+        bxu = xu
+        byu = yu
+        bzu = zu
         if(xl == xmin) bxl = xl+1 !if most west block(processor)
         if(yl == ymin) byl = yl+1 !if most south block
         if(zu == zmax) bzu = zu-1!if most back  block
@@ -620,6 +644,12 @@ contains
         End do
 
         !Direction 6
+        bxl = xl
+        byl = yl
+        bzl = zl
+        bxu = xu
+        byu = yu
+        bzu = zu
         if(xu == xmax) bxu = xu-1 !if most west block(processor)
         if(yl == ymin) byl = yl+1 !if most south block
         if(zu == zmax) bzu = zu-1!if most back  block
@@ -648,6 +678,12 @@ contains
         End do
 
         !Direction 7
+        bxl = xl
+        byl = yl
+        bzl = zl
+        bxu = xu
+        byu = yu
+        bzu = zu
         if(xu == xmax) bxu = xu-1 !if most west block(processor)
         if(yu == ymax) byu = yu-1 !if most south block
         if(zu == zmax) bzu = zu-1!if most back  block
@@ -676,6 +712,12 @@ contains
         End do
 
         !Direction 8
+        bxl = xl
+        byl = yl
+        bzl = zl
+        bxu = xu
+        byu = yu
+        bzu = zu
         if(xl == xmin) bxl = xl+1
         if(yu == ymax) byu = yu-1
         if(zu == zmax) bzu = zu-1
