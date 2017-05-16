@@ -3685,10 +3685,10 @@ End do
             l=(column+ghostLayer)+(j+ghostLayer-1)*Nxtotal+(k+ghostLayer-1)*Nxytotal
             mass2=mass2+(Ux(location(l))+Ux(location(l+(Ny-1)*Nxtotal)))*ds*ds*0.50
         Enddo		
-        mass2=(mass2+0.25d0*ds*ds*(Ux(location(column+ghostLayer*Nxtotal+ghostLayer*Nxytotal)) &
-        &      +Ux(location(column+(ghostLayer+Ny-1)*Nxtotal+ghostLayer*Nxytotal)) &
-        &      +Ux(location(column+ghostLayer*Nxtotal+(ghostLayer+Nz-1)*Nxytotal)) &
-        &      +Ux(location(column+(ghostLayer+Ny-1)*Nxtotal+(ghostLayer+Nz-1)*Nxytotal)) &
+        mass2=(mass2+0.25d0*ds*ds*(Ux(location(ghostLayer+column+ghostLayer*Nxtotal+ghostLayer*Nxytotal)) &
+        &      +Ux(location(ghostLayer+column+(ghostLayer+Ny-1)*Nxtotal+ghostLayer*Nxytotal)) &
+        &      +Ux(location(ghostLayer+column+ghostLayer*Nxtotal+(ghostLayer+Nz-1)*Nxytotal)) &
+        &      +Ux(location(ghostLayer+column+(ghostLayer+Ny-1)*Nxtotal+(ghostLayer+Nz-1)*Nxytotal)) &
         & ))/PressDrop/(1.d0/Ref_L)**2
         error=abs(1.d0-mass2/mass)/(interval)
         mass=mass2

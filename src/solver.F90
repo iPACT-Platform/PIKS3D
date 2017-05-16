@@ -1649,10 +1649,10 @@ module solver
                 i = xl
                 l = (k-zlg)*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
                 !inlet
-                f1(l,:)=f1(l + Nxsub -1,:) + w(:)*PressDrop
-                f4(l,:)=f4(l + Nxsub -1,:) + w(:)*PressDrop
-                f5(l,:)=f5(l + Nxsub -1,:) + w(:)*PressDrop
-                f8(l,:)=f8(l + Nxsub -1,:) + w(:)*PressDrop
+                f1(l,:)=f1(l-1,:) + w(:)*PressDrop
+                f4(l,:)=f4(l-1,:) + w(:)*PressDrop
+                f5(l,:)=f5(l-1,:) + w(:)*PressDrop
+                f8(l,:)=f8(l-1,:) + w(:)*PressDrop
             End do
         End do
 !$OMP END DO
@@ -1665,10 +1665,10 @@ module solver
                 i = xu
                 l = (k-zlg)*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
                 !outlet
-                f2(l,:)=f2(l - Nxsub +1,:) - w(:)*PressDrop
-                f3(l,:)=f3(l - Nxsub +1,:) - w(:)*PressDrop
-                f6(l,:)=f6(l - Nxsub +1,:) - w(:)*PressDrop
-                f7(l,:)=f7(l - Nxsub +1,:) - w(:)*PressDrop
+                f2(l,:)=f2(l+1,:) - w(:)*PressDrop
+                f3(l,:)=f3(l+1,:) - w(:)*PressDrop
+                f6(l,:)=f6(l+1,:) - w(:)*PressDrop
+                f7(l,:)=f7(l+1,:) - w(:)*PressDrop
             Enddo
         End do
 !$OMP END DO            
