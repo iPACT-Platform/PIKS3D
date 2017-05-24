@@ -75,7 +75,7 @@ module solver
 !$OMP END SINGLE NOWAIT
 
 !------------------------------------------------------------------------
-!           In the 1st group of direction cx<0 & cy>0 & cz>0
+!           In the 1st group of direction cx>0 & cy>0 & cz>0
 !------------------------------------------------------------------------
 !$OMP DO SCHEDULE(STATIC) 
     Do l=1,Nc8
@@ -87,18 +87,25 @@ module solver
             k = (ii-xlg+1) + (jj-ylg)*Nxtotal + (kk-zlg)*Nxytotal
             ! Switch from reflected in x-direction (default) to in y-direction
             ! only for group of velocity overlapped by two reflected direction x-y
-            If ((image(ii,jj-1,kk)==wallEN).OR.(image(ii,jj-1,kk)==wallENF) &
-            .OR.(image(ii,jj-1,kk)==wallENB)) then
+            if (image(ii,jj-1,kk)==wallEN) then
+                f1(k-Nxtotal,l)=f3(k-Nxtotal,l)
+            elseif ((image(ii,jj-1,kk)==wallENF) &
+                .or.(image(ii,jj-1,kk)==wallENB)) then
                 f1(k-Nxtotal,l)=f1w(which_corner(ii,jj-1,kk),l)
-            End if
+            endif
+
             ! Switch from reflected in x/y-direction to in z-direction
             ! only for group of velocity overlapped by two/three reflected x/y&z-direction
-            If ((image(ii,jj,kk-1)==wallNF) .OR.(image(ii,jj,kk-1)==wallEF) &
-            .OR.(image(ii,jj,kk-1)==wallWNF).OR.(image(ii,jj,kk-1)==wallESF)) then
+            if (image(ii,jj,kk-1)==wallNF) then
+                f1(k-Nxytotal,l)=f8(k-Nxytotal,l)
+            elseif (image(ii,jj,kk-1)==wallEF) then
+                f1(k-Nxytotal,l)=f6(k-Nxytotal,l)
+            elseif ((image(ii,jj,kk-1)==wallWNF) &
+               .or. (image(ii,jj,kk-1)==wallESF)) then
                 f1(k-Nxytotal,l)=f1w(which_corner(ii,jj,kk-1),l)
             else if (image(ii,jj,kk-1)==wallENF) then
                 f1(k-Nxytotal,l)=f7(k-Nxytotal,l)
-            End if
+            endif
 
             fEq=w(l)*(Rho(k)+2.d0*(cx(l)*Ux(k)+cy(l)*Uy(k)+cz(l)*Uz(k)))
             f1(k,l)=(mu*(fEq-0.5d0*f1(k,l)) &
@@ -126,18 +133,24 @@ module solver
             k = (ii-xlg+1) + (jj-ylg)*Nxtotal + (kk-zlg)*Nxytotal
             ! Switch from reflected in x-direction (default) to in y-direction
             ! only for group of velocity overlapped by two reflected x&y-direction
-            If ((image(ii,jj-1,kk)==wallWN).OR.(image(ii,jj-1,kk)==wallWNF) &
-            .OR.(image(ii,jj-1,kk)==wallWNB)) then
+            if (image(ii,jj-1,kk)==wallWN) then
+                f2(k-Nxtotal,l)=f4(k-Nxtotal, l)
+            elseif ((image(ii,jj-1,kk)==wallWNF) &
+               .or. (image(ii,jj-1,kk)==wallWNB)) then
                 f2(k-Nxtotal,l)=f2w(which_corner(ii,jj-1,kk),l)
-            End if
+            endif
             ! Switch from reflected in x/y-direction to in z-direction
             ! only for group of velocity overlapped by two/three reflected x/y&z-direction
-            If ((image(ii,jj,kk-1)==wallNF) .OR.(image(ii,jj,kk-1)==wallWF) &
-            .OR.(image(ii,jj,kk-1)==wallENF).OR.(image(ii,jj,kk-1)==wallWSF)) then
+            if (image(ii,jj,kk-1)==wallNF) then
+                f2(k-Nxytotal,l)=f7(k-Nxytotal,l)
+            elseif (image(ii,jj,kk-1)==wallWF) then
+                f2(k-Nxytotal,l)=f5(k-Nxytotal,l)
+            elseif ((image(ii,jj,kk-1)==wallENF) &
+               .or. (image(ii,jj,kk-1)==wallWSF)) then
                 f2(k-Nxytotal,l)=f2w(which_corner(ii,jj,kk-1),l)
-            else if (image(ii,jj,kk-1)==wallWNF) then
+            elseif (image(ii,jj,kk-1)==wallWNF) then
                 f2(k-Nxytotal,l)=f8(k-Nxytotal,l)
-            End if
+            end if
 
             fEq=w(l)*(Rho(k)+2.d0*(-cx(l)*Ux(k)+cy(l)*Uy(k)+cz(l)*Uz(k)))
             f2(k,l)=(mu*(fEq-0.5d0*f2(k,l)) &
@@ -164,18 +177,24 @@ module solver
             k = (ii-xlg+1) + (jj-ylg)*Nxtotal + (kk-zlg)*Nxytotal
             ! Switch from reflected in x-direction (default) to in y-direction
             ! only for group of velocity overlapped by two reflected direction
-            If ((image(ii,jj+1,kk)==wallWS).OR.(image(ii,jj+1,kk)==wallWSF) &
-            .OR.(image(ii,jj+1,kk)==wallWSB)) then
+            if (image(ii,jj+1,kk)==wallWS) then
+                f3(k+Nxtotal,l)=f1(k+Nxtotal,l)
+            elseif ((image(ii,jj+1,kk)==wallWSF) &
+               .or. (image(ii,jj+1,kk)==wallWSB)) then
                 f3(k+Nxtotal,l)=f3w(which_corner(ii,jj+1,kk),l)
-            End if
+            end if
             ! Switch from reflected in x/y-direction to in z-direction
             ! only for group of velocity overlapped by two/three reflected x/y&z-direction
-            If ((image(ii,jj,kk-1)==wallSF) .OR.(image(ii,jj,kk-1)==wallWF) &
-            .OR.(image(ii,jj,kk-1)==wallWNF).OR.(image(ii,jj,kk-1)==wallESF)) then
+            if (image(ii,jj,kk-1)==wallSF) then
+                f3(k-Nxytotal,l)=f6(k-Nxytotal,l) 
+            elseif (image(ii,jj,kk-1)==wallWF) then
+                f3(k-Nxytotal,l)=f8(k-Nxytotal,l) 
+            elseif ((image(ii,jj,kk-1)==wallWNF) &
+               .or. (image(ii,jj,kk-1)==wallESF)) then
                 f3(k-Nxytotal,l)=f3w(which_corner(ii,jj,kk-1),l)
-            else if (image(ii,jj,kk-1)==wallWSF) then
+            elseif (image(ii,jj,kk-1)==wallWSF) then
                 f3(k-Nxytotal,l)=f5(k-Nxytotal,l)
-            End if
+            endif
 
             fEq=w(l)*(Rho(k)+2.d0*(-cx(l)*Ux(k)-cy(l)*Uy(k)+cz(l)*Uz(k)))
             f3(k,l)=(mu*(fEq-0.5d0*f3(k,l)) &
@@ -202,18 +221,24 @@ module solver
             k = (ii-xlg+1) + (jj-ylg)*Nxtotal + (kk-zlg)*Nxytotal
             ! Switch from reflected in x-direction (default) to in y-direction
             ! only for group of velocity overlapped by two reflected direction
-            If ((image(ii,jj+1,kk)==wallES).OR.(image(ii,jj+1,kk)==wallESF) &
-            .OR.(image(ii,jj+1,kk)==wallESB)) then
+            if (image(ii,jj+1,kk)==wallES) then
+                f4(k+Nxtotal,l)=f2(k+Nxtotal,l)
+            elseif ((image(ii,jj+1,kk)==wallESF) &
+               .or. (image(ii,jj+1,kk)==wallESB)) then
                 f4(k+Nxtotal,l)=f4w(which_corner(ii,jj+1,kk),l)
-            End if
+            endif
             ! Switch from reflected in x/y-direction to in z-direction
             ! only for group of velocity overlapped by two/three reflected x/y&z-direction
-            If ((image(ii,jj,kk-1)==wallSF) .OR.(image(ii,jj,kk-1)==wallEF) &
-            .OR.(image(ii,jj,kk-1)==wallENF).OR.(image(ii,jj,kk-1)==wallWSF)) then
+            if (image(ii,jj,kk-1)==wallSF) then
+                f4(k-Nxytotal,l)=f5(k-Nxytotal,l)
+            elseif (image(ii,jj,kk-1)==wallEF) then
+                f4(k-Nxytotal,l)=f7(k-Nxytotal,l)
+            elseif ((image(ii,jj,kk-1)==wallENF) &
+                .or.(image(ii,jj,kk-1)==wallWSF)) then
                 f4(k-Nxytotal,l)=f4w(which_corner(ii,jj,kk-1),l)
-            else if (image(ii,jj,kk-1)==wallESF) then
+            elseif (image(ii,jj,kk-1)==wallESF) then
                 f4(k-Nxytotal,l)=f6(k-Nxytotal,l)
-            End if
+            endif
 
             fEq=w(l)*(Rho(k)+2.d0*(cx(l)*Ux(k)-cy(l)*Uy(k)+cz(l)*Uz(k)))
             f4(k,l)=(mu*(fEq-0.5d0*f4(k,l)) &
@@ -240,18 +265,24 @@ module solver
             k = (ii-xlg+1) + (jj-ylg)*Nxtotal + (kk-zlg)*Nxytotal
             ! Switch from reflected in x-direction (default) to in y-direction
             ! only for group of velocity overlapped by two reflected direction x-y
-            If ((image(ii,jj-1,kk)==wallEN).OR.(image(ii,jj-1,kk)==wallENF) &
-            .OR.(image(ii,jj-1,kk)==wallENB)) then
+            if (image(ii,jj-1,kk)==wallEN) then
+                f5(k-Nxtotal,l)=f7(k-Nxtotal,l)
+            elseif ((image(ii,jj-1,kk)==wallENF) &
+               .or. (image(ii,jj-1,kk)==wallENB)) then
                 f5(k-Nxtotal,l)=f5w(which_corner(ii,jj-1,kk),l)
-            End if
+            endif
             ! Switch from reflected in x/y-direction to in z-direction
             ! only for group of velocity overlapped by two/three reflected x/y&z-direction
-            If ((image(ii,jj,kk+1)==wallNB) .OR.(image(ii,jj,kk+1)==wallEB) &
-            .OR.(image(ii,jj,kk+1)==wallESB).OR.(image(ii,jj,kk+1)==wallWNB)) then
+            if (image(ii,jj,kk+1)==wallNB) then
+                f5(k+Nxytotal,l)=f4(k+Nxytotal,l)
+            elseif (image(ii,jj,kk+1)==wallEB) then
+                f5(k+Nxytotal,l)=f2(k+Nxytotal,l)
+            elseif ((image(ii,jj,kk+1)==wallESB) &
+               .or. (image(ii,jj,kk+1)==wallWNB)) then
                 f5(k+Nxytotal,l)=f5w(which_corner(ii,jj,kk+1),l)
-            else if (image(ii,jj,kk+1)==wallENB) then
+            elseif (image(ii,jj,kk+1)==wallENB) then
                 f5(k+Nxytotal,l)=f3(k+Nxytotal,l)
-            End if
+            endif
 
             fEq=w(l)*(Rho(k)+2.d0*(cx(l)*Ux(k)+cy(l)*Uy(k)-cz(l)*Uz(k)))
             f5(k,l)=(mu*(fEq-0.5d0*f5(k,l)) &
@@ -278,18 +309,24 @@ module solver
             k = (ii-xlg+1) + (jj-ylg)*Nxtotal + (kk-zlg)*Nxytotal
             ! Switch from reflected in x-direction (default) to in y-direction
             ! only for group of velocity overlapped by two reflected x&y-direction
-            If ((image(ii,jj-1,kk)==wallWN).OR.(image(ii,jj-1,kk)==wallWNF) &
-            .OR.(image(ii,jj-1,kk)==wallWNB)) then
+            if (image(ii,jj-1,kk)==wallWN) then
+                f6(k-Nxtotal,l)=f8(k-Nxtotal,l)
+            elseif ((image(ii,jj-1,kk)==wallWNF) &
+                .or.(image(ii,jj-1,kk)==wallWNB)) then
                 f6(k-Nxtotal,l)=f6w(which_corner(ii,jj-1,kk),l)
-            End if
+            endif
             ! Switch from reflected in x/y-direction to in z-direction
             ! only for group of velocity overlapped by two/three reflected x/y&z-direction
-            If ((image(ii,jj,kk+1)==wallNB) .OR.(image(ii,jj,kk+1)==wallWB) &
-            .OR.(image(ii,jj,kk+1)==wallENB).OR.(image(ii,jj,kk+1)==wallWSB)) then
+            if (image(ii,jj,kk+1)==wallNB) then
+                f6(k+Nxytotal,l)=f3(k+Nxytotal,l)
+            elseif (image(ii,jj,kk+1)==wallWB) then
+                f6(k+Nxytotal,l)=f1(k+Nxytotal,l)
+            elseif ((image(ii,jj,kk+1)==wallENB) &
+               .or. (image(ii,jj,kk+1)==wallWSB)) then
                 f6(k+Nxytotal,l)=f6w(which_corner(ii,jj,kk+1),l)
-            else if (image(ii,jj,kk+1)==wallWNB) then
+            elseif (image(ii,jj,kk+1)==wallWNB) then
                 f6(k+Nxytotal,l)=f4(k+Nxytotal,l)
-            End if
+            endif
 
             fEq=w(l)*(Rho(k)+2.d0*(-cx(l)*Ux(k)+cy(l)*Uy(k)-cz(l)*Uz(k)))
             f6(k,l)=(mu*(fEq-0.5d0*f6(k,l)) &
@@ -316,18 +353,24 @@ module solver
             k = (ii-xlg+1) + (jj-ylg)*Nxtotal + (kk-zlg)*Nxytotal
             ! Switch from reflected in x-direction (default) to in y-direction
             ! only for group of velocity overlapped by two reflected direction
-            If ((image(ii,jj+1,kk)==wallWS).OR.(image(ii,jj+1,kk)==wallWSF) &
-            .OR.(image(ii,jj+1,kk)==wallWSB)) then
+            if (image(ii,jj+1,kk)==wallWS) then
+                f7(k+Nxtotal,l)=f8(k+Nxtotal,l)
+            elseif ((image(ii,jj+1,kk)==wallWSF) &
+               .or. (image(ii,jj+1,kk)==wallWSB)) then
                 f7(k+Nxtotal,l)=f7w(which_corner(ii,jj+1,kk),l)
-            End if
+            endif
             ! Switch from reflected in x/y-direction to in z-direction
             ! only for group of velocity overlapped by two/three reflected x/y&z-direction
-            If ((image(ii,jj,kk+1)==wallSB) .OR.(image(ii,jj,kk+1)==wallWB) &
-            .OR.(image(ii,jj,kk+1)==wallWNB).OR.(image(ii,jj,kk+1)==wallESB)) then
+            if (image(ii,jj,kk+1)==wallSB) then
+                f7(k+Nxytotal,l)=f2(k+Nxytotal,l)
+            elseif (image(ii,jj,kk+1)==wallWB) then
+                f7(k+Nxytotal,l)=f4(k+Nxytotal,l)
+            elseif ((image(ii,jj,kk+1)==wallWNB) &
+               .or. (image(ii,jj,kk+1)==wallESB)) then
                 f7(k+Nxytotal,l)=f7w(which_corner(ii,jj,kk+1),l)
             else if (image(ii,jj,kk+1)==wallWSB) then
                 f7(k+Nxytotal,l)=f1(k+Nxytotal,l)
-            End if
+            endif
 
             fEq=w(l)*(Rho(k)+2.d0*(-cx(l)*Ux(k)-cy(l)*Uy(k)-cz(l)*Uz(k)))
             f7(k,l)=(mu*(fEq-0.5d0*f7(k,l)) &
@@ -354,18 +397,24 @@ module solver
             k = (ii-xlg+1) + (jj-ylg)*Nxtotal + (kk-zlg)*Nxytotal
             ! Switch from reflected in x-direction (default) to in y-direction
             ! only for group of velocity overlapped by two reflected direction
-            If ((image(ii,jj+1,kk)==wallES).OR.(image(ii,jj+1,kk)==wallESF) &
-            .OR.(image(ii,jj+1,kk)==wallESB)) then
+            if (image(ii,jj+1,kk)==wallES) then
+                f8(k+Nxtotal,l)=f6(k+Nxtotal,l)
+            elseif ((image(ii,jj+1,kk)==wallESF) &
+               .or. (image(ii,jj+1,kk)==wallESB)) then
                 f8(k+Nxtotal,l)=f8w(which_corner(ii,jj+1,kk),l)
-            End if
+            endif
             ! Switch from reflected in x/y-direction to in z-direction
             ! only for group of velocity overlapped by two/three reflected x/y&z-direction
-            If ((image(ii,jj,kk+1)==wallSB) .OR.(image(ii,jj,kk+1)==wallEB) &
-            .OR.(image(ii,jj,kk+1)==wallENB).OR.(image(ii,jj,kk+1)==wallWSB)) then
+            if (image(ii,jj,kk+1)==wallSB) then
+                f8(k+Nxytotal,l)=f1(k+Nxytotal,l)
+            elseif (image(ii,jj,kk+1)==wallEB) then
+                f8(k+Nxytotal,l)=f3(k+Nxytotal,l)
+            elseif ((image(ii,jj,kk+1)==wallENB) &
+               .or. (image(ii,jj,kk+1)==wallWSB)) then
                 f8(k+Nxytotal,l)=f8w(which_corner(ii,jj,kk+1),l)
-            else if (image(ii,jj,kk+1)==wallESB) then
+            elseif (image(ii,jj,kk+1)==wallESB) then
                 f8(k+Nxytotal,l)=f2(k+Nxytotal,l)
-            End if
+            endif
 
             fEq=w(l)*(Rho(k)+2.d0*(cx(l)*Ux(k)-cy(l)*Uy(k)-cz(l)*Uz(k)))
             f8(k,l)=(mu*(fEq-0.5d0*f8(k,l)) &
