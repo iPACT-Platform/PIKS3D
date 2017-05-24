@@ -63,9 +63,13 @@ integer, parameter:: onlyCornerLabels(20) = (/ &
     wallEF, wallEB, wallWF, wallWB, &
     wallENF, wallWNF, wallWSF, wallESF, &
     wallENB, wallWNB, wallWSB, wallESB /)
+integer, parameter:: only3CornerLabels(8) = (/ &
+    wallENF, wallWNF, wallWSF, wallESF, &
+    wallENB, wallWNB, wallWSB, wallESB /)
 
 integer :: Nstencil1, Nstencil2, Nstencil3, Nstencil4 !(group 1-4)
 integer :: Nstencil5, Nstencil6, Nstencil7, Nstencil8 !(group 5-8)
+
 
 double precision :: real_porosity
 
@@ -77,8 +81,15 @@ integer, DIMENSION(:,:), ALLOCATABLE :: dir1, dir2, &
     dir3, dir4, dir5, dir6, dir7, dir8
 double precision, DIMENSION(:,:), ALLOCATABLE :: coef1, coef2, coef3, coef4, &
     coef5, coef6, coef7, coef8
-double precision, DIMENSION(:,:), ALLOCATABLE :: f1w,f2w,f3w,f4w, &
-    f5w,f6w,f7w,f8w
+double precision, DIMENSION(:,:,:), ALLOCATABLE :: fw
+
+! number of 3-fold corners to send/recv at each sides of the sub-domain
+integer :: westN3corner_snd, eastN3corner_snd
+integer :: westN3corner_rcv, eastN3corner_rcv
+integer :: nothN3corner_snd, suthN3corner_snd
+integer :: nothN3corner_rcv, suthN3corner_rcv
+integer :: frntN3corner_snd, backN3corner_snd
+integer :: frntN3corner_rcv, backN3corner_rcv
 
 contains 
     ! should be called after calling MPIParams::setupVirtualProcessGrid
@@ -448,6 +459,21 @@ contains
 
         nWall=0
         nCorner=0
+
+        eastN3corner_snd = 0
+        eastN3corner_rcv = 0
+        nothN3corner_snd = 0
+        nothN3corner_rcv = 0
+        frntN3corner_snd = 0
+        frntN3corner_rcv = 0
+
+        westN3corner_snd = 0
+        westN3corner_rcv = 0
+        suthN3corner_snd = 0
+        suthN3corner_rcv = 0
+        backN3corner_snd = 0
+        backN3corner_rcv = 0
+
         do k=zlg, zug
             do j=ylg, yug
                 do i=xlg, xug
@@ -458,20 +484,47 @@ contains
                             nWall=nWall+1
                             vecWall(nWall) = localid
                         endif
-                        if(any(onlyCornerLabels(:) == image(i,j,k))) then
+                        if(any(only3CornerLabels(:) == image(i,j,k))) then
                             nCorner=nCorner+1
                             which_corner(i,j,k)=nCorner
+
+                            if (i.lt.xl) then
+                                westN3corner_rcv = westN3corner_rcv + 1
+                            elseif (i.gt.xu) then
+                                eastN3corner_rcv = eastN3corner_rcv + 1
+                            elseif (i.ge.xl .and. (i.le.(xl+ghostLayers))) then
+                                westN3corner_snd = westN3corner_snd + 1
+                            elseif (i.le.xu .and. (i.ge.(xu-ghostLayers))) then
+                                eastN3corner_snd = eastN3corner_snd + 1
+                            endif
+
+                            if (j.lt.yl) then
+                                suthN3corner_rcv = suthN3corner_rcv + 1
+                            elseif (j.gt.yu) then
+                                nothN3corner_rcv = nothN3corner_rcv + 1
+                            elseif (j.ge.yl .and. (j.le.(yl+ghostLayers))) then
+                                suthN3corner_snd = suthN3corner_snd + 1
+                            elseif (j.le.yu .and. (j.ge.(yu-ghostLayers))) then
+                                nothN3corner_snd = nothN3corner_snd + 1
+                            endif
+
+                            if (k.lt.zl) then
+                                backN3corner_rcv = backN3corner_rcv + 1
+                            elseif (k.gt.zu) then
+                                frntN3corner_rcv = frntN3corner_rcv + 1
+                            elseif (k.ge.zl .and. (k.le.(zl+ghostLayers))) then
+                                backN3corner_snd = backN3corner_snd + 1
+                            elseif (k.le.zu .and. (k.ge.(zu-ghostLayers))) then
+                                frntN3corner_snd = frntN3corner_snd + 1
+                            endif
+
                         endif
                     endif
                 enddo
             enddo
         enddo                           
 
-        ALLOCATE(f1w(nCorner, Nc8),f2w(nCorner, Nc8),&
-                 f3w(nCorner, Nc8),f4w(nCorner, Nc8))
-        ALLOCATE(f5w(nCorner, Nc8),f6w(nCorner, Nc8),&
-                 f7w(nCorner, Nc8),f8w(nCorner, Nc8))
-
+        ALLOCATE(fw(nCorner, Nc8,1:8))
 
         !Direction 1
         bxl = xl
@@ -1121,13 +1174,6 @@ contains
             end if
         End do
 
-        f1w=0.d0
-        f2w=0.d0
-        f3w=0.d0
-        f4w=0.d0
-        f5w=0.d0
-        f6w=0.d0
-        f7w=0.d0
-        f8w=0.d0
+        fw=0.d0
     end subroutine setupPhysicalGrid
 end module physicalGrid

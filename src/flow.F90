@@ -16,7 +16,7 @@ double precision :: mu
 ! double precision, parameter :: PressDrop=1.0d-1
 ! double precision, parameter :: accom = 1.d0
 
-double precision, DIMENSION(:,:), ALLOCATABLE :: f1,f2,f3,f4,f5,f6,f7,f8
+double precision, DIMENSION(:,:,:), ALLOCATABLE :: f
 double precision, DIMENSION(:), ALLOCATABLE :: Rho, Ux, Uy, Uz
 double precision :: mass
 
@@ -28,38 +28,72 @@ contains
                              f_suth_snd,  f_noth_snd,  f_suth_rcv,  f_noth_rcv, &
                              f_back_snd,  f_frnt_snd,  f_back_rcv,  f_frnt_rcv
         implicit none
-        integer :: i, j, k, l
+        integer :: i, j, k, l, ll
 
-        ALLOCATE(f1(Ntotal,Nc8), f2(Ntotal,Nc8), f3(Ntotal,Nc8), f4(Ntotal,Nc8), &
-                 f5(Ntotal,Nc8), f6(Ntotal,Nc8), f7(Ntotal,Nc8), f8(Ntotal,Nc8) )
+        ALLOCATE(f(Ntotal,Nc8,1:8))
 
         ALLOCATE(Rho(Ntotal), Ux(Ntotal), Uy(Ntotal), Uz(Ntotal))
 
         mu = dsqrt(PI/2.d0)/Kn
 
-        f1=0.d0
+        f=0.d0
         Rho = 0.d0
         Ux = 0.d0
         Uy = 0.d0
         Uz = 0.d0
         mass = 1.d0
 
-        ! Buffer for exchange data only half domain of the velocity
-        allocate( f_west_snd(Nc/2*Nytotal*Nztotal*ghostLayers) ) 
-        allocate( f_west_rcv(Nc/2*Nytotal*Nztotal*ghostLayers) ) 
-        allocate( f_east_snd(Nc/2*Nytotal*Nztotal*ghostLayers) ) 
-        allocate( f_east_rcv(Nc/2*Nytotal*Nztotal*ghostLayers) ) 
 
-        allocate( f_noth_snd(Nc/2*Nxtotal*Nztotal*ghostLayers) ) 
-        allocate( f_noth_rcv(Nc/2*Nxtotal*Nztotal*ghostLayers) )
-        allocate( f_suth_snd(Nc/2*Nxtotal*Nztotal*ghostLayers) ) 
-        allocate( f_suth_rcv(Nc/2*Nxtotal*Nztotal*ghostLayers) )
+        Do k=zlg,zug
+            Do j=ylg,yug
+                Do i=xlg,xug
+                    l=(i-xlg+1)+(j-ylg)*Nxtotal+(k-zlg)*Nxytotal
+                    if (image(i,j,k)/=solid) then
+            !           Rho(l)=pressDrop*(i/2.d0-Nx)/Nx
+                        Rho(l)= 0.d0
+                    end if
+                    do ll=1,8
+                        f(l,:,ll)=w(:)*Rho(l) !Check
+                    enddo
+                 Enddo
+            Enddo
+        Enddo
+    end subroutine setupFlow
 
-        allocate( f_back_snd(Nc/2*Nxtotal*Nytotal*ghostLayers) ) 
-        allocate( f_back_rcv(Nc/2*Nxtotal*Nytotal*ghostLayers) ) 
-        allocate( f_frnt_snd(Nc/2*Nxtotal*Nytotal*ghostLayers) ) 
-        allocate( f_frnt_rcv(Nc/2*Nxtotal*Nytotal*ghostLayers) ) 
+    subroutine allocateBuf
+        use physicalGrid
+        use velocityGrid
+        use mpiParams
+        implicit none
 
+        ! Now we calculate the snd/rcv buffer sizes then we can allocate them
+        ! Send buffer contains f* of first two real layers AND ALSO f*w of 
+        ! 3-fold corners that inside the first two layers
+        westSndSize = Nytotal*Nztotal*ghostLayers*Nc + westN3corner_snd*Nc
+        westRcvSize = Nytotal*Nztotal*ghostLayers*Nc + westN3corner_rcv*Nc
+        eastSndSize = Nytotal*Nztotal*ghostLayers*Nc + eastN3corner_snd*Nc
+        eastRcvSize = Nytotal*Nztotal*ghostLayers*Nc + eastN3corner_rcv*Nc
+        suthSndSize = Nxtotal*Nztotal*ghostLayers*Nc + suthN3corner_snd*Nc
+        suthRcvSize = Nxtotal*Nztotal*ghostLayers*Nc + suthN3corner_rcv*Nc
+        nothSndSize = Nxtotal*Nztotal*ghostLayers*Nc + nothN3corner_snd*Nc
+        nothRcvSize = Nxtotal*Nztotal*ghostLayers*Nc + nothN3corner_rcv*Nc
+        backSndSize = Nxtotal*Nytotal*ghostLayers*Nc + backN3corner_snd*Nc
+        backRcvSize = Nxtotal*Nytotal*ghostLayers*Nc + backN3corner_rcv*Nc
+        frntSndSize = Nxtotal*Nytotal*ghostLayers*Nc + frntN3corner_snd*Nc
+        frntRcvSize = Nxtotal*Nytotal*ghostLayers*Nc + frntN3corner_rcv*Nc
+        ! Allocate the buffer
+        allocate( f_west_snd(westSndSize) )
+        allocate( f_west_rcv(westRcvSize) )
+        allocate( f_east_snd(eastSndSize) )
+        allocate( f_east_rcv(eastRcvSize) )
+        allocate( f_suth_snd(suthSndSize) )
+        allocate( f_suth_rcv(suthRcvSize) )
+        allocate( f_noth_snd(nothSndSize) )
+        allocate( f_noth_rcv(nothRcvSize) )
+        allocate( f_back_snd(backSndSize) )
+        allocate( f_back_rcv(backRcvSize) )
+        allocate( f_frnt_snd(frntSndSize) )
+        allocate( f_frnt_rcv(frntRcvSize) )
         ! Allways initialize allocated arrays
         f_west_rcv = 0.d0
         f_east_rcv = 0.d0
@@ -73,25 +107,5 @@ contains
         f_suth_snd = 0.d0
         f_back_snd = 0.d0
         f_frnt_snd = 0.d0
-
-        Do k=zlg,zug
-            Do j=ylg,yug
-                 Do i=xlg,xug
-                     l=(i-xlg+1)+(j-ylg)*Nxtotal+(k-zlg)*Nxytotal
-                     if (image(i,j,k)/=solid) then
-            !           Rho(l)=pressDrop*(i/2.d0-Nx)/Nx
-                        Rho(l)= 0.d0
-                     end if
-                     f1(l,:)=w(:)*Rho(l) !Check
-                 Enddo
-            Enddo
-        Enddo
-        f2=f1
-        f3=f1
-        f4=f1
-        f5=f1
-        f6=f1
-        f7=f1
-        f8=f1
-    end subroutine setupFlow
+    end subroutine allocateBuf
 end module flow

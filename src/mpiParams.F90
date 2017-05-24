@@ -36,6 +36,11 @@ double precision, ALLOCATABLE, DIMENSION(:) :: f_suth_rcv, f_noth_rcv
 double precision, ALLOCATABLE, DIMENSION(:) :: f_back_snd, f_frnt_snd
 double precision, ALLOCATABLE, DIMENSION(:) :: f_back_rcv, f_frnt_rcv
 
+! Buffer size
+integer :: westSndSize, westRcvSize, eastSndSize, eastRcvSize
+integer :: suthSndSize, suthRcvSize, nothSndSize, nothRcvSize
+integer :: backSndSize, backRcvSize, frntSndSize, frntRcvSize
+
 ! gather the sub-domain extent for writing .pvti file
 integer, allocatable, dimension(:,:) :: sub_ext
 !
