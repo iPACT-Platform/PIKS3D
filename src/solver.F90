@@ -734,10 +734,10 @@ module solver
                     &       + (1.d0-accom)*f3w(j,l)
                     f6(k,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f7w(j,l)
-                    ! Store y
-                    f1w(j,l)=accom*w(l)*RhoWall2 &
+                    ! Store y to unused location
+                    f3(j,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f4w(j,l)
-                    f5w(j,l)=accom*w(l)*RhoWall2 &
+                    f7(j,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f8w(j,l)
                 Enddo
 
@@ -774,10 +774,10 @@ module solver
                     &       + (1.d0-accom)*f4w(j,l)
                     f5(k,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f8w(j,l)
-                    ! Store y
-                    f2w(j,l)=accom*w(l)*RhoWall2 &
+                    ! Store y to unused location
+                    f4(j,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f3w(j,l)
-                    f6w(j,l)=accom*w(l)*RhoWall2 &
+                    f8(j,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f7w(j,l)
                 Enddo
 
@@ -813,10 +813,10 @@ module solver
                     &       + (1.d0-accom)*f2w(j,l)
                     f7(k,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f6w(j,l)
-                    ! Store y
-                    f4w(j,l)=accom*w(l)*RhoWall2 &
+                    ! Store y to unused location
+                    f2(j,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f1w(j,l)
-                    f8w(j,l)=accom*w(l)*RhoWall2 &
+                    f6(j,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f5w(j,l)
                 Enddo
 
@@ -852,10 +852,10 @@ module solver
                     &       + (1.d0-accom)*f1w(j,l)
                     f8(k,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f5w(j,l)
-                    ! Store y
-                    f3w(j,l)=accom*w(l)*RhoWall2 &
+                    ! Store y to unused location
+                    f1(j,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f2w(j,l)
-                    f7w(j,l)=accom*w(l)*RhoWall2 &
+                    f5(j,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f6w(j,l)
                 Enddo
 
@@ -894,10 +894,10 @@ module solver
                     &       + (1.d0-accom)*f6w(j,l)
                     f3(k,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f7w(j,l)
-                    ! Store z
-                    f1w(j,l)=accom*w(l)*RhoWall2 &
+                    ! Store z to unsed location
+                    f6(j,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f5w(j,l)
-                    f4w(j,l)=accom*w(l)*RhoWall2 &
+                    f7(j,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f8w(j,l)
                 Enddo
 
@@ -933,10 +933,10 @@ module solver
                     &       + (1.d0-accom)*f5w(j,l)
                     f4(k,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f8w(j,l)
-                    ! Store z
-                    f2w(j,l)=accom*w(l)*RhoWall2 &
+                    ! Store z to unsed location
+                    f5(j,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f6w(j,l)
-                    f3w(j,l)=accom*w(l)*RhoWall2 &
+                    f8(j,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f7w(j,l)
                 Enddo
 
@@ -972,10 +972,10 @@ module solver
                     &       + (1.d0-accom)*f2w(j,l)
                     f7(k,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f3w(j,l)
-                    ! Store z
-                    f5w(j,l)=accom*w(l)*RhoWall2 &
+                    ! Store z to unsed location
+                    f2(j,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f1w(j,l)
-                    f8w(j,l)=accom*w(l)*RhoWall2 &
+                    f3(j,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f4w(j,l)
                 Enddo
 
@@ -1012,9 +1012,9 @@ module solver
                     f8(k,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f4w(j,l)
                     ! Store z
-                     f6w(j,l)=accom*w(l)*RhoWall2 &
+                    f1(j,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f2w(j,l)
-                    f7w(j,l)=accom*w(l)*RhoWall2 &
+                    f4(j,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f3w(j,l)
                 Enddo
 !------------------------------------------------------------------------
@@ -1052,11 +1052,11 @@ module solver
                     &       + (1.d0-accom)*f7w(j,l)
                     f4(k,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f8w(j,l)
-                    ! Store z
-                     f1w(j,l)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*f5w(j,l)
-                    f2w(j,l)=accom*w(l)*RhoWall2 &
+                    ! Store z to unsed location
+                    f7(j,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f6w(j,l)
+                    f8(j,l)=accom*w(l)*RhoWall2 &
+                    &       + (1.d0-accom)*f5w(j,l)
                 Enddo
 
             CASE (wallSF)
@@ -1091,10 +1091,10 @@ module solver
                     &       + (1.d0-accom)*f5w(j,l)
                     f2(k,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f6w(j,l)
-                    ! Store z
-                    f3w(j,l)=accom*w(l)*RhoWall2 &
+                    ! Store z to unsed location
+                    f6(j,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f7w(j,l)
-                    f4w(j,l)=accom*w(l)*RhoWall2 &
+                    f5(j,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f8w(j,l)
                 Enddo
 
@@ -1130,10 +1130,10 @@ module solver
                     &       + (1.d0-accom)*f3w(j,l)
                     f8(k,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f4w(j,l)
-                    ! Store z
-                    f5w(j,l)=accom*w(l)*RhoWall2 &
+                    ! Store z to unsed location
+                    f4(j,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f1w(j,l)
-                    f6w(j,l)=accom*w(l)*RhoWall2 &
+                    f3(j,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f2w(j,l)
                 Enddo
 
@@ -1169,10 +1169,10 @@ module solver
                     &       + (1.d0-accom)*f1w(j,l)
                     f6(k,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f2w(j,l)
-                    ! Store z
-                    f7w(j,l)=accom*w(l)*RhoWall2 &
+                    ! Store z to unsed location
+                    f2(j,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f3w(j,l)
-                    f8w(j,l)=accom*w(l)*RhoWall2 &
+                    f1(j,l)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*f4w(j,l)
                 Enddo
 !=======================================================================
