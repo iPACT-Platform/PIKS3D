@@ -30,8 +30,12 @@ module solver
         INTEGER :: MPI_STAT(MPI_STATUS_SIZE,6)
         integer :: xfsize, yfsize, zfsize
         double precision :: fEq, RhoWall, RhoWall2, RhoWall3
-        double precision, dimension(Nc8) :: f1wZ,f2wZ,f3wZ,f4wZ,f5wZ,f6wZ,f7wZ,f8wZ
+        double precision, dimension(Nc8,1:8) :: fwZ
         integer :: c3CorMsnd, c3CorMrcv, c3CorPsnd, c3CorPrcv, locB
+        
+        ! for mpi error handling
+        integer :: errMsgLen, errTmp
+        character(len=MPI_MAX_ERROR_STRING) :: errMsg 
 
         ! The size for storing two layers of nodes in buffer 
         xfsize = Nytotal*Nztotal*Nc*ghostLayers
@@ -41,7 +45,7 @@ module solver
 !$OMP PARALLEL &
 !$OMP DEFAULT(SHARED) &
 !$OMP PRIVATE(l, i, j, k, ii, jj, kk, fEq, RhoWall, RhoWall2, RhoWall3)&
-!$OMP PRIVATE(f1wZ,f2wZ,f3wZ,f4wZ,f5wZ,f6wZ,f7wZ,f8wZ)&
+!$OMP PRIVATE(fwZ)&
 !$OMP PRIVATE(localidPsnd, localidPrcv, localidMsnd, localidMrcv, packid)
 
 
@@ -54,12 +58,12 @@ module solver
         CALL MPI_IRECV( f_noth_rcv, nothRcvSize, MPI_DOUBLE_PRECISION, noth, TAG3, &
                         MPI_COMM_VGRID, MPI_REQ_Y(1), MPI_ERR )
         CALL MPI_IRECV( f_suth_rcv, suthRcvSize, MPI_DOUBLE_PRECISION, suth, TAG4, &
-                        MPI_COMM_VGRID, MPI_REQ_Y(2), MPI_ERR )     
+                        MPI_COMM_VGRID, MPI_REQ_Y(2), MPI_ERR )
         CALL MPI_IRECV( f_frnt_rcv, frntRcvSize, MPI_DOUBLE_PRECISION, frnt, TAG5, &
                         MPI_COMM_VGRID, MPI_REQ_Z(1), MPI_ERR )
         CALL MPI_IRECV( f_back_rcv, backRcvSize, MPI_DOUBLE_PRECISION, back, TAG6, &
-                        MPI_COMM_VGRID, MPI_REQ_Z(2), MPI_ERR )   
-        ! Start Sending
+                        MPI_COMM_VGRID, MPI_REQ_Z(2), MPI_ERR )
+
         CALL MPI_ISEND( f_west_snd, westSndSize, MPI_DOUBLE_PRECISION, west, TAG1, &
                         MPI_COMM_VGRID, MPI_REQ_X(3), MPI_ERR )
         CALL MPI_ISEND( f_east_snd, eastSndSize, MPI_DOUBLE_PRECISION, east, TAG2, &
@@ -67,12 +71,11 @@ module solver
         CALL MPI_ISEND( f_suth_snd, suthSndSize, MPI_DOUBLE_PRECISION, suth, TAG3, &
                         MPI_COMM_VGRID, MPI_REQ_Y(3), MPI_ERR )
         CALL MPI_ISEND( f_noth_snd, nothSndSize, MPI_DOUBLE_PRECISION, noth, TAG4, &
-                        MPI_COMM_VGRID, MPI_REQ_Y(4), MPI_ERR ) 
+                        MPI_COMM_VGRID, MPI_REQ_Y(4), MPI_ERR )
         CALL MPI_ISEND( f_back_snd, backSndSize, MPI_DOUBLE_PRECISION, back, TAG5, &
                         MPI_COMM_VGRID, MPI_REQ_Z(3), MPI_ERR )
         CALL MPI_ISEND( f_frnt_snd, frntSndSize, MPI_DOUBLE_PRECISION, frnt, TAG6, &
-                        MPI_COMM_VGRID, MPI_REQ_Z(4), MPI_ERR ) 
-
+                        MPI_COMM_VGRID, MPI_REQ_Z(4), MPI_ERR )
 !$OMP END SINGLE NOWAIT
 
 !------------------------------------------------------------------------
@@ -119,12 +122,12 @@ module solver
             & )/(0.5d0*mu+cx(l)*coef1(i,1)+cy(l)*coef1(i,4)+cz(l)*coef1(i,7))
         End do
     End do
-!$OMP END DO NOWAIT 
+!$OMP END DO NOWAIT
 
 !------------------------------------------------------------------------
 !           In the 2nd group of direction cx<0 & cy>0 & cz>0
 !------------------------------------------------------------------------
-!$OMP DO SCHEDULE(STATIC) 
+!$OMP DO SCHEDULE(STATIC)
     Do l=1,Nc8
         Do i=1,Nstencil2
             !k=dir1(i)
@@ -164,7 +167,7 @@ module solver
             & )/(0.5d0*mu-cx(l)*coef2(i,1)+cy(l)*coef2(i,4)+cz(l)*coef2(i,7))
         End do
     End do
-!$OMP END DO NOWAIT 
+!$OMP END DO NOWAIT
 
 !------------------------------------------------------------------------
 !           In the 3rd group of direction cx<0 & cy<0 & cz>0
@@ -208,7 +211,7 @@ module solver
             & )/(0.5d0*mu-cx(l)*coef3(i,1)-cy(l)*coef3(i,4)+cz(l)*coef3(i,7))
         End do
     End do
-!$OMP END DO NOWAIT 
+!$OMP END DO NOWAIT
 
 !------------------------------------------------------------------------
 !           In the 4th group of direction cx>0 & cy<0 & cz>0
@@ -238,7 +241,7 @@ module solver
                 .or.(image(ii,jj,kk-1)==wallWSF)) then
                 f(k-Nxytotal,l,4)=fw(which_corner(ii,jj,kk-1),l,4)
             elseif (image(ii,jj,kk-1)==wallESF) then
-                f(k-Nxytotal,l,4)=f(k-Nxytotal,l,6)
+                f(k-Nxytotal,l,4)=f(k-Nxytotal,l,6) 
             endif
 
             fEq=w(l)*(Rho(k)+2.d0*(cx(l)*Ux(k)-cy(l)*Uy(k)+cz(l)*Uz(k)))
@@ -428,7 +431,7 @@ module solver
             & )/(0.5d0*mu+cx(l)*coef8(i,1)-cy(l)*coef8(i,4)-cz(l)*coef8(i,7))
         End do
     End do
-!$OMP END DO
+!$OMP END DO NOWAIT
 
 !$OMP SINGLE
         ! Wait until send and recv done
@@ -481,28 +484,28 @@ do k = zlg, zug
                 c3CorMrcv = c3CorMrcv+1
                 do l = 1,8
                     locB = xfsize+(c3CorMrcv-1)*Nc+(l-1)*Nc8
-                    fw(which_corner(i,j,k),:,l) = f_west_rcv(locB+1:locB+Nc8)
+                    fw(which_corner(xlg+i-1,j,k),:,l) = f_west_rcv(locB+1:locB+Nc8)
                 enddo
             endif
             if(any(only3CornerLabels(:) == image(xl+i-1,j,k))) then
                 c3CorMsnd = c3CorMsnd+1
                 do l = 1,8
                     locB = xfsize+(c3CorMsnd-1)*Nc+(l-1)*Nc8
-                    f_west_snd(locB+1:locB+Nc8) = fw(which_corner(i,j,k),:,l)
+                    f_west_snd(locB+1:locB+Nc8) = fw(which_corner(xl+i-1,j,k),:,l)
                 enddo
             endif
             if(any(only3CornerLabels(:) == image(xu-2+i,j,k))) then
                 c3CorPsnd = c3CorPsnd+1
                 do l = 1,8
                     locB = xfsize+(c3CorPsnd-1)*Nc+(l-1)*Nc8
-                    f_east_snd(locB+1:locB+Nc8) = fw(which_corner(i,j,k),:,l)
+                    f_east_snd(locB+1:locB+Nc8) = fw(which_corner(xu-2+i,j,k),:,l)
                 enddo
             endif
             if(any(only3CornerLabels(:) == image(xu+i,j,k))) then
                 c3CorPrcv = c3CorPrcv+1
                 do l = 1,8
                     locB = xfsize+(c3CorPrcv-1)*Nc+(l-1)*Nc8
-                    fw(which_corner(i,j,k),:,l) = f_east_rcv(locB+1:locB+Nc8)
+                    fw(which_corner(xu+i,j,k),:,l) = f_east_rcv(locB+1:locB+Nc8)
                 enddo
             endif
         enddo
@@ -552,28 +555,28 @@ do k = zlg, zug
                 c3CorMrcv = c3CorMrcv+1
                 do l = 1,8
                     locB = yfsize+(c3CorMrcv-1)*Nc+(l-1)*Nc8
-                    fw(which_corner(i,j,k),:,l) = f_suth_rcv(locB+1:locB+Nc8)
+                    fw(which_corner(i,ylg+j-1,k),:,l) = f_suth_rcv(locB+1:locB+Nc8)
                 enddo
             endif
             if(any(only3CornerLabels(:) == image(i,yl+j-1,k))) then
                 c3CorMsnd = c3CorMsnd+1
                 do l = 1,8
                     locB = yfsize+(c3CorMsnd-1)*Nc+(l-1)*Nc8
-                    f_suth_snd(locB+1:locB+Nc8) = fw(which_corner(i,j,k),:,l)
+                    f_suth_snd(locB+1:locB+Nc8) = fw(which_corner(i,yl+j-1,k),:,l)
                 enddo
             endif
             if(any(only3CornerLabels(:) == image(i,yu-2+j,k))) then
                 c3CorPsnd = c3CorPsnd+1
                 do l = 1,8
                     locB = yfsize+(c3CorPsnd-1)*Nc+(l-1)*Nc8
-                    f_noth_snd(locB+1:locB+Nc8) = fw(which_corner(i,j,k),:,l)
+                    f_noth_snd(locB+1:locB+Nc8) = fw(which_corner(i,yu-2+j,k),:,l)
                 enddo
             endif
             if(any(only3CornerLabels(:) == image(i,yu+j,k))) then
                 c3CorPrcv = c3CorPrcv+1
                 do l = 1,8
                     locB = yfsize+(c3CorPrcv-1)*Nc+(l-1)*Nc8
-                    fw(which_corner(i,j,k),:,l) = f_noth_rcv(locB+1:locB+Nc8)
+                    fw(which_corner(i,yu+j,k),:,l) = f_noth_rcv(locB+1:locB+Nc8)
                 enddo
             endif
         enddo
@@ -581,7 +584,6 @@ do k = zlg, zug
 enddo
 !!$OMP END DO
 !$OMP END SINGLE
-
 !$OMP DO 
     ! pack/unpack Z dir buffer
     do k = 1, ghostLayers
@@ -625,28 +627,28 @@ do k = 1, ghostLayers
                 c3CorMrcv = c3CorMrcv+1
                 do l = 1,8
                     locB = zfsize+(c3CorMrcv-1)*Nc+(l-1)*Nc8
-                    fw(which_corner(i,j,k),:,l) = f_back_rcv(locB+1:locB+Nc8)
+                    fw(which_corner(i,j,zlg+k-1),:,l) = f_back_rcv(locB+1:locB+Nc8)
                 enddo
             endif
             if(any(only3CornerLabels(:) == image(i,j,zl+k-1))) then
                 c3CorMsnd = c3CorMsnd+1
                 do l = 1,8
                     locB = zfsize+(c3CorMsnd-1)*Nc+(l-1)*Nc8
-                    f_back_snd(locB+1:locB+Nc8) = fw(which_corner(i,j,k),:,l)
+                    f_back_snd(locB+1:locB+Nc8) = fw(which_corner(i,j,zl+k-1),:,l)
                 enddo
             endif
             if(any(only3CornerLabels(:) == image(i,j,zu-2+k))) then
                 c3CorPsnd = c3CorPsnd+1
                 do l = 1,8
                     locB = zfsize+(c3CorPsnd-1)*Nc+(l-1)*Nc8
-                    f_frnt_snd(locB+1:locB+Nc8) = fw(which_corner(i,j,k),:,l)
+                    f_frnt_snd(locB+1:locB+Nc8) = fw(which_corner(i,j,zu-2+k),:,l)
                 enddo
             endif
             if(any(only3CornerLabels(:) == image(i,j,zu+k))) then
                 c3CorPrcv = c3CorPrcv+1
                 do l = 1,8
                     locB = zfsize+(c3CorPrcv-1)*Nc+(l-1)*Nc8
-                    fw(which_corner(i,j,k),:,l) = f_frnt_rcv(locB+1:locB+Nc8)
+                    fw(which_corner(i,j,zu+k),:,l) = f_frnt_rcv(locB+1:locB+Nc8)
                 enddo
             endif
         enddo
@@ -796,13 +798,13 @@ enddo
                     f(k,l,6)=2.d0*f(k+1,l,6)-f(k+2,l,6)
                     f(k,l,7)=2.d0*f(k+1,l,7)-f(k+2,l,7)
 
-                    fw(j,l,3)=2.d0*f(k+Nxtotal,l,3)-f(k+2*Nxtotal,l,3)
-                    fw(j,l,4)=2.d0*f(k+Nxtotal,l,4)-f(k+2*Nxtotal,l,4)
-                    fw(j,l,7)=2.d0*f(k+Nxtotal,l,7)-f(k+2*Nxtotal,l,7)
-                    fw(j,l,8)=2.d0*f(k+Nxtotal,l,8)-f(k+2*Nxtotal,l,8)
+                    fwZ(l,3)=2.d0*f(k+Nxtotal,l,3)-f(k+2*Nxtotal,l,3)
+                    fwZ(l,4)=2.d0*f(k+Nxtotal,l,4)-f(k+2*Nxtotal,l,4)
+                    fwZ(l,7)=2.d0*f(k+Nxtotal,l,7)-f(k+2*Nxtotal,l,7)
+                    fwZ(l,8)=2.d0*f(k+Nxtotal,l,8)-f(k+2*Nxtotal,l,8)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,2)+f(k,l,3)+f(k,l,6)+f(k,l,7))
-                    RhoWall2=RhoWall2+cy(l)*(fw(j,l,3)+fw(j,l,4)+fw(j,l,7)+fw(j,l,8))
+                    RhoWall2=RhoWall2+cy(l)*(fwZ(l,3)+fwZ(l,4)+fwZ(l,7)+fwZ(l,8))
                 Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
@@ -818,14 +820,14 @@ enddo
                     &       + (1.d0-accom)*f(k,l,7)
                     ! Write y
                     f(k,l,2)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,3)
+                    &       + (1.d0-accom)*fwZ(l,3)
                     f(k,l,6)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,7)
+                    &       + (1.d0-accom)*fwZ(l,7)
                     ! Store y to unused location
-                    f(j,l,3)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,4)
-                    f(j,l,7)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,8)
+                    f(k,l,3)=accom*w(l)*RhoWall2 &
+                    &       + (1.d0-accom)*fwZ(l,4)
+                    f(k,l,7)=accom*w(l)*RhoWall2 &
+                    &       + (1.d0-accom)*fwZ(l,8)
                 Enddo
 
             CASE (wallWN)
@@ -835,13 +837,13 @@ enddo
                     f(k,l,5)=2.d0*f(k-1,l,5)-f(k-2,l,5)
                     f(k,l,8)=2.d0*f(k-1,l,8)-f(k-2,l,8)
 
-                    fw(j,l,3)=2.d0*f(k+Nxtotal,l,3)-f(k+2*Nxtotal,l,3)
-                    fw(j,l,4)=2.d0*f(k+Nxtotal,l,4)-f(k+2*Nxtotal,l,4)
-                    fw(j,l,7)=2.d0*f(k+Nxtotal,l,7)-f(k+2*Nxtotal,l,7)
-                    fw(j,l,8)=2.d0*f(k+Nxtotal,l,8)-f(k+2*Nxtotal,l,8)
+                    fwZ(l,3)=2.d0*f(k+Nxtotal,l,3)-f(k+2*Nxtotal,l,3)
+                    fwZ(l,4)=2.d0*f(k+Nxtotal,l,4)-f(k+2*Nxtotal,l,4)
+                    fwZ(l,7)=2.d0*f(k+Nxtotal,l,7)-f(k+2*Nxtotal,l,7)
+                    fwZ(l,8)=2.d0*f(k+Nxtotal,l,8)-f(k+2*Nxtotal,l,8)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,1)+f(k,l,4)+f(k,l,5)+f(k,l,8))
-                    RhoWall2=RhoWall2+cy(l)*(fw(j,l,3)+fw(j,l,4)+fw(j,l,7)+fw(j,l,8))
+                    RhoWall2=RhoWall2+cy(l)*(fwZ(l,3)+fwZ(l,4)+fwZ(l,7)+fwZ(l,8))
                 Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
@@ -858,14 +860,14 @@ enddo
                     &       + (1.d0-accom)*f(k,l,8)
                     ! Write y
                     f(k,l,1)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,4)
+                    &       + (1.d0-accom)*fwZ(l,4)
                     f(k,l,5)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,8)
+                    &       + (1.d0-accom)*fwZ(l,8)
                     ! Store y to unused location
-                    f(j,l,4)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,3)
-                    f(j,l,8)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,7)
+                    f(k,l,4)=accom*w(l)*RhoWall2 &
+                    &       + (1.d0-accom)*fwZ(l,3)
+                    f(k,l,8)=accom*w(l)*RhoWall2 &
+                    &       + (1.d0-accom)*fwZ(l,7)
                 Enddo
 
             CASE (wallES)
@@ -875,13 +877,13 @@ enddo
                     f(k,l,6)=2.d0*f(k+1,l,6)-f(k+2,l,6)
                     f(k,l,7)=2.d0*f(k+1,l,7)-f(k+2,l,7)
 
-                    fw(j,l,1)=2.d0*f(k-Nxtotal,l,1)-f(k-2*Nxtotal,l,1)
-                    fw(j,l,2)=2.d0*f(k-Nxtotal,l,2)-f(k-2*Nxtotal,l,2)
-                    fw(j,l,5)=2.d0*f(k-Nxtotal,l,5)-f(k-2*Nxtotal,l,5)
-                    fw(j,l,6)=2.d0*f(k-Nxtotal,l,6)-f(k-2*Nxtotal,l,6)
+                    fwZ(l,1)=2.d0*f(k-Nxtotal,l,1)-f(k-2*Nxtotal,l,1)
+                    fwZ(l,2)=2.d0*f(k-Nxtotal,l,2)-f(k-2*Nxtotal,l,2)
+                    fwZ(l,5)=2.d0*f(k-Nxtotal,l,5)-f(k-2*Nxtotal,l,5)
+                    fwZ(l,6)=2.d0*f(k-Nxtotal,l,6)-f(k-2*Nxtotal,l,6)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,2)+f(k,l,3)+f(k,l,6)+f(k,l,7))
-                    RhoWall2=RhoWall2+cy(l)*(fw(j,l,1)+fw(j,l,2)+fw(j,l,5)+fw(j,l,6))
+                    RhoWall2=RhoWall2+cy(l)*(fwZ(l,1)+fwZ(l,2)+fwZ(l,5)+fwZ(l,6))
                 Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
@@ -897,14 +899,14 @@ enddo
                     &       + (1.d0-accom)*f(k,l,7)
                     ! Write y
                     f(k,l,3)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,2)
+                    &       + (1.d0-accom)*fwZ(l,2)
                     f(k,l,7)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,6)
+                    &       + (1.d0-accom)*fwZ(l,6)
                     ! Store y to unused location
-                    f(j,l,2)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,1)
-                    f(j,l,6)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,5)
+                    f(k,l,2)=accom*w(l)*RhoWall2 &
+                    &       + (1.d0-accom)*fwZ(l,1)
+                    f(k,l,6)=accom*w(l)*RhoWall2 &
+                    &       + (1.d0-accom)*fwZ(l,5)
                 Enddo
 
             CASE (wallWS)
@@ -914,13 +916,13 @@ enddo
                     f(k,l,5)=2.d0*f(k-1,l,5)-f(k-2,l,5)
                     f(k,l,8)=2.d0*f(k-1,l,8)-f(k-2,l,8)
 
-                    fw(j,l,1)=2.d0*f(k-Nxtotal,l,1)-f(k-2*Nxtotal,l,1)
-                    fw(j,l,2)=2.d0*f(k-Nxtotal,l,2)-f(k-2*Nxtotal,l,2)
-                    fw(j,l,5)=2.d0*f(k-Nxtotal,l,5)-f(k-2*Nxtotal,l,5)
-                    fw(j,l,6)=2.d0*f(k-Nxtotal,l,6)-f(k-2*Nxtotal,l,6)
+                    fwZ(l,1)=2.d0*f(k-Nxtotal,l,1)-f(k-2*Nxtotal,l,1)
+                    fwZ(l,2)=2.d0*f(k-Nxtotal,l,2)-f(k-2*Nxtotal,l,2)
+                    fwZ(l,5)=2.d0*f(k-Nxtotal,l,5)-f(k-2*Nxtotal,l,5)
+                    fwZ(l,6)=2.d0*f(k-Nxtotal,l,6)-f(k-2*Nxtotal,l,6)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,1)+f(k,l,4)+f(k,l,5)+f(k,l,8))
-                    RhoWall2=RhoWall2+cy(l)*(fw(j,l,1)+fw(j,l,2)+fw(j,l,5)+fw(j,l,6))
+                    RhoWall2=RhoWall2+cy(l)*(fwZ(l,1)+fwZ(l,2)+fwZ(l,5)+fwZ(l,6))
                 Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
@@ -936,14 +938,14 @@ enddo
                     &       + (1.d0-accom)*f(k,l,8)
                     ! Write y
                     f(k,l,4)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,1)
+                    &       + (1.d0-accom)*fwZ(l,1)
                     f(k,l,8)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,5)
+                    &       + (1.d0-accom)*fwZ(l,5)
                     ! Store y to unused location
-                    f(j,l,1)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,2)
-                    f(j,l,5)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,6)
+                    f(k,l,1)=accom*w(l)*RhoWall2 &
+                    &       + (1.d0-accom)*fwZ(l,2)
+                    f(k,l,5)=accom*w(l)*RhoWall2 &
+                    &       + (1.d0-accom)*fwZ(l,6)
                 Enddo
 
 !------------------------------------------------------------------------
@@ -956,13 +958,13 @@ enddo
                     f(k,l,6)=2.d0*f(k+1,l,6)-f(k+2,l,6)
                     f(k,l,7)=2.d0*f(k+1,l,7)-f(k+2,l,7)
 
-                    fw(j,l,5)=2.d0*f(k+Nxytotal,l,5)-f(k+2*Nxytotal,l,5)
-                    fw(j,l,6)=2.d0*f(k+Nxytotal,l,6)-f(k+2*Nxytotal,l,6)
-                    fw(j,l,7)=2.d0*f(k+Nxytotal,l,7)-f(k+2*Nxytotal,l,7)
-                    fw(j,l,8)=2.d0*f(k+Nxytotal,l,8)-f(k+2*Nxytotal,l,8)
+                    fwZ(l,5)=2.d0*f(k+Nxytotal,l,5)-f(k+2*Nxytotal,l,5)
+                    fwZ(l,6)=2.d0*f(k+Nxytotal,l,6)-f(k+2*Nxytotal,l,6)
+                    fwZ(l,7)=2.d0*f(k+Nxytotal,l,7)-f(k+2*Nxytotal,l,7)
+                    fwZ(l,8)=2.d0*f(k+Nxytotal,l,8)-f(k+2*Nxytotal,l,8)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,2)+f(k,l,3)+f(k,l,6)+f(k,l,7))
-                    RhoWall2=RhoWall2+cz(l)*(fw(j,l,5)+fw(j,l,6)+fw(j,l,7)+fw(j,l,8))
+                    RhoWall2=RhoWall2+cz(l)*(fwZ(l,5)+fwZ(l,6)+fwZ(l,7)+fwZ(l,8))
                 Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
@@ -978,14 +980,14 @@ enddo
                     &       + (1.d0-accom)*f(k,l,7)
                     ! Write z
                     f(k,l,2)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,6)
+                    &       + (1.d0-accom)*fwZ(l,6)
                     f(k,l,3)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,7)
+                    &       + (1.d0-accom)*fwZ(l,7)
                     ! Store z to unsed location
-                    f(j,l,6)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,5)
-                    f(j,l,7)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,8)
+                    f(k,l,6)=accom*w(l)*RhoWall2 &
+                    &       + (1.d0-accom)*fwZ(l,5)
+                    f(k,l,7)=accom*w(l)*RhoWall2 &
+                    &       + (1.d0-accom)*fwZ(l,8)
                 Enddo
 
             CASE (wallWF)
@@ -995,13 +997,13 @@ enddo
                     f(k,l,5)=2.d0*f(k-1,l,5)-f(k-2,l,5)
                     f(k,l,8)=2.d0*f(k-1,l,8)-f(k-2,l,8)
 
-                    fw(j,l,5)=2.d0*f(k+Nxytotal,l,5)-f(k+2*Nxytotal,l,5)
-                    fw(j,l,6)=2.d0*f(k+Nxytotal,l,6)-f(k+2*Nxytotal,l,6)
-                    fw(j,l,7)=2.d0*f(k+Nxytotal,l,7)-f(k+2*Nxytotal,l,7)
-                    fw(j,l,8)=2.d0*f(k+Nxytotal,l,8)-f(k+2*Nxytotal,l,8)
+                    fwZ(l,5)=2.d0*f(k+Nxytotal,l,5)-f(k+2*Nxytotal,l,5)
+                    fwZ(l,6)=2.d0*f(k+Nxytotal,l,6)-f(k+2*Nxytotal,l,6)
+                    fwZ(l,7)=2.d0*f(k+Nxytotal,l,7)-f(k+2*Nxytotal,l,7)
+                    fwZ(l,8)=2.d0*f(k+Nxytotal,l,8)-f(k+2*Nxytotal,l,8)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,1)+f(k,l,4)+f(k,l,5)+f(k,l,8))
-                    RhoWall2=RhoWall2+cz(l)*(fw(j,l,5)+fw(j,l,6)+fw(j,l,7)+fw(j,l,8))
+                    RhoWall2=RhoWall2+cz(l)*(fwZ(l,5)+fwZ(l,6)+fwZ(l,7)+fwZ(l,8))
                 Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
@@ -1017,14 +1019,14 @@ enddo
                     &       + (1.d0-accom)*f(k,l,8)
                     ! Write z
                     f(k,l,1)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,5)
+                    &       + (1.d0-accom)*fwZ(l,5)
                     f(k,l,4)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,8)
+                    &       + (1.d0-accom)*fwZ(l,8)
                     ! Store z to unsed location
-                    f(j,l,5)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,6)
-                    f(j,l,8)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,7)
+                    f(k,l,5)=accom*w(l)*RhoWall2 &
+                    &       + (1.d0-accom)*fwZ(l,6)
+                    f(k,l,8)=accom*w(l)*RhoWall2 &
+                    &       + (1.d0-accom)*fwZ(l,7)
                 Enddo
 
             CASE (wallEB)
@@ -1034,13 +1036,13 @@ enddo
                     f(k,l,6)=2.d0*f(k+1,l,6)-f(k+2,l,6)
                     f(k,l,7)=2.d0*f(k+1,l,7)-f(k+2,l,7)
 
-                    fw(j,l,1)=2.d0*f(k-Nxytotal,l,1)-f(k-2*Nxytotal,l,1)
-                    fw(j,l,2)=2.d0*f(k-Nxytotal,l,2)-f(k-2*Nxytotal,l,2)
-                    fw(j,l,3)=2.d0*f(k-Nxytotal,l,3)-f(k-2*Nxytotal,l,3)
-                    fw(j,l,4)=2.d0*f(k-Nxytotal,l,4)-f(k-2*Nxytotal,l,4)
+                    fwZ(l,1)=2.d0*f(k-Nxytotal,l,1)-f(k-2*Nxytotal,l,1)
+                    fwZ(l,2)=2.d0*f(k-Nxytotal,l,2)-f(k-2*Nxytotal,l,2)
+                    fwZ(l,3)=2.d0*f(k-Nxytotal,l,3)-f(k-2*Nxytotal,l,3)
+                    fwZ(l,4)=2.d0*f(k-Nxytotal,l,4)-f(k-2*Nxytotal,l,4)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,2)+f(k,l,3)+f(k,l,6)+f(k,l,7))
-                    RhoWall2=RhoWall2+cz(l)*(fw(j,l,1)+fw(j,l,2)+fw(j,l,3)+fw(j,l,4))
+                    RhoWall2=RhoWall2+cz(l)*(fwZ(l,1)+fwZ(l,2)+fwZ(l,3)+fwZ(l,4))
                 Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
@@ -1056,14 +1058,14 @@ enddo
                     &       + (1.d0-accom)*f(k,l,7)
                     ! Write z
                     f(k,l,6)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,2)
+                    &       + (1.d0-accom)*fwZ(l,2)
                     f(k,l,7)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,3)
+                    &       + (1.d0-accom)*fwZ(l,3)
                     ! Store z to unsed location
-                    f(j,l,2)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,1)
-                    f(j,l,3)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,4)
+                    f(k,l,2)=accom*w(l)*RhoWall2 &
+                    &       + (1.d0-accom)*fwZ(l,1)
+                    f(k,l,3)=accom*w(l)*RhoWall2 &
+                    &       + (1.d0-accom)*fwZ(l,4)
                 Enddo
 
             CASE (wallWB)
@@ -1073,13 +1075,13 @@ enddo
                     f(k,l,5)=2.d0*f(k-1,l,5)-f(k-2,l,5)
                     f(k,l,8)=2.d0*f(k-1,l,8)-f(k-2,l,8)
 
-                    fw(j,l,1)=2.d0*f(k-Nxytotal,l,1)-f(k-2*Nxytotal,l,1)
-                    fw(j,l,2)=2.d0*f(k-Nxytotal,l,2)-f(k-2*Nxytotal,l,2)
-                    fw(j,l,3)=2.d0*f(k-Nxytotal,l,3)-f(k-2*Nxytotal,l,3)
-                    fw(j,l,4)=2.d0*f(k-Nxytotal,l,4)-f(k-2*Nxytotal,l,4)
+                    fwZ(l,1)=2.d0*f(k-Nxytotal,l,1)-f(k-2*Nxytotal,l,1)
+                    fwZ(l,2)=2.d0*f(k-Nxytotal,l,2)-f(k-2*Nxytotal,l,2)
+                    fwZ(l,3)=2.d0*f(k-Nxytotal,l,3)-f(k-2*Nxytotal,l,3)
+                    fwZ(l,4)=2.d0*f(k-Nxytotal,l,4)-f(k-2*Nxytotal,l,4)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,1)+f(k,l,4)+f(k,l,5)+f(k,l,8))
-                    RhoWall2=RhoWall2+cz(l)*(fw(j,l,1)+fw(j,l,2)+fw(j,l,3)+fw(j,l,4))
+                    RhoWall2=RhoWall2+cz(l)*(fwZ(l,1)+fwZ(l,2)+fwZ(l,3)+fwZ(l,4))
                 Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
@@ -1095,14 +1097,14 @@ enddo
                     &       + (1.d0-accom)*f(k,l,8)
                     ! Write z
                     f(k,l,5)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,1)
+                    &       + (1.d0-accom)*fwZ(l,1)
                     f(k,l,8)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,4)
+                    &       + (1.d0-accom)*fwZ(l,4)
                     ! Store z
-                    f(j,l,1)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,2)
-                    f(j,l,4)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,3)
+                    f(k,l,1)=accom*w(l)*RhoWall2 &
+                    &       + (1.d0-accom)*fwZ(l,2)
+                    f(k,l,4)=accom*w(l)*RhoWall2 &
+                    &       + (1.d0-accom)*fwZ(l,3)
                 Enddo
 !------------------------------------------------------------------------
 !           No x-direction type wall
@@ -1114,13 +1116,13 @@ enddo
                     f(k,l,7)=2.d0*f(k+Nxtotal,l,7)-f(k+2*Nxtotal,l,7)
                     f(k,l,8)=2.d0*f(k+Nxtotal,l,8)-f(k+2*Nxtotal,l,8)
 
-                    fw(j,l,5)=2.d0*f(k+Nxytotal,l,5)-f(k+2*Nxytotal,l,5)
-                    fw(j,l,6)=2.d0*f(k+Nxytotal,l,6)-f(k+2*Nxytotal,l,6)
-                    fw(j,l,7)=2.d0*f(k+Nxytotal,l,7)-f(k+2*Nxytotal,l,7)
-                    fw(j,l,8)=2.d0*f(k+Nxytotal,l,8)-f(k+2*Nxytotal,l,8)
+                    fwZ(l,5)=2.d0*f(k+Nxytotal,l,5)-f(k+2*Nxytotal,l,5)
+                    fwZ(l,6)=2.d0*f(k+Nxytotal,l,6)-f(k+2*Nxytotal,l,6)
+                    fwZ(l,7)=2.d0*f(k+Nxytotal,l,7)-f(k+2*Nxytotal,l,7)
+                    fwZ(l,8)=2.d0*f(k+Nxytotal,l,8)-f(k+2*Nxytotal,l,8)
 
                     RhoWall=RhoWall+cy(l)*(f(k,l,3)+f(k,l,4)+f(k,l,7)+f(k,l,8))
-                    RhoWall2=RhoWall2+cz(l)*(fw(j,l,5)+fw(j,l,6)+fw(j,l,7)+fw(j,l,8))
+                    RhoWall2=RhoWall2+cz(l)*(fwZ(l,5)+fwZ(l,6)+fwZ(l,7)+fwZ(l,8))
                 Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
@@ -1136,14 +1138,14 @@ enddo
                     &       + (1.d0-accom)*f(k,l,7)
                     ! Write z
                     f(k,l,3)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,7)
+                    &       + (1.d0-accom)*fwZ(l,7)
                     f(k,l,4)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,8)
+                    &       + (1.d0-accom)*fwZ(l,8)
                     ! Store z to unsed location
-                    f(j,l,7)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,6)
-                    f(j,l,8)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,5)
+                    f(k,l,7)=accom*w(l)*RhoWall2 &
+                    &       + (1.d0-accom)*fwZ(l,6)
+                    f(k,l,8)=accom*w(l)*RhoWall2 &
+                    &       + (1.d0-accom)*fwZ(l,5)
                 Enddo
 
             CASE (wallSF)
@@ -1153,13 +1155,13 @@ enddo
                     f(k,l,5)=2.d0*f(k-Nxtotal,l,5)-f(k-2*Nxtotal,l,5)
                     f(k,l,6)=2.d0*f(k-Nxtotal,l,6)-f(k-2*Nxtotal,l,6)
 
-                    fw(j,l,5)=2.d0*f(k+Nxytotal,l,5)-f(k+2*Nxytotal,l,5)
-                    fw(j,l,6)=2.d0*f(k+Nxytotal,l,6)-f(k+2*Nxytotal,l,6)
-                    fw(j,l,7)=2.d0*f(k+Nxytotal,l,7)-f(k+2*Nxytotal,l,7)
-                    fw(j,l,8)=2.d0*f(k+Nxytotal,l,8)-f(k+2*Nxytotal,l,8)
+                    fwZ(l,5)=2.d0*f(k+Nxytotal,l,5)-f(k+2*Nxytotal,l,5)
+                    fwZ(l,6)=2.d0*f(k+Nxytotal,l,6)-f(k+2*Nxytotal,l,6)
+                    fwZ(l,7)=2.d0*f(k+Nxytotal,l,7)-f(k+2*Nxytotal,l,7)
+                    fwZ(l,8)=2.d0*f(k+Nxytotal,l,8)-f(k+2*Nxytotal,l,8)
 
                     RhoWall=RhoWall+cy(l)*(f(k,l,1)+f(k,l,2)+f(k,l,5)+f(k,l,6))
-                    RhoWall2=RhoWall2+cz(l)*(fw(j,l,5)+fw(j,l,6)+fw(j,l,7)+fw(j,l,8))
+                    RhoWall2=RhoWall2+cz(l)*(fwZ(l,5)+fwZ(l,6)+fwZ(l,7)+fwZ(l,8))
                 Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
@@ -1175,14 +1177,14 @@ enddo
                     &       + (1.d0-accom)*f(k,l,5)
                     ! Write z
                     f(k,l,1)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,5)
+                    &       + (1.d0-accom)*fwZ(l,5)
                     f(k,l,2)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,6)
+                    &       + (1.d0-accom)*fwZ(l,6)
                     ! Store z to unsed location
-                    f(j,l,6)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,7)
-                    f(j,l,5)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,8)
+                    f(k,l,6)=accom*w(l)*RhoWall2 &
+                    &       + (1.d0-accom)*fwZ(l,7)
+                    f(k,l,5)=accom*w(l)*RhoWall2 &
+                    &       + (1.d0-accom)*fwZ(l,8)
                 Enddo
 
             CASE (wallNB)
@@ -1192,13 +1194,13 @@ enddo
                     f(k,l,7)=2.d0*f(k+Nxtotal,l,7)-f(k+2*Nxtotal,l,7)
                     f(k,l,8)=2.d0*f(k+Nxtotal,l,8)-f(k+2*Nxtotal,l,8)
 
-                    fw(j,l,1)=2.d0*f(k-Nxytotal,l,1)-f(k-2*Nxytotal,l,1)
-                    fw(j,l,2)=2.d0*f(k-Nxytotal,l,2)-f(k-2*Nxytotal,l,2)
-                    fw(j,l,3)=2.d0*f(k-Nxytotal,l,3)-f(k-2*Nxytotal,l,3)
-                    fw(j,l,4)=2.d0*f(k-Nxytotal,l,4)-f(k-2*Nxytotal,l,4)
+                    fwZ(l,1)=2.d0*f(k-Nxytotal,l,1)-f(k-2*Nxytotal,l,1)
+                    fwZ(l,2)=2.d0*f(k-Nxytotal,l,2)-f(k-2*Nxytotal,l,2)
+                    fwZ(l,3)=2.d0*f(k-Nxytotal,l,3)-f(k-2*Nxytotal,l,3)
+                    fwZ(l,4)=2.d0*f(k-Nxytotal,l,4)-f(k-2*Nxytotal,l,4)
 
                     RhoWall=RhoWall+cy(l)*(f(k,l,3)+f(k,l,4)+f(k,l,7)+f(k,l,8))
-                    RhoWall2=RhoWall2+cz(l)*(fw(j,l,1)+fw(j,l,2)+fw(j,l,3)+fw(j,l,4))
+                    RhoWall2=RhoWall2+cz(l)*(fwZ(l,1)+fwZ(l,2)+fwZ(l,3)+fwZ(l,4))
                 Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
@@ -1214,14 +1216,14 @@ enddo
                     &       + (1.d0-accom)*f(k,l,7)
                     ! Write z
                     f(k,l,7)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,3)
+                    &       + (1.d0-accom)*fwZ(l,3)
                     f(k,l,8)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,4)
+                    &       + (1.d0-accom)*fwZ(l,4)
                     ! Store z to unsed location
-                    f(j,l,4)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,1)
-                    f(j,l,3)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,2)
+                    f(k,l,4)=accom*w(l)*RhoWall2 &
+                    &       + (1.d0-accom)*fwZ(l,1)
+                    f(k,l,3)=accom*w(l)*RhoWall2 &
+                    &       + (1.d0-accom)*fwZ(l,2)
                 Enddo
 
             CASE (wallSB)
@@ -1231,13 +1233,13 @@ enddo
                     f(k,l,5)=2.d0*f(k-Nxtotal,l,5)-f(k-2*Nxtotal,l,5)
                     f(k,l,6)=2.d0*f(k-Nxtotal,l,6)-f(k-2*Nxtotal,l,6)
 
-                    fw(j,l,1)=2.d0*f(k-Nxytotal,l,1)-f(k-2*Nxytotal,l,1)
-                    fw(j,l,2)=2.d0*f(k-Nxytotal,l,2)-f(k-2*Nxytotal,l,2)
-                    fw(j,l,3)=2.d0*f(k-Nxytotal,l,3)-f(k-2*Nxytotal,l,3)
-                    fw(j,l,4)=2.d0*f(k-Nxytotal,l,4)-f(k-2*Nxytotal,l,4)
+                    fwZ(l,1)=2.d0*f(k-Nxytotal,l,1)-f(k-2*Nxytotal,l,1)
+                    fwZ(l,2)=2.d0*f(k-Nxytotal,l,2)-f(k-2*Nxytotal,l,2)
+                    fwZ(l,3)=2.d0*f(k-Nxytotal,l,3)-f(k-2*Nxytotal,l,3)
+                    fwZ(l,4)=2.d0*f(k-Nxytotal,l,4)-f(k-2*Nxytotal,l,4)
 
                     RhoWall=RhoWall+cy(l)*(f(k,l,1)+f(k,l,2)+f(k,l,5)+f(k,l,6))
-                    RhoWall2=RhoWall2+cz(l)*(fw(j,l,1)+fw(j,l,2)+fw(j,l,3)+fw(j,l,4))
+                    RhoWall2=RhoWall2+cz(l)*(fwZ(l,1)+fwZ(l,2)+fwZ(l,3)+fwZ(l,4))
                 Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
@@ -1253,14 +1255,14 @@ enddo
                     &       + (1.d0-accom)*f(k,l,5)
                     ! Write z
                     f(k,l,5)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,1)
+                    &       + (1.d0-accom)*fwZ(l,1)
                     f(k,l,6)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,2)
+                    &       + (1.d0-accom)*fwZ(l,2)
                     ! Store z to unsed location
-                    f(j,l,2)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,3)
-                    f(j,l,1)=accom*w(l)*RhoWall2 &
-                    &       + (1.d0-accom)*fw(j,l,4)
+                    f(k,l,2)=accom*w(l)*RhoWall2 &
+                    &       + (1.d0-accom)*fwZ(l,3)
+                    f(k,l,1)=accom*w(l)*RhoWall2 &
+                    &       + (1.d0-accom)*fwZ(l,4)
                 Enddo
 !=======================================================================
 !     Boundary condition on the 3-direction corner wall
@@ -1277,14 +1279,14 @@ enddo
                     fw(j,l,7)=2.d0*f(k+Nxtotal,l,7)-f(k+2*Nxtotal,l,7)
                     fw(j,l,8)=2.d0*f(k+Nxtotal,l,8)-f(k+2*Nxtotal,l,8)
 
-                    f5wZ(l)=2.d0*f(k+Nxytotal,l,5)-f(k+2*Nxytotal,l,5)
-                    f6wZ(l)=2.d0*f(k+Nxytotal,l,6)-f(k+2*Nxytotal,l,6)
-                    f7wZ(l)=2.d0*f(k+Nxytotal,l,7)-f(k+2*Nxytotal,l,7)
-                    f8wZ(l)=2.d0*f(k+Nxytotal,l,8)-f(k+2*Nxytotal,l,8)
+                    fwZ(l,5)=2.d0*f(k+Nxytotal,l,5)-f(k+2*Nxytotal,l,5)
+                    fwZ(l,6)=2.d0*f(k+Nxytotal,l,6)-f(k+2*Nxytotal,l,6)
+                    fwZ(l,7)=2.d0*f(k+Nxytotal,l,7)-f(k+2*Nxytotal,l,7)
+                    fwZ(l,8)=2.d0*f(k+Nxytotal,l,8)-f(k+2*Nxytotal,l,8)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,2)+f(k,l,3)+f(k,l,6)+f(k,l,7))
                     RhoWall2=RhoWall2+cy(l)*(fw(j,l,3)+fw(j,l,4)+fw(j,l,7)+fw(j,l,8))
-                    RhoWall3=RhoWall3+cz(l)*(f5wZ(l)+f6wZ(l)+f7wZ(l)+f8wZ(l))
+                    RhoWall3=RhoWall3+cz(l)*(fwZ(l,5)+fwZ(l,6)+fwZ(l,7)+fwZ(l,8))
                 Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
@@ -1306,7 +1308,7 @@ enddo
                     &       + (1.d0-accom)*fw(j,l,7)
                     ! Write z
                     f(k,l,3)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f7wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,7)
 
                     ! Store y
                     fw(j,l,1)=accom*w(l)*RhoWall2 &
@@ -1315,12 +1317,12 @@ enddo
                     &       + (1.d0-accom)*fw(j,l,8)
                     ! Store z
                     fw(j,l,2)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f6wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,6)
                     fw(j,l,4)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f8wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,8)
                     ! Borrow the un-used variable to store z for the opposite velocity
                     f(k,l,7)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f5wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,5)
                 Enddo
             CASE (wallWNF) !direction2
                 Do l=1,Nc8
@@ -1334,14 +1336,14 @@ enddo
                     fw(j,l,7)=2.d0*f(k+Nxtotal,l,7)-f(k+2*Nxtotal,l,7)
                     fw(j,l,8)=2.d0*f(k+Nxtotal,l,8)-f(k+2*Nxtotal,l,8)
 
-                    f5wZ(l)=2.d0*f(k+Nxytotal,l,5)-f(k+2*Nxytotal,l,5)
-                    f6wZ(l)=2.d0*f(k+Nxytotal,l,6)-f(k+2*Nxytotal,l,6)
-                    f7wZ(l)=2.d0*f(k+Nxytotal,l,7)-f(k+2*Nxytotal,l,7)
-                    f8wZ(l)=2.d0*f(k+Nxytotal,l,8)-f(k+2*Nxytotal,l,8)
+                    fwZ(l,5)=2.d0*f(k+Nxytotal,l,5)-f(k+2*Nxytotal,l,5)
+                    fwZ(l,6)=2.d0*f(k+Nxytotal,l,6)-f(k+2*Nxytotal,l,6)
+                    fwZ(l,7)=2.d0*f(k+Nxytotal,l,7)-f(k+2*Nxytotal,l,7)
+                    fwZ(l,8)=2.d0*f(k+Nxytotal,l,8)-f(k+2*Nxytotal,l,8)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,1)+f(k,l,4)+f(k,l,5)+f(k,l,8))
                     RhoWall2=RhoWall2+cy(l)*(fw(j,l,3)+fw(j,l,4)+fw(j,l,7)+fw(j,l,8))
-                    RhoWall3=RhoWall3+cz(l)*(f5wZ(l)+f6wZ(l)+f7wZ(l)+f8wZ(l))
+                    RhoWall3=RhoWall3+cz(l)*(fwZ(l,5)+fwZ(l,6)+fwZ(l,7)+fwZ(l,8))
                 Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
@@ -1363,7 +1365,7 @@ enddo
                     &       + (1.d0-accom)*fw(j,l,8)
                     ! Write z
                     f(k,l,4)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f8wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,8)
 
                     ! Store y
                     fw(j,l,2)=accom*w(l)*RhoWall2 &
@@ -1372,12 +1374,12 @@ enddo
                     &       + (1.d0-accom)*fw(j,l,7)
                     ! Store z
                     fw(j,l,1)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f5wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,5)
                     fw(j,l,3)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f7wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,7)
                     ! Borrow the un-used variable to store z for the opposite velocity
                     f(k,l,8)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f6wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,6)
                 Enddo
             CASE (wallWSF) !direction3
                 Do l=1,Nc8
@@ -1391,14 +1393,14 @@ enddo
                     fw(j,l,5)=2.d0*f(k-Nxtotal,l,5)-f(k-2*Nxtotal,l,5)
                     fw(j,l,6)=2.d0*f(k-Nxtotal,l,6)-f(k-2*Nxtotal,l,6)
 
-                    f5wZ(l)=2.d0*f(k+Nxytotal,l,5)-f(k+2*Nxytotal,l,5)
-                    f6wZ(l)=2.d0*f(k+Nxytotal,l,6)-f(k+2*Nxytotal,l,6)
-                    f7wZ(l)=2.d0*f(k+Nxytotal,l,7)-f(k+2*Nxytotal,l,7)
-                    f8wZ(l)=2.d0*f(k+Nxytotal,l,8)-f(k+2*Nxytotal,l,8)
+                    fwZ(l,5)=2.d0*f(k+Nxytotal,l,5)-f(k+2*Nxytotal,l,5)
+                    fwZ(l,6)=2.d0*f(k+Nxytotal,l,6)-f(k+2*Nxytotal,l,6)
+                    fwZ(l,7)=2.d0*f(k+Nxytotal,l,7)-f(k+2*Nxytotal,l,7)
+                    fwZ(l,8)=2.d0*f(k+Nxytotal,l,8)-f(k+2*Nxytotal,l,8)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,1)+f(k,l,4)+f(k,l,5)+f(k,l,8))
                     RhoWall2=RhoWall2+cy(l)*(fw(j,l,1)+fw(j,l,2)+fw(j,l,5)+fw(j,l,6))
-                    RhoWall3=RhoWall3+cz(l)*(f5wZ(l)+f6wZ(l)+f7wZ(l)+f8wZ(l))
+                    RhoWall3=RhoWall3+cz(l)*(fwZ(l,5)+fwZ(l,6)+fwZ(l,7)+fwZ(l,8))
                 Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
@@ -1420,7 +1422,7 @@ enddo
                     &       + (1.d0-accom)*fw(j,l,5)
                     ! Write z
                     f(k,l,1)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f5wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,5)
 
                     ! Store y
                     fw(j,l,3)=accom*w(l)*RhoWall2 &
@@ -1429,12 +1431,12 @@ enddo
                     &       + (1.d0-accom)*fw(j,l,6)
                     ! Store z
                     fw(j,l,2)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f6wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,6)
                     fw(j,l,4)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f8wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,8)
                     ! Borrow the un-used variable to store z for the opposite velocity
                     f(k,l,5)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f7wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,7)
                 Enddo
             CASE (wallESF) !direction4
                 Do l=1,Nc8
@@ -1448,14 +1450,14 @@ enddo
                     fw(j,l,5)=2.d0*f(k-Nxtotal,l,5)-f(k-2*Nxtotal,l,5)
                     fw(j,l,6)=2.d0*f(k-Nxtotal,l,6)-f(k-2*Nxtotal,l,6)
 
-                    f5wZ(l)=2.d0*f(k+Nxytotal,l,5)-f(k+2*Nxytotal,l,5)
-                    f6wZ(l)=2.d0*f(k+Nxytotal,l,6)-f(k+2*Nxytotal,l,6)
-                    f7wZ(l)=2.d0*f(k+Nxytotal,l,7)-f(k+2*Nxytotal,l,7)
-                    f8wZ(l)=2.d0*f(k+Nxytotal,l,8)-f(k+2*Nxytotal,l,8)
+                    fwZ(l,5)=2.d0*f(k+Nxytotal,l,5)-f(k+2*Nxytotal,l,5)
+                    fwZ(l,6)=2.d0*f(k+Nxytotal,l,6)-f(k+2*Nxytotal,l,6)
+                    fwZ(l,7)=2.d0*f(k+Nxytotal,l,7)-f(k+2*Nxytotal,l,7)
+                    fwZ(l,8)=2.d0*f(k+Nxytotal,l,8)-f(k+2*Nxytotal,l,8)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,2)+f(k,l,3)+f(k,l,6)+f(k,l,7))
                     RhoWall2=RhoWall2+cy(l)*(fw(j,l,1)+fw(j,l,2)+fw(j,l,5)+fw(j,l,6))
-                    RhoWall3=RhoWall3+cz(l)*(f5wZ(l)+f6wZ(l)+f7wZ(l)+f8wZ(l))
+                    RhoWall3=RhoWall3+cz(l)*(fwZ(l,5)+fwZ(l,6)+fwZ(l,7)+fwZ(l,8))
                 Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
@@ -1477,7 +1479,7 @@ enddo
                     &       + (1.d0-accom)*fw(j,l,6)
                     ! Write z
                     f(k,l,2)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f6wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,6)
 
                     ! Store y
                     fw(j,l,4)=accom*w(l)*RhoWall2 &
@@ -1486,12 +1488,12 @@ enddo
                     &       + (1.d0-accom)*fw(j,l,5)
                     ! Store z
                     fw(j,l,1)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f5wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,5)
                     fw(j,l,3)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f7wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,7)
                     ! Borrow the un-used variable to store z for the opposite velocity
                     f(k,l,6)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f8wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,8)
                 Enddo
             CASE (wallENB) !direction5
                 Do l=1,Nc8
@@ -1505,14 +1507,14 @@ enddo
                     fw(j,l,7)=2.d0*f(k+Nxtotal,l,7)-f(k+2*Nxtotal,l,7)
                     fw(j,l,8)=2.d0*f(k+Nxtotal,l,8)-f(k+2*Nxtotal,l,8)
 
-                    f1wZ(l)=2.d0*f(k-Nxytotal,l,1)-f(k-2*Nxytotal,l,1)
-                    f2wZ(l)=2.d0*f(k-Nxytotal,l,2)-f(k-2*Nxytotal,l,2)
-                    f3wZ(l)=2.d0*f(k-Nxytotal,l,3)-f(k-2*Nxytotal,l,3)
-                    f4wZ(l)=2.d0*f(k-Nxytotal,l,4)-f(k-2*Nxytotal,l,4)
+                    fwZ(l,1)=2.d0*f(k-Nxytotal,l,1)-f(k-2*Nxytotal,l,1)
+                    fwZ(l,2)=2.d0*f(k-Nxytotal,l,2)-f(k-2*Nxytotal,l,2)
+                    fwZ(l,3)=2.d0*f(k-Nxytotal,l,3)-f(k-2*Nxytotal,l,3)
+                    fwZ(l,4)=2.d0*f(k-Nxytotal,l,4)-f(k-2*Nxytotal,l,4)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,2)+f(k,l,3)+f(k,l,6)+f(k,l,7))
                     RhoWall2=RhoWall2+cy(l)*(fw(j,l,3)+fw(j,l,4)+fw(j,l,7)+fw(j,l,8))
-                    RhoWall3=RhoWall3+cz(l)*(f1wZ(l)+f2wZ(l)+f3wZ(l)+f4wZ(l))
+                    RhoWall3=RhoWall3+cz(l)*(fwZ(l,1)+fwZ(l,2)+fwZ(l,3)+fwZ(l,4))
                 Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
@@ -1534,7 +1536,7 @@ enddo
                     &       + (1.d0-accom)*fw(j,l,7)
                     ! Write z
                     f(k,l,7)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f3wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,3)
 
                     ! Store y
                     fw(j,l,1)=accom*w(l)*RhoWall2 &
@@ -1543,12 +1545,12 @@ enddo
                     &       + (1.d0-accom)*fw(j,l,8)
                     ! Store z
                     fw(j,l,6)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f2wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,2)
                     fw(j,l,8)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f4wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,4)
                     ! Borrow the un-used variable to store z for the opposite velocity
                     f(k,l,3)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f1wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,1)
                 Enddo
             CASE (wallWNB) !direction6
                 Do l=1,Nc8
@@ -1562,14 +1564,14 @@ enddo
                     fw(j,l,7)=2.d0*f(k+Nxtotal,l,7)-f(k+2*Nxtotal,l,7)
                     fw(j,l,8)=2.d0*f(k+Nxtotal,l,8)-f(k+2*Nxtotal,l,8)
 
-                    f1wZ(l)=2.d0*f(k-Nxytotal,l,1)-f(k-2*Nxytotal,l,1)
-                    f2wZ(l)=2.d0*f(k-Nxytotal,l,2)-f(k-2*Nxytotal,l,2)
-                    f3wZ(l)=2.d0*f(k-Nxytotal,l,3)-f(k-2*Nxytotal,l,3)
-                    f4wZ(l)=2.d0*f(k-Nxytotal,l,4)-f(k-2*Nxytotal,l,4)
+                    fwZ(l,1)=2.d0*f(k-Nxytotal,l,1)-f(k-2*Nxytotal,l,1)
+                    fwZ(l,2)=2.d0*f(k-Nxytotal,l,2)-f(k-2*Nxytotal,l,2)
+                    fwZ(l,3)=2.d0*f(k-Nxytotal,l,3)-f(k-2*Nxytotal,l,3)
+                    fwZ(l,4)=2.d0*f(k-Nxytotal,l,4)-f(k-2*Nxytotal,l,4)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,1)+f(k,l,4)+f(k,l,5)+f(k,l,8))
                     RhoWall2=RhoWall2+cy(l)*(fw(j,l,3)+fw(j,l,4)+fw(j,l,7)+fw(j,l,8))
-                    RhoWall3=RhoWall3+cz(l)*(f1wZ(l)+f2wZ(l)+f3wZ(l)+f4wZ(l))
+                    RhoWall3=RhoWall3+cz(l)*(fwZ(l,1)+fwZ(l,2)+fwZ(l,3)+fwZ(l,4))
                 Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
@@ -1591,7 +1593,7 @@ enddo
                     &       + (1.d0-accom)*fw(j,l,8)
                     ! Write z
                     f(k,l,8)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f4wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,4)
 
                     ! Store y
                     fw(j,l,2)=accom*w(l)*RhoWall2 &
@@ -1600,12 +1602,12 @@ enddo
                     &       + (1.d0-accom)*fw(j,l,7)
                     ! Store z
                     fw(j,l,5)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f1wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,1)
                     fw(j,l,7)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f3wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,3)
                     ! Borrow the un-used variable to store z for the opposite velocity
                     f(k,l,4)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f2wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,2)
                 Enddo
             CASE (wallWSB) !direction7
                 Do l=1,Nc8
@@ -1619,14 +1621,14 @@ enddo
                     fw(j,l,5)=2.d0*f(k-Nxtotal,l,5)-f(k-2*Nxtotal,l,5)
                     fw(j,l,6)=2.d0*f(k-Nxtotal,l,6)-f(k-2*Nxtotal,l,6)
 
-                    f1wZ(l)=2.d0*f(k-Nxytotal,l,1)-f(k-2*Nxytotal,l,1)
-                    f2wZ(l)=2.d0*f(k-Nxytotal,l,2)-f(k-2*Nxytotal,l,2)
-                    f3wZ(l)=2.d0*f(k-Nxytotal,l,3)-f(k-2*Nxytotal,l,3)
-                    f4wZ(l)=2.d0*f(k-Nxytotal,l,4)-f(k-2*Nxytotal,l,4)
+                    fwZ(l,1)=2.d0*f(k-Nxytotal,l,1)-f(k-2*Nxytotal,l,1)
+                    fwZ(l,2)=2.d0*f(k-Nxytotal,l,2)-f(k-2*Nxytotal,l,2)
+                    fwZ(l,3)=2.d0*f(k-Nxytotal,l,3)-f(k-2*Nxytotal,l,3)
+                    fwZ(l,4)=2.d0*f(k-Nxytotal,l,4)-f(k-2*Nxytotal,l,4)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,1)+f(k,l,4)+f(k,l,5)+f(k,l,8))
                     RhoWall2=RhoWall2+cy(l)*(fw(j,l,1)+fw(j,l,2)+fw(j,l,5)+fw(j,l,6))
-                    RhoWall3=RhoWall3+cz(l)*(f1wZ(l)+f2wZ(l)+f3wZ(l)+f4wZ(l))
+                    RhoWall3=RhoWall3+cz(l)*(fwZ(l,1)+fwZ(l,2)+fwZ(l,3)+fwZ(l,4))
                 Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
@@ -1648,7 +1650,7 @@ enddo
                     &       + (1.d0-accom)*fw(j,l,5)
                     ! Write z
                     f(k,l,5)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f1wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,1)
 
                     ! Store y
                     fw(j,l,3)=accom*w(l)*RhoWall2 &
@@ -1657,12 +1659,12 @@ enddo
                     &       + (1.d0-accom)*fw(j,l,6)
                     ! Store z
                     fw(j,l,6)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f2wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,2)
                     fw(j,l,8)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f4wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,4)
                     ! Borrow the un-used variable to store z for the opposite velocity
                     f(k,l,1)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f3wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,3)
                 Enddo
             CASE (wallESB) !direction8
                 Do l=1,Nc8
@@ -1676,14 +1678,14 @@ enddo
                     fw(j,l,5)=2.d0*f(k-Nxtotal,l,5)-f(k-2*Nxtotal,l,5)
                     fw(j,l,6)=2.d0*f(k-Nxtotal,l,6)-f(k-2*Nxtotal,l,6)
 
-                    f1wZ(l)=2.d0*f(k-Nxytotal,l,1)-f(k-2*Nxytotal,l,1)
-                    f2wZ(l)=2.d0*f(k-Nxytotal,l,2)-f(k-2*Nxytotal,l,2)
-                    f3wZ(l)=2.d0*f(k-Nxytotal,l,3)-f(k-2*Nxytotal,l,3)
-                    f4wZ(l)=2.d0*f(k-Nxytotal,l,4)-f(k-2*Nxytotal,l,4)
+                    fwZ(l,1)=2.d0*f(k-Nxytotal,l,1)-f(k-2*Nxytotal,l,1)
+                    fwZ(l,2)=2.d0*f(k-Nxytotal,l,2)-f(k-2*Nxytotal,l,2)
+                    fwZ(l,3)=2.d0*f(k-Nxytotal,l,3)-f(k-2*Nxytotal,l,3)
+                    fwZ(l,4)=2.d0*f(k-Nxytotal,l,4)-f(k-2*Nxytotal,l,4)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,2)+f(k,l,3)+f(k,l,6)+f(k,l,7))
                     RhoWall2=RhoWall2+cy(l)*(fw(j,l,1)+fw(j,l,2)+fw(j,l,5)+fw(j,l,6))
-                    RhoWall3=RhoWall3+cz(l)*(f1wZ(l)+f2wZ(l)+f3wZ(l)+f4wZ(l))
+                    RhoWall3=RhoWall3+cz(l)*(fwZ(l,1)+fwZ(l,2)+fwZ(l,3)+fwZ(l,4))
                 Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
@@ -1705,7 +1707,7 @@ enddo
                     &       + (1.d0-accom)*fw(j,l,6)
                     ! Write z
                     f(k,l,6)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f2wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,2)
 
                     ! Store y
                     fw(j,l,4)=accom*w(l)*RhoWall2 &
@@ -1714,12 +1716,12 @@ enddo
                     &       + (1.d0-accom)*fw(j,l,5)
                     ! Store z
                     fw(j,l,5)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f1wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,1)
                     fw(j,l,7)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f3wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,3)
                     ! Borrow the un-used variable to store z for the opposite velocity
                     f(k,l,2)=accom*w(l)*RhoWall3 &
-                    &       + (1.d0-accom)*f4wZ(l)
+                    &       + (1.d0-accom)*fwZ(l,4)
                 Enddo
         END SELECT
     End do

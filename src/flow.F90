@@ -81,6 +81,7 @@ contains
         backRcvSize = Nxtotal*Nytotal*ghostLayers*Nc + backN3corner_rcv*Nc
         frntSndSize = Nxtotal*Nytotal*ghostLayers*Nc + frntN3corner_snd*Nc
         frntRcvSize = Nxtotal*Nytotal*ghostLayers*Nc + frntN3corner_rcv*Nc
+        
         ! Allocate the buffer
         allocate( f_west_snd(westSndSize) )
         allocate( f_west_rcv(westRcvSize) )

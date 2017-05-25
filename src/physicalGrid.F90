@@ -90,6 +90,12 @@ integer :: nothN3corner_snd, suthN3corner_snd
 integer :: nothN3corner_rcv, suthN3corner_rcv
 integer :: frntN3corner_snd, backN3corner_snd
 integer :: frntN3corner_rcv, backN3corner_rcv
+! number of 3-fold corners in the global ghostLayers 
+! if we copy the obbsite periodical flag info into them
+integer :: westGlbN3corner_rcv, eastGlbN3corner_rcv
+integer :: suthGlbN3corner_rcv, nothGlbN3corner_rcv
+integer :: backGlbN3corner_rcv, frntGlbN3corner_rcv
+
 
 contains 
     ! should be called after calling MPIParams::setupVirtualProcessGrid
@@ -284,6 +290,17 @@ contains
             enddo
         enddo
 
+        ! Temperorily set the ghost node to the periodical conterpart
+        ! to count the 3-fold corner nodes in rcv layers.
+        ! MPI_Waitall require the snd and rcv buffer sizes to be the same
+        ! even though the Y and Z direction is not periodical 
+        !array3Dg(xmin-2:xmin-1,:,:) = array3Dg(xmax-1:xmax,:,:)
+        !array3Dg(xmax+1:xmax+2,:,:) = array3Dg(xmin-2:xmin-1,:,:)
+        !array3Dg(:,ymin-2:ymin-1,:) = array3Dg(:,ymax-1:ymax,:)
+        !array3Dg(:,ymax+1:ymax+2,:) = array3Dg(:,ymin-2:ymin-1,:)
+        !array3Dg(:,:,zmin-2:zmin-1) = array3Dg(:,:,zmax:zmax-1)
+        !array3Dg(:,:,zmax+1:zmax+2) = array3Dg(:,:,zmin-2:zmin-1)
+        
         ! set local image
         image = fluid
         bxl = xlg
@@ -492,9 +509,9 @@ contains
                                 westN3corner_rcv = westN3corner_rcv + 1
                             elseif (i.gt.xu) then
                                 eastN3corner_rcv = eastN3corner_rcv + 1
-                            elseif (i.ge.xl .and. (i.le.(xl+ghostLayers))) then
+                            elseif (i.ge.xl .and. (i.lt.(xl+ghostLayers))) then
                                 westN3corner_snd = westN3corner_snd + 1
-                            elseif (i.le.xu .and. (i.ge.(xu-ghostLayers))) then
+                            elseif (i.le.xu .and. (i.gt.(xu-ghostLayers))) then
                                 eastN3corner_snd = eastN3corner_snd + 1
                             endif
 
@@ -502,9 +519,9 @@ contains
                                 suthN3corner_rcv = suthN3corner_rcv + 1
                             elseif (j.gt.yu) then
                                 nothN3corner_rcv = nothN3corner_rcv + 1
-                            elseif (j.ge.yl .and. (j.le.(yl+ghostLayers))) then
+                            elseif (j.ge.yl .and. (j.lt.(yl+ghostLayers))) then
                                 suthN3corner_snd = suthN3corner_snd + 1
-                            elseif (j.le.yu .and. (j.ge.(yu-ghostLayers))) then
+                            elseif (j.le.yu .and. (j.gt.(yu-ghostLayers))) then
                                 nothN3corner_snd = nothN3corner_snd + 1
                             endif
 
@@ -512,19 +529,71 @@ contains
                                 backN3corner_rcv = backN3corner_rcv + 1
                             elseif (k.gt.zu) then
                                 frntN3corner_rcv = frntN3corner_rcv + 1
-                            elseif (k.ge.zl .and. (k.le.(zl+ghostLayers))) then
+                            elseif (k.ge.zl .and. (k.lt.(zl+ghostLayers))) then
                                 backN3corner_snd = backN3corner_snd + 1
-                            elseif (k.le.zu .and. (k.ge.(zu-ghostLayers))) then
+                            elseif (k.le.zu .and. (k.gt.(zu-ghostLayers))) then
                                 frntN3corner_snd = frntN3corner_snd + 1
                             endif
-
                         endif
                     endif
                 enddo
             enddo
-        enddo                           
+        enddo
 
         ALLOCATE(fw(nCorner, Nc8,1:8))
+
+
+        ! correct the number of boundary processors' N3corner
+        ! MPI_Waitall require the snd and rcv buffer sizes to be the same
+        ! even though the Y and Z direction is not periodical
+        westGlbN3corner_rcv = 0
+        eastGlbN3corner_rcv = 0
+        suthGlbN3corner_rcv = 0
+        nothGlbN3corner_rcv = 0
+        backGlbN3corner_rcv = 0
+        frntGlbN3corner_rcv = 0
+        do k=zlg,zug
+            do j=ylg,yug
+                do i=1,ghostLayers
+                    if(any(only3CornerLabels(:) == image(xl+i-1,j,k))) then
+                        eastGlbN3corner_rcv = eastGlbN3corner_rcv+1
+                    endif
+                    if(any(only3CornerLabels(:) == image(xu-2+i,j,k))) then
+                        westGlbN3corner_rcv = westGlbN3corner_rcv+1
+                    endif
+                enddo
+            enddo
+        enddo
+        do k=zlg,zug
+            do j=1,ghostLayers
+                do i=xlg,xug
+                    if(any(only3CornerLabels(:) == image(i,yl+j-1,k))) then
+                        nothGlbN3corner_rcv = nothGlbN3corner_rcv+1
+                    endif
+                    if(any(only3CornerLabels(:) == image(i,yu-2+j,k))) then
+                        suthGlbN3corner_rcv = suthGlbN3corner_rcv+1
+                    endif
+                enddo
+            enddo
+        enddo
+        do k=1,ghostLayers
+            do j=ylg,yug
+                do i=xlg,xug
+                    if(any(only3CornerLabels(:) == image(i,j,zl+k-1))) then
+                        frntGlbN3corner_rcv = frntGlbN3corner_rcv+1
+                    endif
+                    if(any(only3CornerLabels(:) == image(i,j,zu-2+k))) then
+                        backGlbN3corner_rcv = backGlbN3corner_rcv+1
+                    endif
+                enddo
+            enddo
+        enddo
+        if(xl == xmin) westN3corner_rcv = westGlbN3corner_rcv
+        if(xu == xmax) eastN3corner_rcv = eastGlbN3corner_rcv
+        if(yl == ymin) suthN3corner_rcv = suthGlbN3corner_rcv
+        if(yu == ymax) nothN3corner_rcv = nothGlbN3corner_rcv
+        if(zl == zmin) backN3corner_rcv = backGlbN3corner_rcv
+        if(zu == zmax) frntN3corner_rcv = frntGlbN3corner_rcv
 
         !Direction 1
         bxl = xl
