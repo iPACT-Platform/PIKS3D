@@ -42,6 +42,10 @@ module solver
         yfsize = Nxtotal*Nztotal*Nc*ghostLayers
         zfsize = Nxtotal*Nytotal*Nc*ghostLayers
 
+        MPI_REQ_X = MPI_REQUEST_NULL
+        MPI_REQ_Y = MPI_REQUEST_NULL
+        MPI_REQ_Z = MPI_REQUEST_NULL
+
 !$OMP PARALLEL &
 !$OMP DEFAULT(SHARED) &
 !$OMP PRIVATE(l, i, j, k, ii, jj, kk, fEq, RhoWall, RhoWall2, RhoWall3)&
@@ -431,7 +435,7 @@ module solver
             & )/(0.5d0*mu+cx(l)*coef8(i,1)-cy(l)*coef8(i,4)-cz(l)*coef8(i,7))
         End do
     End do
-!$OMP END DO NOWAIT
+!$OMP END DO 
 
 !$OMP SINGLE
         ! Wait until send and recv done
