@@ -67,6 +67,30 @@ integer, parameter:: only3CornerLabels(8) = (/ &
     wallENF, wallWNF, wallWSF, wallESF, &
     wallENB, wallWNB, wallWSB, wallESB /)
 
+integer, parameter:: wallHasW(9) = (/ &
+    wallW, wallWN, wallWS, wallWF, wallWB, &
+    wallWNF, wallWSF, wallWNB, wallWSB/)
+
+integer, parameter:: wallHasE(9) = (/ &
+    wallE, wallEN, wallES, wallEF, wallEB, &
+    wallENF, wallESF, wallENB, wallESB/)
+
+integer, parameter:: wallHasS(9) = (/ &
+    wallS, wallES, wallWS, wallSF, wallSB, &
+    wallWSF, wallESF, wallWSB, wallESB/)
+
+integer, parameter:: wallHasN(9) = (/ &
+    wallN, wallEN, wallWN, wallNF, wallNB, &
+    wallWNF, wallENF, wallWNB, wallENB/)
+
+integer, parameter:: wallHasB(9) = (/ &
+    wallB, wallNB, wallSB, wallEB, wallWB, &
+    wallENB, wallWNB, wallWSB, wallESB/)
+
+integer, parameter:: wallHasF(9) = (/ &
+    wallF, wallNF, wallSF, wallEF, wallWF, &
+    wallENF, wallWNF, wallWSF, wallESF/)
+
 integer :: Nstencil1, Nstencil2, Nstencil3, Nstencil4 !(group 1-4)
 integer :: Nstencil5, Nstencil6, Nstencil7, Nstencil8 !(group 5-8)
 
@@ -82,6 +106,8 @@ integer, DIMENSION(:,:), ALLOCATABLE :: dir1, dir2, &
 double precision, DIMENSION(:,:), ALLOCATABLE :: coef1, coef2, coef3, coef4, &
     coef5, coef6, coef7, coef8
 double precision, DIMENSION(:,:,:), ALLOCATABLE :: fw
+! extrapolation coefficient for all wall points
+double precision, DIMENSION(:,:), ALLOCATABLE :: extCoef
 
 ! number of 3-fold corners to send/recv at each sides of the sub-domain
 integer :: westN3corner_snd, eastN3corner_snd
@@ -107,7 +133,7 @@ contains
         ! local vars
         integer :: localid, i, j, k, icount, countVoidP, NneighborFluid
         integer :: bxl, bxu, byl, byu, bzl, bzu ! bound when counting fluid point for sweeping
-        integer :: ii, jj, kk
+        integer :: ii, jj, kk, l
         integer :: nCorner
         character(kind=1) :: ctemp
 
@@ -261,22 +287,22 @@ contains
         ! NOTE: O type wall points need to be change to fluid
         !       The same role applys to Y/Z commu. boundary
         !-----------------------------------------------------------------
-        ! do k=zl,zu
-        !   do j=yl,yu
-        !     do i=xl,xu
-        !       if(array3Dg(i,j,k) == solid) then
-        !         if ( (k==(zl+1) .and. array3Dg(i,j,k-1)==fluid) &
-        !         .or. (k==(zu-1) .and. array3Dg(i,j,k+1)==fluid) &
-        !         .or. (j==(yl+1) .and. array3Dg(i,j-1,k)==fluid) &
-        !         .or. (j==(yu-1) .and. array3Dg(i,j+1,k)==fluid) &
-        !         .or. (i==(xl+1) .and. array3Dg(i-1,j,k)==fluid) &
-        !         .or. (i==(xu-1) .and. array3Dg(i+1,j,k)==fluid) ) then
-        !           array3Dg(i,j,k) = fluid
-        !         endif
-        !       endif
-        !     enddo
-        !   enddo
-        ! enddo
+        !do k=zl,zu
+        !  do j=yl,yu
+        !    do i=xl,xu
+        !      if(array3Dg(i,j,k) == solid) then
+        !        if ( (k==(zl+1) .and. array3Dg(i,j,k-1)==fluid) &
+        !        .or. (k==(zu-1) .and. array3Dg(i,j,k+1)==fluid) &
+        !        .or. (j==(yl+1) .and. array3Dg(i,j-1,k)==fluid) &
+        !        .or. (j==(yu-1) .and. array3Dg(i,j+1,k)==fluid) &
+        !        .or. (i==(xl+1) .and. array3Dg(i-1,j,k)==fluid) &
+        !        .or. (i==(xu-1) .and. array3Dg(i+1,j,k)==fluid) ) then
+        !          array3Dg(i,j,k) = fluid
+        !        endif
+        !      endif
+        !    enddo
+        !  enddo
+        !enddo
 
 
         !-----------------------------------------------------------------
@@ -290,17 +316,6 @@ contains
             enddo
         enddo
 
-        ! Temperorily set the ghost node to the periodical conterpart
-        ! to count the 3-fold corner nodes in rcv layers.
-        ! MPI_Waitall require the snd and rcv buffer sizes to be the same
-        ! even though the Y and Z direction is not periodical 
-        !array3Dg(xmin-2:xmin-1,:,:) = array3Dg(xmax-1:xmax,:,:)
-        !array3Dg(xmax+1:xmax+2,:,:) = array3Dg(xmin-2:xmin-1,:,:)
-        !array3Dg(:,ymin-2:ymin-1,:) = array3Dg(:,ymax-1:ymax,:)
-        !array3Dg(:,ymax+1:ymax+2,:) = array3Dg(:,ymin-2:ymin-1,:)
-        !array3Dg(:,:,zmin-2:zmin-1) = array3Dg(:,:,zmax:zmax-1)
-        !array3Dg(:,:,zmax+1:zmax+2) = array3Dg(:,:,zmin-2:zmin-1)
-        
         ! set local image
         image = fluid
         bxl = xlg
@@ -474,6 +489,7 @@ contains
         !vecWall(walli) mark the global id of the walli'th wall in the image
         ALLOCATE(vecWall(nWall))
 
+
         nWall=0
         nCorner=0
 
@@ -594,6 +610,66 @@ contains
         if(yu == ymax) nothN3corner_rcv = nothGlbN3corner_rcv
         if(zl == zmin) backN3corner_rcv = backGlbN3corner_rcv
         if(zu == zmax) frntN3corner_rcv = frntGlbN3corner_rcv
+
+        ! allocate the array for wall extrapolation coefficient
+        ALLOCATE(extCoef(nWall,2))
+        ! default 2nd order
+        extCoef(:, 1) =  2.d0
+        extCoef(:, 2) = -1.d0
+        do l=1, nWall
+            localid = vecWall(l)
+            k = zlg + localid/Nxytotal
+            j = ylg + (localid - (k-zlg)*Nxytotal)/Nytotal
+            i = xlg + localid - (k-zlg)*Nxytotal - (j-ylg)*Nytotal
+            if(any(wallHasW(:) == image(i,j,k))) then
+                if(i==xl+1 .and. image(xl,j,k) == fluid) then
+                    extCoef(l,1) = 1.d0
+                    extCoef(l,2) = 0.d0
+                endif
+            endif
+            if(any(wallHasE(:) == image(i,j,k))) then
+                if(i==xu-1 .and. image(xu,j,k) == fluid) then
+                    extCoef(l,1) = 1.d0
+                    extCoef(l,2) = 0.d0
+                endif
+            endif
+            if(any(wallHasS(:) == image(i,j,k))) then
+                if(j==yl+1 .and. image(i,yl,k) == fluid) then
+                    extCoef(l,1) = 1.d0
+                    extCoef(l,2) = 0.d0
+                endif
+            endif
+            if(any(wallHasN(:) == image(i,j,k))) then
+                if(j==yu-1 .and. image(i,yu,k) == fluid) then
+                    extCoef(l,1) = 1.d0
+                    extCoef(l,2) = 0.d0
+                endif
+            endif
+            if(any(wallHasB(:) == image(i,j,k))) then
+                if(k==zl+1 .and. image(i,j,zl) == fluid) then
+                    extCoef(l,1) = 1.d0
+                    extCoef(l,2) = 0.d0
+                endif
+            endif
+            if(any(wallHasF(:) == image(i,j,k))) then
+                if(k==zu-1 .and. image(i,j,zu) == fluid) then
+                    extCoef(l,1) = 1.d0
+                    extCoef(l,2) = 0.d0
+                endif
+            endif
+        enddo
+
+        if(wallExtOrder == 2) then
+            ! reset to 2nd order
+            extCoef(:, 1) =  2.d0
+            extCoef(:, 2) = -1.d0
+        elseif (wallExtOrder == 1) then
+            ! reset to 1st order
+            extCoef(:, 1) =  1.d0
+            extCoef(:, 2) =  0.d0
+        elseif (wallExtOrder /= 3) then
+            PRINT*, "Error: wallExtOrder wroond shoud be [1|2|3]"
+        endif
 
         !Direction 1
         bxl = xl

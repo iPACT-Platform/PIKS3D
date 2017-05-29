@@ -677,10 +677,10 @@ enddo
         SELECT CASE (image(ii,jj,kk))
             CASE (wallE)
                 Do l=1,Nc8
-                    f(k,l,2)=2.d0*f(k+1,l,2)-f(k+2,l,2)
-                    f(k,l,3)=2.d0*f(k+1,l,3)-f(k+2,l,3)
-                    f(k,l,6)=2.d0*f(k+1,l,6)-f(k+2,l,6)
-                    f(k,l,7)=2.d0*f(k+1,l,7)-f(k+2,l,7)
+                    f(k,l,2)=extCoef(i,1)*f(k+1,l,2)+extCoef(i,2)*f(k+2,l,2)
+                    f(k,l,3)=extCoef(i,1)*f(k+1,l,3)+extCoef(i,2)*f(k+2,l,3)
+                    f(k,l,6)=extCoef(i,1)*f(k+1,l,6)+extCoef(i,2)*f(k+2,l,6)
+                    f(k,l,7)=extCoef(i,1)*f(k+1,l,7)+extCoef(i,2)*f(k+2,l,7)
                     RhoWall=RhoWall+cx(l)*(f(k,l,2)+f(k,l,3)+f(k,l,6)+f(k,l,7))
                 Enddo
                 RhoWall=RhoWall/DiffFlux
@@ -696,10 +696,10 @@ enddo
                 Enddo
             CASE (wallW)
                 Do l=1,Nc8
-                    f(k,l,1)=2.d0*f(k-1,l,1)-f(k-2,l,1)
-                    f(k,l,4)=2.d0*f(k-1,l,4)-f(k-2,l,4)
-                    f(k,l,5)=2.d0*f(k-1,l,5)-f(k-2,l,5)
-                    f(k,l,8)=2.d0*f(k-1,l,8)-f(k-2,l,8)
+                    f(k,l,1)=extCoef(i,1)*f(k-1,l,1)+extCoef(i,2)*f(k-2,l,1)
+                    f(k,l,4)=extCoef(i,1)*f(k-1,l,4)+extCoef(i,2)*f(k-2,l,4)
+                    f(k,l,5)=extCoef(i,1)*f(k-1,l,5)+extCoef(i,2)*f(k-2,l,5)
+                    f(k,l,8)=extCoef(i,1)*f(k-1,l,8)+extCoef(i,2)*f(k-2,l,8)
                     RhoWall=RhoWall+cx(l)*(f(k,l,1)+f(k,l,4)+f(k,l,5)+f(k,l,8))
                 Enddo
                 RhoWall=RhoWall/DiffFlux
@@ -715,10 +715,10 @@ enddo
                 Enddo
             CASE (wallN)
                 Do l=1,Nc8
-                    f(k,l,3)=2.d0*f(k+Nxtotal,l,3)-f(k+2*Nxtotal,l,3)
-                    f(k,l,4)=2.d0*f(k+Nxtotal,l,4)-f(k+2*Nxtotal,l,4)
-                    f(k,l,7)=2.d0*f(k+Nxtotal,l,7)-f(k+2*Nxtotal,l,7)
-                    f(k,l,8)=2.d0*f(k+Nxtotal,l,8)-f(k+2*Nxtotal,l,8)
+                    f(k,l,3)=extCoef(i,1)*f(k+Nxtotal,l,3)+extCoef(i,2)*f(k+2*Nxtotal,l,3)
+                    f(k,l,4)=extCoef(i,1)*f(k+Nxtotal,l,4)+extCoef(i,2)*f(k+2*Nxtotal,l,4)
+                    f(k,l,7)=extCoef(i,1)*f(k+Nxtotal,l,7)+extCoef(i,2)*f(k+2*Nxtotal,l,7)
+                    f(k,l,8)=extCoef(i,1)*f(k+Nxtotal,l,8)+extCoef(i,2)*f(k+2*Nxtotal,l,8)
                     RhoWall=RhoWall+cy(l)*(f(k,l,3)+f(k,l,4)+f(k,l,7)+f(k,l,8))
                 Enddo
                 RhoWall=RhoWall/DiffFlux
@@ -734,10 +734,10 @@ enddo
                 Enddo
             CASE (wallS)
                 Do l=1,Nc8
-                    f(k,l,1)=2.d0*f(k-Nxtotal,l,1)-f(k-2*Nxtotal,l,1)
-                    f(k,l,2)=2.d0*f(k-Nxtotal,l,2)-f(k-2*Nxtotal,l,2)
-                    f(k,l,5)=2.d0*f(k-Nxtotal,l,5)-f(k-2*Nxtotal,l,5)
-                    f(k,l,6)=2.d0*f(k-Nxtotal,l,6)-f(k-2*Nxtotal,l,6)
+                    f(k,l,1)=extCoef(i,1)*f(k-Nxtotal,l,1)+extCoef(i,2)*f(k-2*Nxtotal,l,1)
+                    f(k,l,2)=extCoef(i,1)*f(k-Nxtotal,l,2)+extCoef(i,2)*f(k-2*Nxtotal,l,2)
+                    f(k,l,5)=extCoef(i,1)*f(k-Nxtotal,l,5)+extCoef(i,2)*f(k-2*Nxtotal,l,5)
+                    f(k,l,6)=extCoef(i,1)*f(k-Nxtotal,l,6)+extCoef(i,2)*f(k-2*Nxtotal,l,6)
                     RhoWall=RhoWall+cy(l)*(f(k,l,1)+f(k,l,2)+f(k,l,5)+f(k,l,6))
                 Enddo
                 RhoWall=RhoWall/DiffFlux
@@ -753,10 +753,10 @@ enddo
                 Enddo
             CASE (wallF)
                 Do l=1,Nc8
-                    f(k,l,5)=2.d0*f(k+Nxytotal,l,5)-f(k+2*Nxytotal,l,5)
-                    f(k,l,6)=2.d0*f(k+Nxytotal,l,6)-f(k+2*Nxytotal,l,6)
-                    f(k,l,7)=2.d0*f(k+Nxytotal,l,7)-f(k+2*Nxytotal,l,7)
-                    f(k,l,8)=2.d0*f(k+Nxytotal,l,8)-f(k+2*Nxytotal,l,8)
+                    f(k,l,5)=extCoef(i,1)*f(k+Nxytotal,l,5)+extCoef(i,2)*f(k+2*Nxytotal,l,5)
+                    f(k,l,6)=extCoef(i,1)*f(k+Nxytotal,l,6)+extCoef(i,2)*f(k+2*Nxytotal,l,6)
+                    f(k,l,7)=extCoef(i,1)*f(k+Nxytotal,l,7)+extCoef(i,2)*f(k+2*Nxytotal,l,7)
+                    f(k,l,8)=extCoef(i,1)*f(k+Nxytotal,l,8)+extCoef(i,2)*f(k+2*Nxytotal,l,8)
                     RhoWall=RhoWall+cz(l)*(f(k,l,5)+f(k,l,6)+f(k,l,7)+f(k,l,8))
                 Enddo
                 RhoWall=RhoWall/DiffFlux
@@ -772,10 +772,10 @@ enddo
                 Enddo
             CASE (wallB)
                 Do l=1,Nc8
-                    f(k,l,1)=2.d0*f(k-Nxytotal,l,1)-f(k-2*Nxytotal,l,1)
-                    f(k,l,2)=2.d0*f(k-Nxytotal,l,2)-f(k-2*Nxytotal,l,2)
-                    f(k,l,3)=2.d0*f(k-Nxytotal,l,3)-f(k-2*Nxytotal,l,3)
-                    f(k,l,4)=2.d0*f(k-Nxytotal,l,4)-f(k-2*Nxytotal,l,4)
+                    f(k,l,1)=extCoef(i,1)*f(k-Nxytotal,l,1)+extCoef(i,2)*f(k-2*Nxytotal,l,1)
+                    f(k,l,2)=extCoef(i,1)*f(k-Nxytotal,l,2)+extCoef(i,2)*f(k-2*Nxytotal,l,2)
+                    f(k,l,3)=extCoef(i,1)*f(k-Nxytotal,l,3)+extCoef(i,2)*f(k-2*Nxytotal,l,3)
+                    f(k,l,4)=extCoef(i,1)*f(k-Nxytotal,l,4)+extCoef(i,2)*f(k-2*Nxytotal,l,4)
                     RhoWall=RhoWall+cz(l)*(f(k,l,1)+f(k,l,2)+f(k,l,3)+f(k,l,4))
                 Enddo
                 RhoWall=RhoWall/DiffFlux
@@ -797,15 +797,15 @@ enddo
 !------------------------------------------------------------------------
             CASE (wallEN)
                 Do l=1,Nc8
-                    f(k,l,2)=2.d0*f(k+1,l,2)-f(k+2,l,2)
-                    f(k,l,3)=2.d0*f(k+1,l,3)-f(k+2,l,3)
-                    f(k,l,6)=2.d0*f(k+1,l,6)-f(k+2,l,6)
-                    f(k,l,7)=2.d0*f(k+1,l,7)-f(k+2,l,7)
+                    f(k,l,2)=extCoef(i,1)*f(k+1,l,2)+extCoef(i,2)*f(k+2,l,2)
+                    f(k,l,3)=extCoef(i,1)*f(k+1,l,3)+extCoef(i,2)*f(k+2,l,3)
+                    f(k,l,6)=extCoef(i,1)*f(k+1,l,6)+extCoef(i,2)*f(k+2,l,6)
+                    f(k,l,7)=extCoef(i,1)*f(k+1,l,7)+extCoef(i,2)*f(k+2,l,7)
 
-                    fwZ(l,3)=2.d0*f(k+Nxtotal,l,3)-f(k+2*Nxtotal,l,3)
-                    fwZ(l,4)=2.d0*f(k+Nxtotal,l,4)-f(k+2*Nxtotal,l,4)
-                    fwZ(l,7)=2.d0*f(k+Nxtotal,l,7)-f(k+2*Nxtotal,l,7)
-                    fwZ(l,8)=2.d0*f(k+Nxtotal,l,8)-f(k+2*Nxtotal,l,8)
+                    fwZ(l,3)=extCoef(i,1)*f(k+Nxtotal,l,3)+extCoef(i,2)*f(k+2*Nxtotal,l,3)
+                    fwZ(l,4)=extCoef(i,1)*f(k+Nxtotal,l,4)+extCoef(i,2)*f(k+2*Nxtotal,l,4)
+                    fwZ(l,7)=extCoef(i,1)*f(k+Nxtotal,l,7)+extCoef(i,2)*f(k+2*Nxtotal,l,7)
+                    fwZ(l,8)=extCoef(i,1)*f(k+Nxtotal,l,8)+extCoef(i,2)*f(k+2*Nxtotal,l,8)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,2)+f(k,l,3)+f(k,l,6)+f(k,l,7))
                     RhoWall2=RhoWall2+cy(l)*(fwZ(l,3)+fwZ(l,4)+fwZ(l,7)+fwZ(l,8))
@@ -836,15 +836,15 @@ enddo
 
             CASE (wallWN)
                 Do l=1,Nc8
-                    f(k,l,1)=2.d0*f(k-1,l,1)-f(k-2,l,1)
-                    f(k,l,4)=2.d0*f(k-1,l,4)-f(k-2,l,4)
-                    f(k,l,5)=2.d0*f(k-1,l,5)-f(k-2,l,5)
-                    f(k,l,8)=2.d0*f(k-1,l,8)-f(k-2,l,8)
+                    f(k,l,1)=extCoef(i,1)*f(k-1,l,1)+extCoef(i,2)*f(k-2,l,1)
+                    f(k,l,4)=extCoef(i,1)*f(k-1,l,4)+extCoef(i,2)*f(k-2,l,4)
+                    f(k,l,5)=extCoef(i,1)*f(k-1,l,5)+extCoef(i,2)*f(k-2,l,5)
+                    f(k,l,8)=extCoef(i,1)*f(k-1,l,8)+extCoef(i,2)*f(k-2,l,8)
 
-                    fwZ(l,3)=2.d0*f(k+Nxtotal,l,3)-f(k+2*Nxtotal,l,3)
-                    fwZ(l,4)=2.d0*f(k+Nxtotal,l,4)-f(k+2*Nxtotal,l,4)
-                    fwZ(l,7)=2.d0*f(k+Nxtotal,l,7)-f(k+2*Nxtotal,l,7)
-                    fwZ(l,8)=2.d0*f(k+Nxtotal,l,8)-f(k+2*Nxtotal,l,8)
+                    fwZ(l,3)=extCoef(i,1)*f(k+Nxtotal,l,3)+extCoef(i,2)*f(k+2*Nxtotal,l,3)
+                    fwZ(l,4)=extCoef(i,1)*f(k+Nxtotal,l,4)+extCoef(i,2)*f(k+2*Nxtotal,l,4)
+                    fwZ(l,7)=extCoef(i,1)*f(k+Nxtotal,l,7)+extCoef(i,2)*f(k+2*Nxtotal,l,7)
+                    fwZ(l,8)=extCoef(i,1)*f(k+Nxtotal,l,8)+extCoef(i,2)*f(k+2*Nxtotal,l,8)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,1)+f(k,l,4)+f(k,l,5)+f(k,l,8))
                     RhoWall2=RhoWall2+cy(l)*(fwZ(l,3)+fwZ(l,4)+fwZ(l,7)+fwZ(l,8))
@@ -876,15 +876,15 @@ enddo
 
             CASE (wallES)
                 Do l=1,Nc8
-                    f(k,l,2)=2.d0*f(k+1,l,2)-f(k+2,l,2)
-                    f(k,l,3)=2.d0*f(k+1,l,3)-f(k+2,l,3)
-                    f(k,l,6)=2.d0*f(k+1,l,6)-f(k+2,l,6)
-                    f(k,l,7)=2.d0*f(k+1,l,7)-f(k+2,l,7)
+                    f(k,l,2)=extCoef(i,1)*f(k+1,l,2)+extCoef(i,2)*f(k+2,l,2)
+                    f(k,l,3)=extCoef(i,1)*f(k+1,l,3)+extCoef(i,2)*f(k+2,l,3)
+                    f(k,l,6)=extCoef(i,1)*f(k+1,l,6)+extCoef(i,2)*f(k+2,l,6)
+                    f(k,l,7)=extCoef(i,1)*f(k+1,l,7)+extCoef(i,2)*f(k+2,l,7)
 
-                    fwZ(l,1)=2.d0*f(k-Nxtotal,l,1)-f(k-2*Nxtotal,l,1)
-                    fwZ(l,2)=2.d0*f(k-Nxtotal,l,2)-f(k-2*Nxtotal,l,2)
-                    fwZ(l,5)=2.d0*f(k-Nxtotal,l,5)-f(k-2*Nxtotal,l,5)
-                    fwZ(l,6)=2.d0*f(k-Nxtotal,l,6)-f(k-2*Nxtotal,l,6)
+                    fwZ(l,1)=extCoef(i,1)*f(k-Nxtotal,l,1)+extCoef(i,2)*f(k-2*Nxtotal,l,1)
+                    fwZ(l,2)=extCoef(i,1)*f(k-Nxtotal,l,2)+extCoef(i,2)*f(k-2*Nxtotal,l,2)
+                    fwZ(l,5)=extCoef(i,1)*f(k-Nxtotal,l,5)+extCoef(i,2)*f(k-2*Nxtotal,l,5)
+                    fwZ(l,6)=extCoef(i,1)*f(k-Nxtotal,l,6)+extCoef(i,2)*f(k-2*Nxtotal,l,6)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,2)+f(k,l,3)+f(k,l,6)+f(k,l,7))
                     RhoWall2=RhoWall2+cy(l)*(fwZ(l,1)+fwZ(l,2)+fwZ(l,5)+fwZ(l,6))
@@ -915,15 +915,15 @@ enddo
 
             CASE (wallWS)
                 Do l=1,Nc8
-                    f(k,l,1)=2.d0*f(k-1,l,1)-f(k-2,l,1)
-                    f(k,l,4)=2.d0*f(k-1,l,4)-f(k-2,l,4)
-                    f(k,l,5)=2.d0*f(k-1,l,5)-f(k-2,l,5)
-                    f(k,l,8)=2.d0*f(k-1,l,8)-f(k-2,l,8)
+                    f(k,l,1)=extCoef(i,1)*f(k-1,l,1)+extCoef(i,2)*f(k-2,l,1)
+                    f(k,l,4)=extCoef(i,1)*f(k-1,l,4)+extCoef(i,2)*f(k-2,l,4)
+                    f(k,l,5)=extCoef(i,1)*f(k-1,l,5)+extCoef(i,2)*f(k-2,l,5)
+                    f(k,l,8)=extCoef(i,1)*f(k-1,l,8)+extCoef(i,2)*f(k-2,l,8)
 
-                    fwZ(l,1)=2.d0*f(k-Nxtotal,l,1)-f(k-2*Nxtotal,l,1)
-                    fwZ(l,2)=2.d0*f(k-Nxtotal,l,2)-f(k-2*Nxtotal,l,2)
-                    fwZ(l,5)=2.d0*f(k-Nxtotal,l,5)-f(k-2*Nxtotal,l,5)
-                    fwZ(l,6)=2.d0*f(k-Nxtotal,l,6)-f(k-2*Nxtotal,l,6)
+                    fwZ(l,1)=extCoef(i,1)*f(k-Nxtotal,l,1)+extCoef(i,2)*f(k-2*Nxtotal,l,1)
+                    fwZ(l,2)=extCoef(i,1)*f(k-Nxtotal,l,2)+extCoef(i,2)*f(k-2*Nxtotal,l,2)
+                    fwZ(l,5)=extCoef(i,1)*f(k-Nxtotal,l,5)+extCoef(i,2)*f(k-2*Nxtotal,l,5)
+                    fwZ(l,6)=extCoef(i,1)*f(k-Nxtotal,l,6)+extCoef(i,2)*f(k-2*Nxtotal,l,6)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,1)+f(k,l,4)+f(k,l,5)+f(k,l,8))
                     RhoWall2=RhoWall2+cy(l)*(fwZ(l,1)+fwZ(l,2)+fwZ(l,5)+fwZ(l,6))
@@ -957,15 +957,15 @@ enddo
 !------------------------------------------------------------------------
             CASE (wallEF)
                 Do l=1,Nc8
-                    f(k,l,2)=2.d0*f(k+1,l,2)-f(k+2,l,2)
-                    f(k,l,3)=2.d0*f(k+1,l,3)-f(k+2,l,3)
-                    f(k,l,6)=2.d0*f(k+1,l,6)-f(k+2,l,6)
-                    f(k,l,7)=2.d0*f(k+1,l,7)-f(k+2,l,7)
+                    f(k,l,2)=extCoef(i,1)*f(k+1,l,2)+extCoef(i,2)*f(k+2,l,2)
+                    f(k,l,3)=extCoef(i,1)*f(k+1,l,3)+extCoef(i,2)*f(k+2,l,3)
+                    f(k,l,6)=extCoef(i,1)*f(k+1,l,6)+extCoef(i,2)*f(k+2,l,6)
+                    f(k,l,7)=extCoef(i,1)*f(k+1,l,7)+extCoef(i,2)*f(k+2,l,7)
 
-                    fwZ(l,5)=2.d0*f(k+Nxytotal,l,5)-f(k+2*Nxytotal,l,5)
-                    fwZ(l,6)=2.d0*f(k+Nxytotal,l,6)-f(k+2*Nxytotal,l,6)
-                    fwZ(l,7)=2.d0*f(k+Nxytotal,l,7)-f(k+2*Nxytotal,l,7)
-                    fwZ(l,8)=2.d0*f(k+Nxytotal,l,8)-f(k+2*Nxytotal,l,8)
+                    fwZ(l,5)=extCoef(i,1)*f(k+Nxytotal,l,5)+extCoef(i,2)*f(k+2*Nxytotal,l,5)
+                    fwZ(l,6)=extCoef(i,1)*f(k+Nxytotal,l,6)+extCoef(i,2)*f(k+2*Nxytotal,l,6)
+                    fwZ(l,7)=extCoef(i,1)*f(k+Nxytotal,l,7)+extCoef(i,2)*f(k+2*Nxytotal,l,7)
+                    fwZ(l,8)=extCoef(i,1)*f(k+Nxytotal,l,8)+extCoef(i,2)*f(k+2*Nxytotal,l,8)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,2)+f(k,l,3)+f(k,l,6)+f(k,l,7))
                     RhoWall2=RhoWall2+cz(l)*(fwZ(l,5)+fwZ(l,6)+fwZ(l,7)+fwZ(l,8))
@@ -996,15 +996,15 @@ enddo
 
             CASE (wallWF)
                 Do l=1,Nc8
-                    f(k,l,1)=2.d0*f(k-1,l,1)-f(k-2,l,1)
-                    f(k,l,4)=2.d0*f(k-1,l,4)-f(k-2,l,4)
-                    f(k,l,5)=2.d0*f(k-1,l,5)-f(k-2,l,5)
-                    f(k,l,8)=2.d0*f(k-1,l,8)-f(k-2,l,8)
+                    f(k,l,1)=extCoef(i,1)*f(k-1,l,1)+extCoef(i,2)*f(k-2,l,1)
+                    f(k,l,4)=extCoef(i,1)*f(k-1,l,4)+extCoef(i,2)*f(k-2,l,4)
+                    f(k,l,5)=extCoef(i,1)*f(k-1,l,5)+extCoef(i,2)*f(k-2,l,5)
+                    f(k,l,8)=extCoef(i,1)*f(k-1,l,8)+extCoef(i,2)*f(k-2,l,8)
 
-                    fwZ(l,5)=2.d0*f(k+Nxytotal,l,5)-f(k+2*Nxytotal,l,5)
-                    fwZ(l,6)=2.d0*f(k+Nxytotal,l,6)-f(k+2*Nxytotal,l,6)
-                    fwZ(l,7)=2.d0*f(k+Nxytotal,l,7)-f(k+2*Nxytotal,l,7)
-                    fwZ(l,8)=2.d0*f(k+Nxytotal,l,8)-f(k+2*Nxytotal,l,8)
+                    fwZ(l,5)=extCoef(i,1)*f(k+Nxytotal,l,5)+extCoef(i,2)*f(k+2*Nxytotal,l,5)
+                    fwZ(l,6)=extCoef(i,1)*f(k+Nxytotal,l,6)+extCoef(i,2)*f(k+2*Nxytotal,l,6)
+                    fwZ(l,7)=extCoef(i,1)*f(k+Nxytotal,l,7)+extCoef(i,2)*f(k+2*Nxytotal,l,7)
+                    fwZ(l,8)=extCoef(i,1)*f(k+Nxytotal,l,8)+extCoef(i,2)*f(k+2*Nxytotal,l,8)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,1)+f(k,l,4)+f(k,l,5)+f(k,l,8))
                     RhoWall2=RhoWall2+cz(l)*(fwZ(l,5)+fwZ(l,6)+fwZ(l,7)+fwZ(l,8))
@@ -1035,15 +1035,15 @@ enddo
 
             CASE (wallEB)
                 Do l=1,Nc8
-                    f(k,l,2)=2.d0*f(k+1,l,2)-f(k+2,l,2)
-                    f(k,l,3)=2.d0*f(k+1,l,3)-f(k+2,l,3)
-                    f(k,l,6)=2.d0*f(k+1,l,6)-f(k+2,l,6)
-                    f(k,l,7)=2.d0*f(k+1,l,7)-f(k+2,l,7)
+                    f(k,l,2)=extCoef(i,1)*f(k+1,l,2)+extCoef(i,2)*f(k+2,l,2)
+                    f(k,l,3)=extCoef(i,1)*f(k+1,l,3)+extCoef(i,2)*f(k+2,l,3)
+                    f(k,l,6)=extCoef(i,1)*f(k+1,l,6)+extCoef(i,2)*f(k+2,l,6)
+                    f(k,l,7)=extCoef(i,1)*f(k+1,l,7)+extCoef(i,2)*f(k+2,l,7)
 
-                    fwZ(l,1)=2.d0*f(k-Nxytotal,l,1)-f(k-2*Nxytotal,l,1)
-                    fwZ(l,2)=2.d0*f(k-Nxytotal,l,2)-f(k-2*Nxytotal,l,2)
-                    fwZ(l,3)=2.d0*f(k-Nxytotal,l,3)-f(k-2*Nxytotal,l,3)
-                    fwZ(l,4)=2.d0*f(k-Nxytotal,l,4)-f(k-2*Nxytotal,l,4)
+                    fwZ(l,1)=extCoef(i,1)*f(k-Nxytotal,l,1)+extCoef(i,2)*f(k-2*Nxytotal,l,1)
+                    fwZ(l,2)=extCoef(i,1)*f(k-Nxytotal,l,2)+extCoef(i,2)*f(k-2*Nxytotal,l,2)
+                    fwZ(l,3)=extCoef(i,1)*f(k-Nxytotal,l,3)+extCoef(i,2)*f(k-2*Nxytotal,l,3)
+                    fwZ(l,4)=extCoef(i,1)*f(k-Nxytotal,l,4)+extCoef(i,2)*f(k-2*Nxytotal,l,4)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,2)+f(k,l,3)+f(k,l,6)+f(k,l,7))
                     RhoWall2=RhoWall2+cz(l)*(fwZ(l,1)+fwZ(l,2)+fwZ(l,3)+fwZ(l,4))
@@ -1074,15 +1074,15 @@ enddo
 
             CASE (wallWB)
                 Do l=1,Nc8
-                    f(k,l,1)=2.d0*f(k-1,l,1)-f(k-2,l,1)
-                    f(k,l,4)=2.d0*f(k-1,l,4)-f(k-2,l,4)
-                    f(k,l,5)=2.d0*f(k-1,l,5)-f(k-2,l,5)
-                    f(k,l,8)=2.d0*f(k-1,l,8)-f(k-2,l,8)
+                    f(k,l,1)=extCoef(i,1)*f(k-1,l,1)+extCoef(i,2)*f(k-2,l,1)
+                    f(k,l,4)=extCoef(i,1)*f(k-1,l,4)+extCoef(i,2)*f(k-2,l,4)
+                    f(k,l,5)=extCoef(i,1)*f(k-1,l,5)+extCoef(i,2)*f(k-2,l,5)
+                    f(k,l,8)=extCoef(i,1)*f(k-1,l,8)+extCoef(i,2)*f(k-2,l,8)
 
-                    fwZ(l,1)=2.d0*f(k-Nxytotal,l,1)-f(k-2*Nxytotal,l,1)
-                    fwZ(l,2)=2.d0*f(k-Nxytotal,l,2)-f(k-2*Nxytotal,l,2)
-                    fwZ(l,3)=2.d0*f(k-Nxytotal,l,3)-f(k-2*Nxytotal,l,3)
-                    fwZ(l,4)=2.d0*f(k-Nxytotal,l,4)-f(k-2*Nxytotal,l,4)
+                    fwZ(l,1)=extCoef(i,1)*f(k-Nxytotal,l,1)+extCoef(i,2)*f(k-2*Nxytotal,l,1)
+                    fwZ(l,2)=extCoef(i,1)*f(k-Nxytotal,l,2)+extCoef(i,2)*f(k-2*Nxytotal,l,2)
+                    fwZ(l,3)=extCoef(i,1)*f(k-Nxytotal,l,3)+extCoef(i,2)*f(k-2*Nxytotal,l,3)
+                    fwZ(l,4)=extCoef(i,1)*f(k-Nxytotal,l,4)+extCoef(i,2)*f(k-2*Nxytotal,l,4)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,1)+f(k,l,4)+f(k,l,5)+f(k,l,8))
                     RhoWall2=RhoWall2+cz(l)*(fwZ(l,1)+fwZ(l,2)+fwZ(l,3)+fwZ(l,4))
@@ -1115,15 +1115,15 @@ enddo
 !------------------------------------------------------------------------
             CASE (wallNF)
                 Do l=1,Nc8
-                    f(k,l,3)=2.d0*f(k+Nxtotal,l,3)-f(k+2*Nxtotal,l,3)
-                    f(k,l,4)=2.d0*f(k+Nxtotal,l,4)-f(k+2*Nxtotal,l,4)
-                    f(k,l,7)=2.d0*f(k+Nxtotal,l,7)-f(k+2*Nxtotal,l,7)
-                    f(k,l,8)=2.d0*f(k+Nxtotal,l,8)-f(k+2*Nxtotal,l,8)
+                    f(k,l,3)=extCoef(i,1)*f(k+Nxtotal,l,3)+extCoef(i,2)*f(k+2*Nxtotal,l,3)
+                    f(k,l,4)=extCoef(i,1)*f(k+Nxtotal,l,4)+extCoef(i,2)*f(k+2*Nxtotal,l,4)
+                    f(k,l,7)=extCoef(i,1)*f(k+Nxtotal,l,7)+extCoef(i,2)*f(k+2*Nxtotal,l,7)
+                    f(k,l,8)=extCoef(i,1)*f(k+Nxtotal,l,8)+extCoef(i,2)*f(k+2*Nxtotal,l,8)
 
-                    fwZ(l,5)=2.d0*f(k+Nxytotal,l,5)-f(k+2*Nxytotal,l,5)
-                    fwZ(l,6)=2.d0*f(k+Nxytotal,l,6)-f(k+2*Nxytotal,l,6)
-                    fwZ(l,7)=2.d0*f(k+Nxytotal,l,7)-f(k+2*Nxytotal,l,7)
-                    fwZ(l,8)=2.d0*f(k+Nxytotal,l,8)-f(k+2*Nxytotal,l,8)
+                    fwZ(l,5)=extCoef(i,1)*f(k+Nxytotal,l,5)+extCoef(i,2)*f(k+2*Nxytotal,l,5)
+                    fwZ(l,6)=extCoef(i,1)*f(k+Nxytotal,l,6)+extCoef(i,2)*f(k+2*Nxytotal,l,6)
+                    fwZ(l,7)=extCoef(i,1)*f(k+Nxytotal,l,7)+extCoef(i,2)*f(k+2*Nxytotal,l,7)
+                    fwZ(l,8)=extCoef(i,1)*f(k+Nxytotal,l,8)+extCoef(i,2)*f(k+2*Nxytotal,l,8)
 
                     RhoWall=RhoWall+cy(l)*(f(k,l,3)+f(k,l,4)+f(k,l,7)+f(k,l,8))
                     RhoWall2=RhoWall2+cz(l)*(fwZ(l,5)+fwZ(l,6)+fwZ(l,7)+fwZ(l,8))
@@ -1154,15 +1154,15 @@ enddo
 
             CASE (wallSF)
                 Do l=1,Nc8
-                    f(k,l,1)=2.d0*f(k-Nxtotal,l,1)-f(k-2*Nxtotal,l,1)
-                    f(k,l,2)=2.d0*f(k-Nxtotal,l,2)-f(k-2*Nxtotal,l,2)
-                    f(k,l,5)=2.d0*f(k-Nxtotal,l,5)-f(k-2*Nxtotal,l,5)
-                    f(k,l,6)=2.d0*f(k-Nxtotal,l,6)-f(k-2*Nxtotal,l,6)
+                    f(k,l,1)=extCoef(i,1)*f(k-Nxtotal,l,1)+extCoef(i,2)*f(k-2*Nxtotal,l,1)
+                    f(k,l,2)=extCoef(i,1)*f(k-Nxtotal,l,2)+extCoef(i,2)*f(k-2*Nxtotal,l,2)
+                    f(k,l,5)=extCoef(i,1)*f(k-Nxtotal,l,5)+extCoef(i,2)*f(k-2*Nxtotal,l,5)
+                    f(k,l,6)=extCoef(i,1)*f(k-Nxtotal,l,6)+extCoef(i,2)*f(k-2*Nxtotal,l,6)
 
-                    fwZ(l,5)=2.d0*f(k+Nxytotal,l,5)-f(k+2*Nxytotal,l,5)
-                    fwZ(l,6)=2.d0*f(k+Nxytotal,l,6)-f(k+2*Nxytotal,l,6)
-                    fwZ(l,7)=2.d0*f(k+Nxytotal,l,7)-f(k+2*Nxytotal,l,7)
-                    fwZ(l,8)=2.d0*f(k+Nxytotal,l,8)-f(k+2*Nxytotal,l,8)
+                    fwZ(l,5)=extCoef(i,1)*f(k+Nxytotal,l,5)+extCoef(i,2)*f(k+2*Nxytotal,l,5)
+                    fwZ(l,6)=extCoef(i,1)*f(k+Nxytotal,l,6)+extCoef(i,2)*f(k+2*Nxytotal,l,6)
+                    fwZ(l,7)=extCoef(i,1)*f(k+Nxytotal,l,7)+extCoef(i,2)*f(k+2*Nxytotal,l,7)
+                    fwZ(l,8)=extCoef(i,1)*f(k+Nxytotal,l,8)+extCoef(i,2)*f(k+2*Nxytotal,l,8)
 
                     RhoWall=RhoWall+cy(l)*(f(k,l,1)+f(k,l,2)+f(k,l,5)+f(k,l,6))
                     RhoWall2=RhoWall2+cz(l)*(fwZ(l,5)+fwZ(l,6)+fwZ(l,7)+fwZ(l,8))
@@ -1193,15 +1193,15 @@ enddo
 
             CASE (wallNB)
                 Do l=1,Nc8
-                    f(k,l,3)=2.d0*f(k+Nxtotal,l,3)-f(k+2*Nxtotal,l,3)
-                    f(k,l,4)=2.d0*f(k+Nxtotal,l,4)-f(k+2*Nxtotal,l,4)
-                    f(k,l,7)=2.d0*f(k+Nxtotal,l,7)-f(k+2*Nxtotal,l,7)
-                    f(k,l,8)=2.d0*f(k+Nxtotal,l,8)-f(k+2*Nxtotal,l,8)
+                    f(k,l,3)=extCoef(i,1)*f(k+Nxtotal,l,3)+extCoef(i,2)*f(k+2*Nxtotal,l,3)
+                    f(k,l,4)=extCoef(i,1)*f(k+Nxtotal,l,4)+extCoef(i,2)*f(k+2*Nxtotal,l,4)
+                    f(k,l,7)=extCoef(i,1)*f(k+Nxtotal,l,7)+extCoef(i,2)*f(k+2*Nxtotal,l,7)
+                    f(k,l,8)=extCoef(i,1)*f(k+Nxtotal,l,8)+extCoef(i,2)*f(k+2*Nxtotal,l,8)
 
-                    fwZ(l,1)=2.d0*f(k-Nxytotal,l,1)-f(k-2*Nxytotal,l,1)
-                    fwZ(l,2)=2.d0*f(k-Nxytotal,l,2)-f(k-2*Nxytotal,l,2)
-                    fwZ(l,3)=2.d0*f(k-Nxytotal,l,3)-f(k-2*Nxytotal,l,3)
-                    fwZ(l,4)=2.d0*f(k-Nxytotal,l,4)-f(k-2*Nxytotal,l,4)
+                    fwZ(l,1)=extCoef(i,1)*f(k-Nxytotal,l,1)+extCoef(i,2)*f(k-2*Nxytotal,l,1)
+                    fwZ(l,2)=extCoef(i,1)*f(k-Nxytotal,l,2)+extCoef(i,2)*f(k-2*Nxytotal,l,2)
+                    fwZ(l,3)=extCoef(i,1)*f(k-Nxytotal,l,3)+extCoef(i,2)*f(k-2*Nxytotal,l,3)
+                    fwZ(l,4)=extCoef(i,1)*f(k-Nxytotal,l,4)+extCoef(i,2)*f(k-2*Nxytotal,l,4)
 
                     RhoWall=RhoWall+cy(l)*(f(k,l,3)+f(k,l,4)+f(k,l,7)+f(k,l,8))
                     RhoWall2=RhoWall2+cz(l)*(fwZ(l,1)+fwZ(l,2)+fwZ(l,3)+fwZ(l,4))
@@ -1232,15 +1232,15 @@ enddo
 
             CASE (wallSB)
                 Do l=1,Nc8
-                    f(k,l,1)=2.d0*f(k-Nxtotal,l,1)-f(k-2*Nxtotal,l,1)
-                    f(k,l,2)=2.d0*f(k-Nxtotal,l,2)-f(k-2*Nxtotal,l,2)
-                    f(k,l,5)=2.d0*f(k-Nxtotal,l,5)-f(k-2*Nxtotal,l,5)
-                    f(k,l,6)=2.d0*f(k-Nxtotal,l,6)-f(k-2*Nxtotal,l,6)
+                    f(k,l,1)=extCoef(i,1)*f(k-Nxtotal,l,1)+extCoef(i,2)*f(k-2*Nxtotal,l,1)
+                    f(k,l,2)=extCoef(i,1)*f(k-Nxtotal,l,2)+extCoef(i,2)*f(k-2*Nxtotal,l,2)
+                    f(k,l,5)=extCoef(i,1)*f(k-Nxtotal,l,5)+extCoef(i,2)*f(k-2*Nxtotal,l,5)
+                    f(k,l,6)=extCoef(i,1)*f(k-Nxtotal,l,6)+extCoef(i,2)*f(k-2*Nxtotal,l,6)
 
-                    fwZ(l,1)=2.d0*f(k-Nxytotal,l,1)-f(k-2*Nxytotal,l,1)
-                    fwZ(l,2)=2.d0*f(k-Nxytotal,l,2)-f(k-2*Nxytotal,l,2)
-                    fwZ(l,3)=2.d0*f(k-Nxytotal,l,3)-f(k-2*Nxytotal,l,3)
-                    fwZ(l,4)=2.d0*f(k-Nxytotal,l,4)-f(k-2*Nxytotal,l,4)
+                    fwZ(l,1)=extCoef(i,1)*f(k-Nxytotal,l,1)+extCoef(i,2)*f(k-2*Nxytotal,l,1)
+                    fwZ(l,2)=extCoef(i,1)*f(k-Nxytotal,l,2)+extCoef(i,2)*f(k-2*Nxytotal,l,2)
+                    fwZ(l,3)=extCoef(i,1)*f(k-Nxytotal,l,3)+extCoef(i,2)*f(k-2*Nxytotal,l,3)
+                    fwZ(l,4)=extCoef(i,1)*f(k-Nxytotal,l,4)+extCoef(i,2)*f(k-2*Nxytotal,l,4)
 
                     RhoWall=RhoWall+cy(l)*(f(k,l,1)+f(k,l,2)+f(k,l,5)+f(k,l,6))
                     RhoWall2=RhoWall2+cz(l)*(fwZ(l,1)+fwZ(l,2)+fwZ(l,3)+fwZ(l,4))
@@ -1273,20 +1273,20 @@ enddo
 !=======================================================================
             CASE (wallENF) !direction1
                 Do l=1,Nc8
-                    f(k,l,2)=2.d0*f(k+1,l,2)-f(k+2,l,2)
-                    f(k,l,3)=2.d0*f(k+1,l,3)-f(k+2,l,3)
-                    f(k,l,6)=2.d0*f(k+1,l,6)-f(k+2,l,6)
-                    f(k,l,7)=2.d0*f(k+1,l,7)-f(k+2,l,7)
+                    f(k,l,2)=extCoef(i,1)*f(k+1,l,2)+extCoef(i,2)*f(k+2,l,2)
+                    f(k,l,3)=extCoef(i,1)*f(k+1,l,3)+extCoef(i,2)*f(k+2,l,3)
+                    f(k,l,6)=extCoef(i,1)*f(k+1,l,6)+extCoef(i,2)*f(k+2,l,6)
+                    f(k,l,7)=extCoef(i,1)*f(k+1,l,7)+extCoef(i,2)*f(k+2,l,7)
 
-                    fw(j,l,3)=2.d0*f(k+Nxtotal,l,3)-f(k+2*Nxtotal,l,3)
-                    fw(j,l,4)=2.d0*f(k+Nxtotal,l,4)-f(k+2*Nxtotal,l,4)
-                    fw(j,l,7)=2.d0*f(k+Nxtotal,l,7)-f(k+2*Nxtotal,l,7)
-                    fw(j,l,8)=2.d0*f(k+Nxtotal,l,8)-f(k+2*Nxtotal,l,8)
+                    fw(j,l,3)=extCoef(i,1)*f(k+Nxtotal,l,3)+extCoef(i,2)*f(k+2*Nxtotal,l,3)
+                    fw(j,l,4)=extCoef(i,1)*f(k+Nxtotal,l,4)+extCoef(i,2)*f(k+2*Nxtotal,l,4)
+                    fw(j,l,7)=extCoef(i,1)*f(k+Nxtotal,l,7)+extCoef(i,2)*f(k+2*Nxtotal,l,7)
+                    fw(j,l,8)=extCoef(i,1)*f(k+Nxtotal,l,8)+extCoef(i,2)*f(k+2*Nxtotal,l,8)
 
-                    fwZ(l,5)=2.d0*f(k+Nxytotal,l,5)-f(k+2*Nxytotal,l,5)
-                    fwZ(l,6)=2.d0*f(k+Nxytotal,l,6)-f(k+2*Nxytotal,l,6)
-                    fwZ(l,7)=2.d0*f(k+Nxytotal,l,7)-f(k+2*Nxytotal,l,7)
-                    fwZ(l,8)=2.d0*f(k+Nxytotal,l,8)-f(k+2*Nxytotal,l,8)
+                    fwZ(l,5)=extCoef(i,1)*f(k+Nxytotal,l,5)+extCoef(i,2)*f(k+2*Nxytotal,l,5)
+                    fwZ(l,6)=extCoef(i,1)*f(k+Nxytotal,l,6)+extCoef(i,2)*f(k+2*Nxytotal,l,6)
+                    fwZ(l,7)=extCoef(i,1)*f(k+Nxytotal,l,7)+extCoef(i,2)*f(k+2*Nxytotal,l,7)
+                    fwZ(l,8)=extCoef(i,1)*f(k+Nxytotal,l,8)+extCoef(i,2)*f(k+2*Nxytotal,l,8)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,2)+f(k,l,3)+f(k,l,6)+f(k,l,7))
                     RhoWall2=RhoWall2+cy(l)*(fw(j,l,3)+fw(j,l,4)+fw(j,l,7)+fw(j,l,8))
@@ -1330,20 +1330,20 @@ enddo
                 Enddo
             CASE (wallWNF) !direction2
                 Do l=1,Nc8
-                    f(k,l,1)=2.d0*f(k-1,l,1)-f(k-2,l,1)
-                    f(k,l,4)=2.d0*f(k-1,l,4)-f(k-2,l,4)
-                    f(k,l,5)=2.d0*f(k-1,l,5)-f(k-2,l,5)
-                    f(k,l,8)=2.d0*f(k-1,l,8)-f(k-2,l,8)
+                    f(k,l,1)=extCoef(i,1)*f(k-1,l,1)+extCoef(i,2)*f(k-2,l,1)
+                    f(k,l,4)=extCoef(i,1)*f(k-1,l,4)+extCoef(i,2)*f(k-2,l,4)
+                    f(k,l,5)=extCoef(i,1)*f(k-1,l,5)+extCoef(i,2)*f(k-2,l,5)
+                    f(k,l,8)=extCoef(i,1)*f(k-1,l,8)+extCoef(i,2)*f(k-2,l,8)
 
-                    fw(j,l,3)=2.d0*f(k+Nxtotal,l,3)-f(k+2*Nxtotal,l,3)
-                    fw(j,l,4)=2.d0*f(k+Nxtotal,l,4)-f(k+2*Nxtotal,l,4)
-                    fw(j,l,7)=2.d0*f(k+Nxtotal,l,7)-f(k+2*Nxtotal,l,7)
-                    fw(j,l,8)=2.d0*f(k+Nxtotal,l,8)-f(k+2*Nxtotal,l,8)
+                    fw(j,l,3)=extCoef(i,1)*f(k+Nxtotal,l,3)+extCoef(i,2)*f(k+2*Nxtotal,l,3)
+                    fw(j,l,4)=extCoef(i,1)*f(k+Nxtotal,l,4)+extCoef(i,2)*f(k+2*Nxtotal,l,4)
+                    fw(j,l,7)=extCoef(i,1)*f(k+Nxtotal,l,7)+extCoef(i,2)*f(k+2*Nxtotal,l,7)
+                    fw(j,l,8)=extCoef(i,1)*f(k+Nxtotal,l,8)+extCoef(i,2)*f(k+2*Nxtotal,l,8)
 
-                    fwZ(l,5)=2.d0*f(k+Nxytotal,l,5)-f(k+2*Nxytotal,l,5)
-                    fwZ(l,6)=2.d0*f(k+Nxytotal,l,6)-f(k+2*Nxytotal,l,6)
-                    fwZ(l,7)=2.d0*f(k+Nxytotal,l,7)-f(k+2*Nxytotal,l,7)
-                    fwZ(l,8)=2.d0*f(k+Nxytotal,l,8)-f(k+2*Nxytotal,l,8)
+                    fwZ(l,5)=extCoef(i,1)*f(k+Nxytotal,l,5)+extCoef(i,2)*f(k+2*Nxytotal,l,5)
+                    fwZ(l,6)=extCoef(i,1)*f(k+Nxytotal,l,6)+extCoef(i,2)*f(k+2*Nxytotal,l,6)
+                    fwZ(l,7)=extCoef(i,1)*f(k+Nxytotal,l,7)+extCoef(i,2)*f(k+2*Nxytotal,l,7)
+                    fwZ(l,8)=extCoef(i,1)*f(k+Nxytotal,l,8)+extCoef(i,2)*f(k+2*Nxytotal,l,8)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,1)+f(k,l,4)+f(k,l,5)+f(k,l,8))
                     RhoWall2=RhoWall2+cy(l)*(fw(j,l,3)+fw(j,l,4)+fw(j,l,7)+fw(j,l,8))
@@ -1387,20 +1387,20 @@ enddo
                 Enddo
             CASE (wallWSF) !direction3
                 Do l=1,Nc8
-                    f(k,l,1)=2.d0*f(k-1,l,1)-f(k-2,l,1)
-                    f(k,l,4)=2.d0*f(k-1,l,4)-f(k-2,l,4)
-                    f(k,l,5)=2.d0*f(k-1,l,5)-f(k-2,l,5)
-                    f(k,l,8)=2.d0*f(k-1,l,8)-f(k-2,l,8)
+                    f(k,l,1)=extCoef(i,1)*f(k-1,l,1)+extCoef(i,2)*f(k-2,l,1)
+                    f(k,l,4)=extCoef(i,1)*f(k-1,l,4)+extCoef(i,2)*f(k-2,l,4)
+                    f(k,l,5)=extCoef(i,1)*f(k-1,l,5)+extCoef(i,2)*f(k-2,l,5)
+                    f(k,l,8)=extCoef(i,1)*f(k-1,l,8)+extCoef(i,2)*f(k-2,l,8)
 
-                    fw(j,l,1)=2.d0*f(k-Nxtotal,l,1)-f(k-2*Nxtotal,l,1)
-                    fw(j,l,2)=2.d0*f(k-Nxtotal,l,2)-f(k-2*Nxtotal,l,2)
-                    fw(j,l,5)=2.d0*f(k-Nxtotal,l,5)-f(k-2*Nxtotal,l,5)
-                    fw(j,l,6)=2.d0*f(k-Nxtotal,l,6)-f(k-2*Nxtotal,l,6)
+                    fw(j,l,1)=extCoef(i,1)*f(k-Nxtotal,l,1)+extCoef(i,2)*f(k-2*Nxtotal,l,1)
+                    fw(j,l,2)=extCoef(i,1)*f(k-Nxtotal,l,2)+extCoef(i,2)*f(k-2*Nxtotal,l,2)
+                    fw(j,l,5)=extCoef(i,1)*f(k-Nxtotal,l,5)+extCoef(i,2)*f(k-2*Nxtotal,l,5)
+                    fw(j,l,6)=extCoef(i,1)*f(k-Nxtotal,l,6)+extCoef(i,2)*f(k-2*Nxtotal,l,6)
 
-                    fwZ(l,5)=2.d0*f(k+Nxytotal,l,5)-f(k+2*Nxytotal,l,5)
-                    fwZ(l,6)=2.d0*f(k+Nxytotal,l,6)-f(k+2*Nxytotal,l,6)
-                    fwZ(l,7)=2.d0*f(k+Nxytotal,l,7)-f(k+2*Nxytotal,l,7)
-                    fwZ(l,8)=2.d0*f(k+Nxytotal,l,8)-f(k+2*Nxytotal,l,8)
+                    fwZ(l,5)=extCoef(i,1)*f(k+Nxytotal,l,5)+extCoef(i,2)*f(k+2*Nxytotal,l,5)
+                    fwZ(l,6)=extCoef(i,1)*f(k+Nxytotal,l,6)+extCoef(i,2)*f(k+2*Nxytotal,l,6)
+                    fwZ(l,7)=extCoef(i,1)*f(k+Nxytotal,l,7)+extCoef(i,2)*f(k+2*Nxytotal,l,7)
+                    fwZ(l,8)=extCoef(i,1)*f(k+Nxytotal,l,8)+extCoef(i,2)*f(k+2*Nxytotal,l,8)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,1)+f(k,l,4)+f(k,l,5)+f(k,l,8))
                     RhoWall2=RhoWall2+cy(l)*(fw(j,l,1)+fw(j,l,2)+fw(j,l,5)+fw(j,l,6))
@@ -1444,20 +1444,20 @@ enddo
                 Enddo
             CASE (wallESF) !direction4
                 Do l=1,Nc8
-                    f(k,l,2)=2.d0*f(k+1,l,2)-f(k+2,l,2)
-                    f(k,l,3)=2.d0*f(k+1,l,3)-f(k+2,l,3)
-                    f(k,l,6)=2.d0*f(k+1,l,6)-f(k+2,l,6)
-                    f(k,l,7)=2.d0*f(k+1,l,7)-f(k+2,l,7)
+                    f(k,l,2)=extCoef(i,1)*f(k+1,l,2)+extCoef(i,2)*f(k+2,l,2)
+                    f(k,l,3)=extCoef(i,1)*f(k+1,l,3)+extCoef(i,2)*f(k+2,l,3)
+                    f(k,l,6)=extCoef(i,1)*f(k+1,l,6)+extCoef(i,2)*f(k+2,l,6)
+                    f(k,l,7)=extCoef(i,1)*f(k+1,l,7)+extCoef(i,2)*f(k+2,l,7)
 
-                    fw(j,l,1)=2.d0*f(k-Nxtotal,l,1)-f(k-2*Nxtotal,l,1)
-                    fw(j,l,2)=2.d0*f(k-Nxtotal,l,2)-f(k-2*Nxtotal,l,2)
-                    fw(j,l,5)=2.d0*f(k-Nxtotal,l,5)-f(k-2*Nxtotal,l,5)
-                    fw(j,l,6)=2.d0*f(k-Nxtotal,l,6)-f(k-2*Nxtotal,l,6)
+                    fw(j,l,1)=extCoef(i,1)*f(k-Nxtotal,l,1)+extCoef(i,2)*f(k-2*Nxtotal,l,1)
+                    fw(j,l,2)=extCoef(i,1)*f(k-Nxtotal,l,2)+extCoef(i,2)*f(k-2*Nxtotal,l,2)
+                    fw(j,l,5)=extCoef(i,1)*f(k-Nxtotal,l,5)+extCoef(i,2)*f(k-2*Nxtotal,l,5)
+                    fw(j,l,6)=extCoef(i,1)*f(k-Nxtotal,l,6)+extCoef(i,2)*f(k-2*Nxtotal,l,6)
 
-                    fwZ(l,5)=2.d0*f(k+Nxytotal,l,5)-f(k+2*Nxytotal,l,5)
-                    fwZ(l,6)=2.d0*f(k+Nxytotal,l,6)-f(k+2*Nxytotal,l,6)
-                    fwZ(l,7)=2.d0*f(k+Nxytotal,l,7)-f(k+2*Nxytotal,l,7)
-                    fwZ(l,8)=2.d0*f(k+Nxytotal,l,8)-f(k+2*Nxytotal,l,8)
+                    fwZ(l,5)=extCoef(i,1)*f(k+Nxytotal,l,5)+extCoef(i,2)*f(k+2*Nxytotal,l,5)
+                    fwZ(l,6)=extCoef(i,1)*f(k+Nxytotal,l,6)+extCoef(i,2)*f(k+2*Nxytotal,l,6)
+                    fwZ(l,7)=extCoef(i,1)*f(k+Nxytotal,l,7)+extCoef(i,2)*f(k+2*Nxytotal,l,7)
+                    fwZ(l,8)=extCoef(i,1)*f(k+Nxytotal,l,8)+extCoef(i,2)*f(k+2*Nxytotal,l,8)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,2)+f(k,l,3)+f(k,l,6)+f(k,l,7))
                     RhoWall2=RhoWall2+cy(l)*(fw(j,l,1)+fw(j,l,2)+fw(j,l,5)+fw(j,l,6))
@@ -1501,20 +1501,20 @@ enddo
                 Enddo
             CASE (wallENB) !direction5
                 Do l=1,Nc8
-                    f(k,l,2)=2.d0*f(k+1,l,2)-f(k+2,l,2)
-                    f(k,l,3)=2.d0*f(k+1,l,3)-f(k+2,l,3)
-                    f(k,l,6)=2.d0*f(k+1,l,6)-f(k+2,l,6)
-                    f(k,l,7)=2.d0*f(k+1,l,7)-f(k+2,l,7)
+                    f(k,l,2)=extCoef(i,1)*f(k+1,l,2)+extCoef(i,2)*f(k+2,l,2)
+                    f(k,l,3)=extCoef(i,1)*f(k+1,l,3)+extCoef(i,2)*f(k+2,l,3)
+                    f(k,l,6)=extCoef(i,1)*f(k+1,l,6)+extCoef(i,2)*f(k+2,l,6)
+                    f(k,l,7)=extCoef(i,1)*f(k+1,l,7)+extCoef(i,2)*f(k+2,l,7)
 
-                    fw(j,l,3)=2.d0*f(k+Nxtotal,l,3)-f(k+2*Nxtotal,l,3)
-                    fw(j,l,4)=2.d0*f(k+Nxtotal,l,4)-f(k+2*Nxtotal,l,4)
-                    fw(j,l,7)=2.d0*f(k+Nxtotal,l,7)-f(k+2*Nxtotal,l,7)
-                    fw(j,l,8)=2.d0*f(k+Nxtotal,l,8)-f(k+2*Nxtotal,l,8)
+                    fw(j,l,3)=extCoef(i,1)*f(k+Nxtotal,l,3)+extCoef(i,2)*f(k+2*Nxtotal,l,3)
+                    fw(j,l,4)=extCoef(i,1)*f(k+Nxtotal,l,4)+extCoef(i,2)*f(k+2*Nxtotal,l,4)
+                    fw(j,l,7)=extCoef(i,1)*f(k+Nxtotal,l,7)+extCoef(i,2)*f(k+2*Nxtotal,l,7)
+                    fw(j,l,8)=extCoef(i,1)*f(k+Nxtotal,l,8)+extCoef(i,2)*f(k+2*Nxtotal,l,8)
 
-                    fwZ(l,1)=2.d0*f(k-Nxytotal,l,1)-f(k-2*Nxytotal,l,1)
-                    fwZ(l,2)=2.d0*f(k-Nxytotal,l,2)-f(k-2*Nxytotal,l,2)
-                    fwZ(l,3)=2.d0*f(k-Nxytotal,l,3)-f(k-2*Nxytotal,l,3)
-                    fwZ(l,4)=2.d0*f(k-Nxytotal,l,4)-f(k-2*Nxytotal,l,4)
+                    fwZ(l,1)=extCoef(i,1)*f(k-Nxytotal,l,1)+extCoef(i,2)*f(k-2*Nxytotal,l,1)
+                    fwZ(l,2)=extCoef(i,1)*f(k-Nxytotal,l,2)+extCoef(i,2)*f(k-2*Nxytotal,l,2)
+                    fwZ(l,3)=extCoef(i,1)*f(k-Nxytotal,l,3)+extCoef(i,2)*f(k-2*Nxytotal,l,3)
+                    fwZ(l,4)=extCoef(i,1)*f(k-Nxytotal,l,4)+extCoef(i,2)*f(k-2*Nxytotal,l,4)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,2)+f(k,l,3)+f(k,l,6)+f(k,l,7))
                     RhoWall2=RhoWall2+cy(l)*(fw(j,l,3)+fw(j,l,4)+fw(j,l,7)+fw(j,l,8))
@@ -1558,20 +1558,20 @@ enddo
                 Enddo
             CASE (wallWNB) !direction6
                 Do l=1,Nc8
-                    f(k,l,1)=2.d0*f(k-1,l,1)-f(k-2,l,1)
-                    f(k,l,4)=2.d0*f(k-1,l,4)-f(k-2,l,4)
-                    f(k,l,5)=2.d0*f(k-1,l,5)-f(k-2,l,5)
-                    f(k,l,8)=2.d0*f(k-1,l,8)-f(k-2,l,8)
+                    f(k,l,1)=extCoef(i,1)*f(k-1,l,1)+extCoef(i,2)*f(k-2,l,1)
+                    f(k,l,4)=extCoef(i,1)*f(k-1,l,4)+extCoef(i,2)*f(k-2,l,4)
+                    f(k,l,5)=extCoef(i,1)*f(k-1,l,5)+extCoef(i,2)*f(k-2,l,5)
+                    f(k,l,8)=extCoef(i,1)*f(k-1,l,8)+extCoef(i,2)*f(k-2,l,8)
 
-                    fw(j,l,3)=2.d0*f(k+Nxtotal,l,3)-f(k+2*Nxtotal,l,3)
-                    fw(j,l,4)=2.d0*f(k+Nxtotal,l,4)-f(k+2*Nxtotal,l,4)
-                    fw(j,l,7)=2.d0*f(k+Nxtotal,l,7)-f(k+2*Nxtotal,l,7)
-                    fw(j,l,8)=2.d0*f(k+Nxtotal,l,8)-f(k+2*Nxtotal,l,8)
+                    fw(j,l,3)=extCoef(i,1)*f(k+Nxtotal,l,3)+extCoef(i,2)*f(k+2*Nxtotal,l,3)
+                    fw(j,l,4)=extCoef(i,1)*f(k+Nxtotal,l,4)+extCoef(i,2)*f(k+2*Nxtotal,l,4)
+                    fw(j,l,7)=extCoef(i,1)*f(k+Nxtotal,l,7)+extCoef(i,2)*f(k+2*Nxtotal,l,7)
+                    fw(j,l,8)=extCoef(i,1)*f(k+Nxtotal,l,8)+extCoef(i,2)*f(k+2*Nxtotal,l,8)
 
-                    fwZ(l,1)=2.d0*f(k-Nxytotal,l,1)-f(k-2*Nxytotal,l,1)
-                    fwZ(l,2)=2.d0*f(k-Nxytotal,l,2)-f(k-2*Nxytotal,l,2)
-                    fwZ(l,3)=2.d0*f(k-Nxytotal,l,3)-f(k-2*Nxytotal,l,3)
-                    fwZ(l,4)=2.d0*f(k-Nxytotal,l,4)-f(k-2*Nxytotal,l,4)
+                    fwZ(l,1)=extCoef(i,1)*f(k-Nxytotal,l,1)+extCoef(i,2)*f(k-2*Nxytotal,l,1)
+                    fwZ(l,2)=extCoef(i,1)*f(k-Nxytotal,l,2)+extCoef(i,2)*f(k-2*Nxytotal,l,2)
+                    fwZ(l,3)=extCoef(i,1)*f(k-Nxytotal,l,3)+extCoef(i,2)*f(k-2*Nxytotal,l,3)
+                    fwZ(l,4)=extCoef(i,1)*f(k-Nxytotal,l,4)+extCoef(i,2)*f(k-2*Nxytotal,l,4)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,1)+f(k,l,4)+f(k,l,5)+f(k,l,8))
                     RhoWall2=RhoWall2+cy(l)*(fw(j,l,3)+fw(j,l,4)+fw(j,l,7)+fw(j,l,8))
@@ -1615,20 +1615,20 @@ enddo
                 Enddo
             CASE (wallWSB) !direction7
                 Do l=1,Nc8
-                    f(k,l,1)=2.d0*f(k-1,l,1)-f(k-2,l,1)
-                    f(k,l,4)=2.d0*f(k-1,l,4)-f(k-2,l,4)
-                    f(k,l,5)=2.d0*f(k-1,l,5)-f(k-2,l,5)
-                    f(k,l,8)=2.d0*f(k-1,l,8)-f(k-2,l,8)
+                    f(k,l,1)=extCoef(i,1)*f(k-1,l,1)+extCoef(i,2)*f(k-2,l,1)
+                    f(k,l,4)=extCoef(i,1)*f(k-1,l,4)+extCoef(i,2)*f(k-2,l,4)
+                    f(k,l,5)=extCoef(i,1)*f(k-1,l,5)+extCoef(i,2)*f(k-2,l,5)
+                    f(k,l,8)=extCoef(i,1)*f(k-1,l,8)+extCoef(i,2)*f(k-2,l,8)
 
-                    fw(j,l,1)=2.d0*f(k-Nxtotal,l,1)-f(k-2*Nxtotal,l,1)
-                    fw(j,l,2)=2.d0*f(k-Nxtotal,l,2)-f(k-2*Nxtotal,l,2)
-                    fw(j,l,5)=2.d0*f(k-Nxtotal,l,5)-f(k-2*Nxtotal,l,5)
-                    fw(j,l,6)=2.d0*f(k-Nxtotal,l,6)-f(k-2*Nxtotal,l,6)
+                    fw(j,l,1)=extCoef(i,1)*f(k-Nxtotal,l,1)+extCoef(i,2)*f(k-2*Nxtotal,l,1)
+                    fw(j,l,2)=extCoef(i,1)*f(k-Nxtotal,l,2)+extCoef(i,2)*f(k-2*Nxtotal,l,2)
+                    fw(j,l,5)=extCoef(i,1)*f(k-Nxtotal,l,5)+extCoef(i,2)*f(k-2*Nxtotal,l,5)
+                    fw(j,l,6)=extCoef(i,1)*f(k-Nxtotal,l,6)+extCoef(i,2)*f(k-2*Nxtotal,l,6)
 
-                    fwZ(l,1)=2.d0*f(k-Nxytotal,l,1)-f(k-2*Nxytotal,l,1)
-                    fwZ(l,2)=2.d0*f(k-Nxytotal,l,2)-f(k-2*Nxytotal,l,2)
-                    fwZ(l,3)=2.d0*f(k-Nxytotal,l,3)-f(k-2*Nxytotal,l,3)
-                    fwZ(l,4)=2.d0*f(k-Nxytotal,l,4)-f(k-2*Nxytotal,l,4)
+                    fwZ(l,1)=extCoef(i,1)*f(k-Nxytotal,l,1)+extCoef(i,2)*f(k-2*Nxytotal,l,1)
+                    fwZ(l,2)=extCoef(i,1)*f(k-Nxytotal,l,2)+extCoef(i,2)*f(k-2*Nxytotal,l,2)
+                    fwZ(l,3)=extCoef(i,1)*f(k-Nxytotal,l,3)+extCoef(i,2)*f(k-2*Nxytotal,l,3)
+                    fwZ(l,4)=extCoef(i,1)*f(k-Nxytotal,l,4)+extCoef(i,2)*f(k-2*Nxytotal,l,4)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,1)+f(k,l,4)+f(k,l,5)+f(k,l,8))
                     RhoWall2=RhoWall2+cy(l)*(fw(j,l,1)+fw(j,l,2)+fw(j,l,5)+fw(j,l,6))
@@ -1672,20 +1672,20 @@ enddo
                 Enddo
             CASE (wallESB) !direction8
                 Do l=1,Nc8
-                    f(k,l,2)=2.d0*f(k+1,l,2)-f(k+2,l,2)
-                    f(k,l,3)=2.d0*f(k+1,l,3)-f(k+2,l,3)
-                    f(k,l,6)=2.d0*f(k+1,l,6)-f(k+2,l,6)
-                    f(k,l,7)=2.d0*f(k+1,l,7)-f(k+2,l,7)
+                    f(k,l,2)=extCoef(i,1)*f(k+1,l,2)+extCoef(i,2)*f(k+2,l,2)
+                    f(k,l,3)=extCoef(i,1)*f(k+1,l,3)+extCoef(i,2)*f(k+2,l,3)
+                    f(k,l,6)=extCoef(i,1)*f(k+1,l,6)+extCoef(i,2)*f(k+2,l,6)
+                    f(k,l,7)=extCoef(i,1)*f(k+1,l,7)+extCoef(i,2)*f(k+2,l,7)
 
-                    fw(j,l,1)=2.d0*f(k-Nxtotal,l,1)-f(k-2*Nxtotal,l,1)
-                    fw(j,l,2)=2.d0*f(k-Nxtotal,l,2)-f(k-2*Nxtotal,l,2)
-                    fw(j,l,5)=2.d0*f(k-Nxtotal,l,5)-f(k-2*Nxtotal,l,5)
-                    fw(j,l,6)=2.d0*f(k-Nxtotal,l,6)-f(k-2*Nxtotal,l,6)
+                    fw(j,l,1)=extCoef(i,1)*f(k-Nxtotal,l,1)+extCoef(i,2)*f(k-2*Nxtotal,l,1)
+                    fw(j,l,2)=extCoef(i,1)*f(k-Nxtotal,l,2)+extCoef(i,2)*f(k-2*Nxtotal,l,2)
+                    fw(j,l,5)=extCoef(i,1)*f(k-Nxtotal,l,5)+extCoef(i,2)*f(k-2*Nxtotal,l,5)
+                    fw(j,l,6)=extCoef(i,1)*f(k-Nxtotal,l,6)+extCoef(i,2)*f(k-2*Nxtotal,l,6)
 
-                    fwZ(l,1)=2.d0*f(k-Nxytotal,l,1)-f(k-2*Nxytotal,l,1)
-                    fwZ(l,2)=2.d0*f(k-Nxytotal,l,2)-f(k-2*Nxytotal,l,2)
-                    fwZ(l,3)=2.d0*f(k-Nxytotal,l,3)-f(k-2*Nxytotal,l,3)
-                    fwZ(l,4)=2.d0*f(k-Nxytotal,l,4)-f(k-2*Nxytotal,l,4)
+                    fwZ(l,1)=extCoef(i,1)*f(k-Nxytotal,l,1)+extCoef(i,2)*f(k-2*Nxytotal,l,1)
+                    fwZ(l,2)=extCoef(i,1)*f(k-Nxytotal,l,2)+extCoef(i,2)*f(k-2*Nxytotal,l,2)
+                    fwZ(l,3)=extCoef(i,1)*f(k-Nxytotal,l,3)+extCoef(i,2)*f(k-2*Nxytotal,l,3)
+                    fwZ(l,4)=extCoef(i,1)*f(k-Nxytotal,l,4)+extCoef(i,2)*f(k-2*Nxytotal,l,4)
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,2)+f(k,l,3)+f(k,l,6)+f(k,l,7))
                     RhoWall2=RhoWall2+cy(l)*(fw(j,l,1)+fw(j,l,2)+fw(j,l,5)+fw(j,l,6))
