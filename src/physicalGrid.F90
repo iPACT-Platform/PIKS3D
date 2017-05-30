@@ -192,7 +192,21 @@ contains
         Close(IMAGEFILE)
 
         !-----------------------------------------------------------------
-        !repeat the base block for weak scaling efficiency study. 
+        ! Calculate real porosity, before drill
+        !-----------------------------------------------------------------
+        icount = 0
+        do k = zmin, zmax
+            do j = ymin, ymax
+                do i = xmin+fluidlayer, xmax-fluidlayer
+                    if (array3D(i,j,k) == fluid) then
+                        icount = icount + 1
+                    endif
+                enddo
+            enddo
+        enddo
+
+        !-----------------------------------------------------------------
+        ! Repeat the base block for weak scaling efficiency study. 
         !-----------------------------------------------------------------
         do k = 0, block_repz-1
         do j = 0, block_repy-1
@@ -226,7 +240,21 @@ contains
         enddo
 
         !-----------------------------------------------------------------
-        ! drill the small pores (change array3Dg)
+        ! Calculate real porosity, before drill
+        !-----------------------------------------------------------------
+        icount = 0
+        do k = zmin, zmax
+            do j = ymin, ymax
+                do i = xmin+fluidlayer, xmax-fluidlayer
+                    if (array3Dg(i,j,k) == fluid) then
+                        icount = icount + 1
+                    endif
+                enddo
+            enddo
+        enddo
+
+        !-----------------------------------------------------------------
+        ! 1st round drill the small pores (change array3Dg)
         !-----------------------------------------------------------------
         do k=1,Nz
             do j=1,Ny
@@ -255,8 +283,22 @@ contains
             enddo !j
         enddo !k
 
+        !-----------------------------------------------------------------   
+        ! 1st round set ghost to fluid temporarily
         !-----------------------------------------------------------------
-        ! Remove 1-layer-thickness wall 
+        do k=zmin-ghostLayers,zmax+ghostLayers
+            do j=ymin-ghostLayers,ymax+ghostLayers
+                do i=xmin-ghostLayers,xmax+ghostLayers
+                    if(k<zmin .or. k>zmax .or. j<ymin .or. &
+                       j>ymax .or. i<xmin .or. i>xmax) then ! ghost layers
+                        array3Dg(i,j,k) = fluid
+                    endif
+                enddo
+            enddo
+        enddo
+
+        !-----------------------------------------------------------------
+        ! 1st round remove 1-layer-thickness wall 
         !-----------------------------------------------------------------
         Do k=1,Nz
           Do j=1,Ny
@@ -271,6 +313,95 @@ contains
             Enddo
           Enddo
         Enddo  
+
+        !-----------------------------------------------------------------   
+        ! 1st round set ghost back to ghost
+        !-----------------------------------------------------------------
+        do k=zmin-ghostLayers,zmax+ghostLayers
+            do j=ymin-ghostLayers,ymax+ghostLayers
+                do i=xmin-ghostLayers,xmax+ghostLayers
+                    if(k<zmin .or. k>zmax .or. j<ymin .or. &
+                       j>ymax .or. i<xmin .or. i>xmax) then ! ghost layers
+                        array3Dg(i,j,k) = ghost
+                    endif
+                enddo
+            enddo
+        enddo
+
+        !-----------------------------------------------------------------
+        ! 2nd round drill the small pores (change array3Dg)
+        !-----------------------------------------------------------------
+        do k=1,Nz
+            do j=1,Ny
+                do i=2,Nx-1
+                    if(array3Dg(i,j,k) == fluid) then
+                        if ((array3Dg(i+1,j,k) /=fluid .and. &
+                             array3Dg(i-1,j,k) /= fluid) .or. &
+                            (array3Dg(i,j+1,k) /=fluid .and. &
+                             array3Dg(i,j-1,k) /= fluid) .or. &
+                            (array3Dg(i,j,k+1) /=fluid .and. &
+                             array3Dg(i,j,k-1) /= fluid) ) then
+                            if (j==Ny) then
+                                if (k==Nz) then
+                                    array3Dg(i:i+1,j-1:j,k-1:k) = fluid
+                                else
+                                    array3Dg(i:i+1,j-1:j,k:k+1) = fluid
+                                endif
+                            else if (k==Nz) then
+                                array3Dg(i:i+1,j:j+1,k-1:k) = fluid
+                            else
+                                array3Dg(i:i+1,j:j+1,k:k+1) = fluid
+                            endif
+                        endif
+                    endif !fluid
+                enddo !i
+            enddo !j
+        enddo !k
+
+        !-----------------------------------------------------------------   
+        ! 2nd round set ghost to fluid temporarily
+        !-----------------------------------------------------------------
+        do k=zmin-ghostLayers,zmax+ghostLayers
+            do j=ymin-ghostLayers,ymax+ghostLayers
+                do i=xmin-ghostLayers,xmax+ghostLayers
+                    if(k<zmin .or. k>zmax .or. j<ymin .or. &
+                       j>ymax .or. i<xmin .or. i>xmax) then ! ghost layers
+                        array3Dg(i,j,k) = fluid
+                    endif
+                enddo
+            enddo
+        enddo
+
+        !-----------------------------------------------------------------
+        ! 2nd round remove 1-layer-thickness wall 
+        !-----------------------------------------------------------------
+        Do k=1,Nz
+          Do j=1,Ny
+            Do i=1,Nx
+              If (array3Dg(i,j,k)==solid) then
+                If(   ((array3Dg(i+1,j,k)==fluid).AND.(array3Dg(i-1,j,k)==fluid)) &
+                  .OR.((array3Dg(i,j+1,k)==fluid).AND.(array3Dg(i,j-1,k)==fluid))&
+                  .OR.((array3Dg(i,j,k+1)==fluid).AND.(array3Dg(i,j,k-1)==fluid))) then
+                    array3Dg(i,j,k)=fluid
+                Endif       
+              Endif
+            Enddo
+          Enddo
+        Enddo  
+
+        !-----------------------------------------------------------------   
+        ! 2nd round set ghost back to ghost
+        !-----------------------------------------------------------------
+        do k=zmin-ghostLayers,zmax+ghostLayers
+            do j=ymin-ghostLayers,ymax+ghostLayers
+                do i=xmin-ghostLayers,xmax+ghostLayers
+                    if(k<zmin .or. k>zmax .or. j<ymin .or. &
+                       j>ymax .or. i<xmin .or. i>xmax) then ! ghost layers
+                        array3Dg(i,j,k) = ghost
+                    endif
+                enddo
+            enddo
+        enddo
 
         !-----------------------------------------------------------------
         ! revoving wall node that near the communication boundary
@@ -303,7 +434,6 @@ contains
         !    enddo
         !  enddo
         !enddo
-
 
         !-----------------------------------------------------------------
         ! reset array3D, since array3Dg has now been cleaned
