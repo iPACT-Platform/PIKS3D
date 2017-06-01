@@ -92,7 +92,7 @@ contains
         dims(3)     = mpi_zdim
         periodic(1) = .true.
         periodic(2) = .false.
-        periodic(2) = .false.
+        periodic(3) = .false.
         reorder     = .true.
         
         !Create the new virtual connectivity grid
@@ -141,7 +141,7 @@ contains
           zu = zmin + complete*(mpi_coords(3) + 1) + partial - 1
         END IF
         IF(MOD(mpi_coords(3) + 1,dims(3)) == 0) zu = zu + 1
-        
+            
         !Ghost layers
         xlg = xl - ghostLayers
         xug = xu + ghostLayers

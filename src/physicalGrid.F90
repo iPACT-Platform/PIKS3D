@@ -192,20 +192,6 @@ contains
         Close(IMAGEFILE)
 
         !-----------------------------------------------------------------
-        ! Calculate real porosity, before drill
-        !-----------------------------------------------------------------
-        icount = 0
-        do k = zmin, zmax
-            do j = ymin, ymax
-                do i = xmin+fluidlayer, xmax-fluidlayer
-                    if (array3D(i,j,k) == fluid) then
-                        icount = icount + 1
-                    endif
-                enddo
-            enddo
-        enddo
-
-        !-----------------------------------------------------------------
         ! Repeat the base block for weak scaling efficiency study. 
         !-----------------------------------------------------------------
         do k = 0, block_repz-1
@@ -240,18 +226,37 @@ contains
         enddo
 
         !-----------------------------------------------------------------
-        ! Calculate real porosity, before drill
+        ! revoving wall node that near the communication boundary
+        ! NOTE: 2017-5-4
+        !   the which_corner bug has been found, so no need now
         !-----------------------------------------------------------------
-        icount = 0
-        do k = zmin, zmax
-            do j = ymin, ymax
-                do i = xmin+fluidlayer, xmax-fluidlayer
-                    if (array3Dg(i,j,k) == fluid) then
-                        icount = icount + 1
-                    endif
-                enddo
-            enddo
-        enddo
+        !                      |                                        
+        !       # # # # # # O *|*                                       
+        !       # # # # # # O *|*                                       
+        !       * # # # # # O *|*                                       
+        !       * * O O O O * *|*                                       
+        !       * * * * * * * *|*                                       
+        !                                                                
+        ! NOTE: O type wall points need to be change to fluid
+        !       The same role applys to Y/Z commu. boundary
+        !-----------------------------------------------------------------
+        !print*, "Removing the wall node near the communication boundary"
+        !do k=zl,zu
+        !  do j=yl,yu
+        !    do i=xl,xu
+        !      if(array3Dg(i,j,k) == solid) then
+        !        if ( (k==(zl+1) .and. array3Dg(i,j,k-1)==fluid) &
+        !        .or. (k==(zu-1) .and. array3Dg(i,j,k+1)==fluid) &
+        !        .or. (j==(yl+1) .and. array3Dg(i,j-1,k)==fluid) &
+        !        .or. (j==(yu-1) .and. array3Dg(i,j+1,k)==fluid) &
+        !        .or. (i==(xl+1) .and. array3Dg(i-1,j,k)==fluid) &
+        !        .or. (i==(xu-1) .and. array3Dg(i+1,j,k)==fluid) ) then
+        !          array3Dg(i,j,k) = fluid
+        !        endif
+        !      endif
+        !    enddo
+        !  enddo
+        !enddo
 
         !-----------------------------------------------------------------
         ! 1st round drill the small pores (change array3Dg)
@@ -403,37 +408,6 @@ contains
             enddo
         enddo
 
-        !-----------------------------------------------------------------
-        ! revoving wall node that near the communication boundary
-        ! NOTE: 2017-5-4
-        !   the which_corner bug has been found, so no need now
-        !-----------------------------------------------------------------
-        !                      |                                        
-        !       # # # # # # O *|*                                       
-        !       # # # # # # O *|*                                       
-        !       * # # # # # O *|*                                       
-        !       * * O O O O * *|*                                       
-        !       * * * * * * * *|*                                       
-        !                                                                
-        ! NOTE: O type wall points need to be change to fluid
-        !       The same role applys to Y/Z commu. boundary
-        !-----------------------------------------------------------------
-        !do k=zl,zu
-        !  do j=yl,yu
-        !    do i=xl,xu
-        !      if(array3Dg(i,j,k) == solid) then
-        !        if ( (k==(zl+1) .and. array3Dg(i,j,k-1)==fluid) &
-        !        .or. (k==(zu-1) .and. array3Dg(i,j,k+1)==fluid) &
-        !        .or. (j==(yl+1) .and. array3Dg(i,j-1,k)==fluid) &
-        !        .or. (j==(yu-1) .and. array3Dg(i,j+1,k)==fluid) &
-        !        .or. (i==(xl+1) .and. array3Dg(i-1,j,k)==fluid) &
-        !        .or. (i==(xu-1) .and. array3Dg(i+1,j,k)==fluid) ) then
-        !          array3Dg(i,j,k) = fluid
-        !        endif
-        !      endif
-        !    enddo
-        !  enddo
-        !enddo
 
         !-----------------------------------------------------------------
         ! reset array3D, since array3Dg has now been cleaned
