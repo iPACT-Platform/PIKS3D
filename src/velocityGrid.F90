@@ -87,6 +87,11 @@ contains
 
         allocate(cx(Nc8), cy(Nc8), cz(Nc8), w(Nc8))
         allocate(oppositeX(Nc), oppositeY(Nc), oppositeZ(Nc))
+
+        ! BUG find 2017-06-09
+        do l=1,Nc_fundamental
+            xi(l) = xi(l)*dsqrt(2.d0)
+        enddo
         
         Do l=1,Nc_fundamental
             Do m=1,Nc_fundamental

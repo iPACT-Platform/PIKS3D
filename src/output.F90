@@ -90,7 +90,7 @@ contains
             ! debug
             massLocal = (massInner + massSuth + massNoth + massFrnt + massBack &
                 + massSB + massSF + massNB + massNF) &
-                /PressDrop/(1.d0/Ref_L)**2
+                *sqrt(1.d0/2.d0)/PressDrop/(1.d0/Ref_L)**2
                 !+ massSB + massSF + massNB + massNF)*dsqrt(1.d0/2.d0)*4.d0/1.d0
 
             ! reduction

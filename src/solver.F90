@@ -115,7 +115,7 @@ module solver
                 f(k-Nxytotal,l,1)=f(k-Nxytotal,l,7)
             endif
 
-            fEq=w(l)*(Rho(k)+2.d0*(cx(l)*Ux(k)+cy(l)*Uy(k)+cz(l)*Uz(k)))
+            fEq=w(l)*(Rho(k)+1.d0*(cx(l)*Ux(k)+cy(l)*Uy(k)+cz(l)*Uz(k)))
             f(k,l,1)=(mu*(fEq-0.5d0*f(k,l,1)) &
             &        + cx(l)*coef1(i,2)*f(k-1,l,1) &
             &        + cx(l)*coef1(i,3)*f(k-2,l,1) &
@@ -160,7 +160,7 @@ module solver
                 f(k-Nxytotal,l,2)=f(k-Nxytotal,l,8)
             end if
 
-            fEq=w(l)*(Rho(k)+2.d0*(-cx(l)*Ux(k)+cy(l)*Uy(k)+cz(l)*Uz(k)))
+            fEq=w(l)*(Rho(k)+1.d0*(-cx(l)*Ux(k)+cy(l)*Uy(k)+cz(l)*Uz(k)))
             f(k,l,2)=(mu*(fEq-0.5d0*f(k,l,2)) &
             &        - cx(l)*coef2(i,2)*f(k+1,l,2) &
             &        - cx(l)*coef2(i,3)*f(k+2,l,2) &
@@ -204,7 +204,7 @@ module solver
                 f(k-Nxytotal,l,3)=f(k-Nxytotal,l,5)
             endif
 
-            fEq=w(l)*(Rho(k)+2.d0*(-cx(l)*Ux(k)-cy(l)*Uy(k)+cz(l)*Uz(k)))
+            fEq=w(l)*(Rho(k)+1.d0*(-cx(l)*Ux(k)-cy(l)*Uy(k)+cz(l)*Uz(k)))
             f(k,l,3)=(mu*(fEq-0.5d0*f(k,l,3)) &
             &        - cx(l)*coef3(i,2)*f(k+1,l,3) &
             &        - cx(l)*coef3(i,3)*f(k+2,l,3) &
@@ -248,7 +248,7 @@ module solver
                 f(k-Nxytotal,l,4)=f(k-Nxytotal,l,6) 
             endif
 
-            fEq=w(l)*(Rho(k)+2.d0*(cx(l)*Ux(k)-cy(l)*Uy(k)+cz(l)*Uz(k)))
+            fEq=w(l)*(Rho(k)+1.d0*(cx(l)*Ux(k)-cy(l)*Uy(k)+cz(l)*Uz(k)))
             f(k,l,4)=(mu*(fEq-0.5d0*f(k,l,4)) &
             &        + cx(l)*coef4(i,2)*f(k-1,l,4) &
             &        + cx(l)*coef4(i,3)*f(k-2,l,4) &
@@ -292,7 +292,7 @@ module solver
                 f(k+Nxytotal,l,5)=f(k+Nxytotal,l,3)
             endif
 
-            fEq=w(l)*(Rho(k)+2.d0*(cx(l)*Ux(k)+cy(l)*Uy(k)-cz(l)*Uz(k)))
+            fEq=w(l)*(Rho(k)+1.d0*(cx(l)*Ux(k)+cy(l)*Uy(k)-cz(l)*Uz(k)))
             f(k,l,5)=(mu*(fEq-0.5d0*f(k,l,5)) &
             &        + cx(l)*coef5(i,2)*f(k-1,l,5) &
             &        + cx(l)*coef5(i,3)*f(k-2,l,5) &
@@ -336,7 +336,7 @@ module solver
                 f(k+Nxytotal,l,6)=f(k+Nxytotal,l,4)
             endif
 
-            fEq=w(l)*(Rho(k)+2.d0*(-cx(l)*Ux(k)+cy(l)*Uy(k)-cz(l)*Uz(k)))
+            fEq=w(l)*(Rho(k)+1.d0*(-cx(l)*Ux(k)+cy(l)*Uy(k)-cz(l)*Uz(k)))
             f(k,l,6)=(mu*(fEq-0.5d0*f(k,l,6)) &
             &        - cx(l)*coef6(i,2)*f(k+1,l,6) &
             &        - cx(l)*coef6(i,3)*f(k+2,l,6) &
@@ -380,7 +380,7 @@ module solver
                 f(k+Nxytotal,l,7)=f(k+Nxytotal,l,1)
             endif
 
-            fEq=w(l)*(Rho(k)+2.d0*(-cx(l)*Ux(k)-cy(l)*Uy(k)-cz(l)*Uz(k)))
+            fEq=w(l)*(Rho(k)+1.d0*(-cx(l)*Ux(k)-cy(l)*Uy(k)-cz(l)*Uz(k)))
             f(k,l,7)=(mu*(fEq-0.5d0*f(k,l,7)) &
             &        - cx(l)*coef7(i,2)*f(k+1,l,7) &
             &        - cx(l)*coef7(i,3)*f(k+2,l,7) &
@@ -424,7 +424,7 @@ module solver
                 f(k+Nxytotal,l,8)=f(k+Nxytotal,l,2)
             endif
 
-            fEq=w(l)*(Rho(k)+2.d0*(cx(l)*Ux(k)-cy(l)*Uy(k)-cz(l)*Uz(k)))
+            fEq=w(l)*(Rho(k)+1.d0*(cx(l)*Ux(k)-cy(l)*Uy(k)-cz(l)*Uz(k)))
             f(k,l,8)=(mu*(fEq-0.5d0*f(k,l,8)) &
             &        + cx(l)*coef8(i,2)*f(k-1,l,8) &
             &        + cx(l)*coef8(i,3)*f(k-2,l,8) &
