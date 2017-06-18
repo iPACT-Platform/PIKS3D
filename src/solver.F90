@@ -23,15 +23,14 @@ module solver
         implicit none
         include "mpif.h"
 
-        integer :: i, j, k, l, ii, jj, kk
+        integer :: i, j, k, l, ii, jj, kk, m
         integer :: localidMsnd, localidPsnd, localidMrcv, localidPrcv, packid
         INTEGER :: MPI_ERR
         INTEGER :: MPI_REQ_X(4), MPI_REQ_Y(4), MPI_REQ_Z(4)
         INTEGER :: MPI_STAT(MPI_STATUS_SIZE,6)
-        integer :: xfsize, yfsize, zfsize
+        integer :: xfsize, yfsize, zfsize, locB
         double precision :: fEq, RhoWall, RhoWall2, RhoWall3
         double precision, dimension(Nc8,1:8) :: fwZ
-        integer :: c3CorMsnd, c3CorMrcv, c3CorPsnd, c3CorPrcv, locB
         
         ! for mpi error handling
         integer :: errMsgLen, errTmp
@@ -48,7 +47,7 @@ module solver
 
 !$OMP PARALLEL &
 !$OMP DEFAULT(SHARED) &
-!$OMP PRIVATE(l, i, j, k, ii, jj, kk, fEq, RhoWall, RhoWall2, RhoWall3)&
+!$OMP PRIVATE(l, i, j, k,m, ii, jj, kk, fEq, RhoWall, RhoWall2, RhoWall3)&
 !$OMP PRIVATE(fwZ)&
 !$OMP PRIVATE(localidPsnd, localidPrcv, localidMsnd, localidMrcv, packid)
 
@@ -444,7 +443,7 @@ module solver
         CALL MPI_WAITALL(4, MPI_REQ_Z, MPI_STAT, MPI_ERR)
 !$OMP END SINGLE 
 
-!$OMP DO 
+!$OMP DO COLLAPSE(3)
     ! pack/unpack X dir buffer
     do k = 1,Nztotal
         do j = 1, Nytotal
@@ -469,56 +468,9 @@ module solver
             enddo !i
         enddo !j
     enddo !k
-!$OMP END DO
+!$OMP END DO NOWAIT
 
-!$OMP SINGLE
-! packing/unpacking f_[west|east]_[snd|rcv]
-c3CorMsnd = 0
-c3CorMrcv = 0
-c3CorPsnd = 0
-c3CorPrcv = 0
-locB = 0
-
-! Cannot use OMP as c3CorMsnd is a counter!!!
-!!$OMP DO 
-do k = zlg, zug
-    do j = ylg, yug
-        do i = 1, ghostLayers
-            if(any(only3CornerLabels(:) == image(xlg+i-1,j,k))) then
-                c3CorMrcv = c3CorMrcv+1
-                do l = 1,8
-                    locB = xfsize+(c3CorMrcv-1)*Nc+(l-1)*Nc8
-                    fw(which_corner(xlg+i-1,j,k),:,l) = f_west_rcv(locB+1:locB+Nc8)
-                enddo
-            endif
-            if(any(only3CornerLabels(:) == image(xl+i-1,j,k))) then
-                c3CorMsnd = c3CorMsnd+1
-                do l = 1,8
-                    locB = xfsize+(c3CorMsnd-1)*Nc+(l-1)*Nc8
-                    f_west_snd(locB+1:locB+Nc8) = fw(which_corner(xl+i-1,j,k),:,l)
-                enddo
-            endif
-            if(any(only3CornerLabels(:) == image(xu-2+i,j,k))) then
-                c3CorPsnd = c3CorPsnd+1
-                do l = 1,8
-                    locB = xfsize+(c3CorPsnd-1)*Nc+(l-1)*Nc8
-                    f_east_snd(locB+1:locB+Nc8) = fw(which_corner(xu-2+i,j,k),:,l)
-                enddo
-            endif
-            if(any(only3CornerLabels(:) == image(xu+i,j,k))) then
-                c3CorPrcv = c3CorPrcv+1
-                do l = 1,8
-                    locB = xfsize+(c3CorPrcv-1)*Nc+(l-1)*Nc8
-                    fw(which_corner(xu+i,j,k),:,l) = f_east_rcv(locB+1:locB+Nc8)
-                enddo
-            endif
-        enddo
-    enddo
-enddo
-!!$OMP END DO
-!$OMP END SINGLE
-
-!$OMP DO 
+!$OMP DO COLLAPSE(3)
     ! pack/unpack Y dir buffer
     do k = 1, Nztotal
         do j = 1, ghostLayers
@@ -541,54 +493,9 @@ enddo
             enddo !i
         enddo !j
     enddo !k
-!$OMP END DO
+!$OMP END DO NOWAIT
 
-!$OMP SINGLE
-! packing/unpacking f_[suth|noth]_[snd|rcv]
-c3CorMsnd = 0
-c3CorMrcv = 0
-c3CorPsnd = 0
-c3CorPrcv = 0
-locB = 0
-
-!!$OMP DO 
-do k = zlg, zug
-    do j = 1, ghostLayers
-        do i = xlg, xug
-            if(any(only3CornerLabels(:) == image(i,ylg+j-1,k))) then
-                c3CorMrcv = c3CorMrcv+1
-                do l = 1,8
-                    locB = yfsize+(c3CorMrcv-1)*Nc+(l-1)*Nc8
-                    fw(which_corner(i,ylg+j-1,k),:,l) = f_suth_rcv(locB+1:locB+Nc8)
-                enddo
-            endif
-            if(any(only3CornerLabels(:) == image(i,yl+j-1,k))) then
-                c3CorMsnd = c3CorMsnd+1
-                do l = 1,8
-                    locB = yfsize+(c3CorMsnd-1)*Nc+(l-1)*Nc8
-                    f_suth_snd(locB+1:locB+Nc8) = fw(which_corner(i,yl+j-1,k),:,l)
-                enddo
-            endif
-            if(any(only3CornerLabels(:) == image(i,yu-2+j,k))) then
-                c3CorPsnd = c3CorPsnd+1
-                do l = 1,8
-                    locB = yfsize+(c3CorPsnd-1)*Nc+(l-1)*Nc8
-                    f_noth_snd(locB+1:locB+Nc8) = fw(which_corner(i,yu-2+j,k),:,l)
-                enddo
-            endif
-            if(any(only3CornerLabels(:) == image(i,yu+j,k))) then
-                c3CorPrcv = c3CorPrcv+1
-                do l = 1,8
-                    locB = yfsize+(c3CorPrcv-1)*Nc+(l-1)*Nc8
-                    fw(which_corner(i,yu+j,k),:,l) = f_noth_rcv(locB+1:locB+Nc8)
-                enddo
-            endif
-        enddo
-    enddo
-enddo
-!!$OMP END DO
-!$OMP END SINGLE
-!$OMP DO 
+!$OMP DO COLLAPSE(3)
     ! pack/unpack Z dir buffer
     do k = 1, ghostLayers
         do j = 1, Nytotal
@@ -612,54 +519,151 @@ enddo
             enddo !i
         enddo !j
     enddo !k
-!$OMP END DO
+!$OMP END DO NOWAIT
 
 
-!$OMP SINGLE
-! packing/unpacking f_[back|frnt]_[snd|rcv]
-c3CorMsnd = 0
-c3CorMrcv = 0
-c3CorPsnd = 0
-c3CorPrcv = 0
-locB = 0
+!------------------------------------------------------------------------
+! pack/unpack 3-fold corners at west/east
+!------------------------------------------------------------------------
+!$OMP SECTIONS
+!$OMP SECTION
+!!$OMP DO
+    ! pack 3-fold corners send buffer at west
+    do m = 1, westN3corner_snd
+        do l = 1,8
+            locB = xfsize+(m-1)*Nc+(l-1)*Nc8
+            f_west_snd(locB+1:locB+Nc8) = fw(map3CorWsnd(m),:,l)
+        end do
+    end do
+!!$OMP ENDDO NOWAIT
 
-!!$OMP DO 
-do k = 1, ghostLayers
-    do j = ylg, yug
-        do i = xlg, xug
-            if(any(only3CornerLabels(:) == image(i,j,zlg+k-1))) then
-                c3CorMrcv = c3CorMrcv+1
-                do l = 1,8
-                    locB = zfsize+(c3CorMrcv-1)*Nc+(l-1)*Nc8
-                    fw(which_corner(i,j,zlg+k-1),:,l) = f_back_rcv(locB+1:locB+Nc8)
-                enddo
-            endif
-            if(any(only3CornerLabels(:) == image(i,j,zl+k-1))) then
-                c3CorMsnd = c3CorMsnd+1
-                do l = 1,8
-                    locB = zfsize+(c3CorMsnd-1)*Nc+(l-1)*Nc8
-                    f_back_snd(locB+1:locB+Nc8) = fw(which_corner(i,j,zl+k-1),:,l)
-                enddo
-            endif
-            if(any(only3CornerLabels(:) == image(i,j,zu-2+k))) then
-                c3CorPsnd = c3CorPsnd+1
-                do l = 1,8
-                    locB = zfsize+(c3CorPsnd-1)*Nc+(l-1)*Nc8
-                    f_frnt_snd(locB+1:locB+Nc8) = fw(which_corner(i,j,zu-2+k),:,l)
-                enddo
-            endif
-            if(any(only3CornerLabels(:) == image(i,j,zu+k))) then
-                c3CorPrcv = c3CorPrcv+1
-                do l = 1,8
-                    locB = zfsize+(c3CorPrcv-1)*Nc+(l-1)*Nc8
-                    fw(which_corner(i,j,zu+k),:,l) = f_frnt_rcv(locB+1:locB+Nc8)
-                enddo
-            endif
-        enddo
-    enddo
-enddo
-!!$OMP END DO
-!$OMP END SINGLE
+!$OMP SECTION
+!!$OMP DO
+    ! pack 3-fold corners send buffer at east
+    do m = 1, eastN3corner_snd
+        do l = 1,8
+            locB = xfsize+(m-1)*Nc+(l-1)*Nc8
+            f_east_snd(locB+1:locB+Nc8) = fw(map3CorEsnd(m),:,l)
+        end do
+    end do
+!!$OMP ENDDO NOWAIT
+
+!$OMP SECTION
+!!$OMP DO
+    ! unpack 3-fold corners rcv buffer at west
+    do m = 1, westN3corner_rcv
+        do l = 1,8
+            locB = xfsize+(m-1)*Nc+(l-1)*Nc8
+            fw(map3CorWrcv(m),:,l) = f_west_rcv(locB+1:locB+Nc8)
+        end do
+    end do
+!!$OMP ENDDO NOWAIT
+
+!$OMP SECTION
+!!$OMP DO
+    ! unpack 3-fold corners rcv buffer at east
+    do m = 1, eastN3corner_rcv
+        do l = 1,8
+            locB = xfsize+(m-1)*Nc+(l-1)*Nc8
+            fw(map3CorErcv(m),:,l) = f_east_rcv(locB+1:locB+Nc8)
+        end do
+    end do
+!!$OMP ENDDO NOWAIT
+
+!------------------------------------------------------------------------
+! pack/unpack 3-fold corners at noth/suth
+!------------------------------------------------------------------------
+!$OMP SECTION
+!!$OMP DO
+    ! pack 3-fold corners send buffer at suth
+    do m = 1, suthN3corner_snd
+        do l = 1,8
+            locB = xfsize+(m-1)*Nc+(l-1)*Nc8
+            f_suth_snd(locB+1:locB+Nc8) = fw(map3CorSsnd(m),:,l)
+        end do
+    end do
+!!$OMP ENDDO
+
+!$OMP SECTION
+!!$OMP DO
+    ! pack 3-fold corners send buffer at noth
+    do m = 1, nothN3corner_snd
+        do l = 1,8
+            locB = xfsize+(m-1)*Nc+(l-1)*Nc8
+            f_noth_snd(locB+1:locB+Nc8) = fw(map3CorNsnd(m),:,l)
+        end do
+    end do
+!!$OMP ENDDO
+
+!$OMP SECTION
+!!$OMP DO
+    ! unpack 3-fold corners rcv buffer at suth
+    do m = 1, suthN3corner_rcv
+        do l = 1,8
+            locB = xfsize+(m-1)*Nc+(l-1)*Nc8
+            fw(map3CorSrcv(m),:,l) = f_suth_rcv(locB+1:locB+Nc8)
+        end do
+    end do
+!!$OMP ENDDO
+
+!$OMP SECTION
+!!$OMP DO
+    ! unpack 3-fold corners rcv buffer at noth
+    do m = 1, nothN3corner_rcv
+        do l = 1,8
+            locB = xfsize+(m-1)*Nc+(l-1)*Nc8
+            fw(map3CorNrcv(m),:,l) = f_noth_rcv(locB+1:locB+Nc8)
+        end do
+    end do
+!!$OMP ENDDO
+
+!------------------------------------------------------------------------
+! pack/unpack 3-fold corners at back/frnt
+!------------------------------------------------------------------------
+!$OMP SECTION
+!!$OMP DO
+    ! pack 3-fold corners send buffer at back
+    do m = 1, backN3corner_snd
+        do l = 1,8
+            locB = xfsize+(m-1)*Nc+(l-1)*Nc8
+            f_back_snd(locB+1:locB+Nc8) = fw(map3CorBsnd(m),:,l)
+        end do
+    end do
+!!$OMP ENDDO NOWAIT
+
+!$OMP SECTION
+!!$OMP DO
+    ! pack 3-fold corners send buffer at frnt
+    do m = 1, frntN3corner_snd
+        do l = 1,8
+            locB = xfsize+(m-1)*Nc+(l-1)*Nc8
+            f_frnt_snd(locB+1:locB+Nc8) = fw(map3CorFsnd(m),:,l)
+        end do
+    end do
+!!$OMP ENDDO NOWAIT
+
+!$OMP SECTION
+!!$OMP DO
+    ! unpack 3-fold corners rcv buffer at back
+    do m = 1, backN3corner_rcv
+        do l = 1,8
+            locB = xfsize+(m-1)*Nc+(l-1)*Nc8
+            fw(map3CorBrcv(m),:,l) = f_back_rcv(locB+1:locB+Nc8)
+        end do
+    end do
+!!$OMP ENDDO NOWAIT
+
+!$OMP SECTION
+!!$OMP DO
+    ! unpack 3-fold corners rcv buffer at frnt
+    do m = 1, frntN3corner_rcv
+        do l = 1,8
+            locB = xfsize+(m-1)*Nc+(l-1)*Nc8
+            fw(map3CorFrcv(m),:,l) = f_frnt_rcv(locB+1:locB+Nc8)
+        end do
+    end do
+!!$OMP ENDDO NOWAIT
+!$OMP END SECTIONS
 
 !=======================================================================
 !     Boundary condition on the flat wall
