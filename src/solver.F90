@@ -1831,7 +1831,9 @@ module solver
 !> Update Macro
 !----------------------------------------------------
 !$OMP DO SCHEDULE(STATIC) 
-    Do k=1,Ntotal
+    !Do k=1,Ntotal
+    Do i=1,Nfluid
+        k=mapF(i)
         Rho(k)=0.d0
         Ux(k)=0.d0
         Uy(k)=0.d0
@@ -1842,8 +1844,6 @@ module solver
             Uy(k)=Uy(k)+cy(l)*(f(k,l,1)+f(k,l,2)-f(k,l,3)-f(k,l,4)+f(k,l,5)+f(k,l,6)-f(k,l,7)-f(k,l,8))
             Uz(k)=Uz(k)+cz(l)*(f(k,l,1)+f(k,l,2)+f(k,l,3)+f(k,l,4)-f(k,l,5)-f(k,l,6)-f(k,l,7)-f(k,l,8))
         End do
-
-
     End do
 !$OMP END DO 
 !$OMP END PARALLEL  

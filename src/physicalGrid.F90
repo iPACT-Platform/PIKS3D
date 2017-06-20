@@ -94,6 +94,8 @@ integer, parameter:: wallHasF(9) = (/ &
 integer :: Nstencil1, Nstencil2, Nstencil3, Nstencil4 !(group 1-4)
 integer :: Nstencil5, Nstencil6, Nstencil7, Nstencil8 !(group 5-8)
 
+integer :: Nfluid
+integer, allocatable, dimension(:) :: mapF
 
 double precision :: real_porosity
 
@@ -860,6 +862,32 @@ contains
         elseif (wallExtOrder /= 3) then
             PRINT*, "Error: wallExtOrder wroond shoud be [1|2|3]"
         endif
+
+        ! count fluid points
+        Nfluid = 0
+        Do k=zl,zu
+            Do j=yl,yu
+                Do i=xl,xu
+                    If (image(i,j,k)==fluid) then
+                        Nfluid=Nfluid+1
+                    End if
+                End do
+            End do
+        End do
+        allocate(mapF(Nfluid))
+
+        ! fill the map
+        Nfluid = 0
+        Do k=zl,zu
+            Do j=yl,yu
+                Do i=xl,xu
+                    If (image(i,j,k)==fluid) then
+                        Nfluid=Nfluid+1
+                        mapF(Nfluid) = (k-zlg)*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
+                    End if
+                End do
+            End do
+        End do
 
         !Direction 1
         bxl = xl
