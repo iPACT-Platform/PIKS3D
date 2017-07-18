@@ -811,8 +811,9 @@ contains
         do l=1, nWall
             localid = vecWall(l)
             k = zlg + localid/Nxytotal
-            j = ylg + (localid - (k-zlg)*Nxytotal)/Nytotal
-            i = xlg + localid - (k-zlg)*Nxytotal - (j-ylg)*Nytotal
+            j = ylg + (localid - (k-zlg)*Nxytotal)/Nxtotal
+            i = xlg + localid - (k-zlg)*Nxytotal - (j-ylg)*Nxtotal
+
             if(any(wallHasW(:) == image(i,j,k))) then
                 if(i==xl+1 .and. image(xl,j,k) == fluid) then
                     extCoef(l,1) = 1.d0
