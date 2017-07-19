@@ -32,6 +32,7 @@ contains
 
         ALLOCATE(f(Ntotal,Nc8,1:8))
 
+
         ALLOCATE(Rho(Ntotal), Ux(Ntotal), Uy(Ntotal), Uz(Ntotal))
 
         mu = dsqrt(PI/2.d0)/Kn

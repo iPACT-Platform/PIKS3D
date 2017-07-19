@@ -671,86 +671,6 @@ contains
         ! corners
         ALLOCATE(fw(nCorner, Nc8,1:8))
 
-        ! allocate maps for 3-fold corners
-        allocate(map3CorWsnd(westN3corner_snd))
-        allocate(map3CorWrcv(westN3corner_rcv))
-        allocate(map3CorEsnd(eastN3corner_snd))
-        allocate(map3CorErcv(eastN3corner_rcv))
-        allocate(map3CorSsnd(suthN3corner_snd))
-        allocate(map3CorSrcv(suthN3corner_rcv))
-        allocate(map3CorNsnd(nothN3corner_snd))
-        allocate(map3CorNrcv(nothN3corner_rcv))
-        allocate(map3CorBsnd(backN3corner_snd))
-        allocate(map3CorBrcv(backN3corner_rcv))
-        allocate(map3CorFsnd(frntN3corner_snd))
-        allocate(map3CorFrcv(frntN3corner_rcv))
-
-        ! construct the maps for 3-fold corners
-        eastN3corner_snd = 0
-        eastN3corner_rcv = 0
-        nothN3corner_snd = 0
-        nothN3corner_rcv = 0
-        frntN3corner_snd = 0
-        frntN3corner_rcv = 0
-        westN3corner_snd = 0
-        westN3corner_rcv = 0
-        suthN3corner_snd = 0
-        suthN3corner_rcv = 0
-        backN3corner_snd = 0
-        backN3corner_rcv = 0
-        do k=zlg, zug
-            do j=ylg, yug
-                do i=xlg, xug
-                    localid = (k-zlg)*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
-                    if(any(only3CornerLabels(:) == image(i,j,k))) then
-                        if (i.lt.xl) then
-                            westN3corner_rcv = westN3corner_rcv + 1
-                            map3CorWrcv(westN3corner_rcv) = localid
-                        elseif (i.gt.xu) then
-                            eastN3corner_rcv = eastN3corner_rcv + 1
-                            map3CorErcv(eastN3corner_rcv) = localid
-                        elseif (i.ge.xl .and. (i.lt.(xl+ghostLayers))) then
-                            westN3corner_snd = westN3corner_snd + 1
-                            map3CorWsnd(westN3corner_snd) = localid
-                        elseif (i.le.xu .and. (i.gt.(xu-ghostLayers))) then
-                            eastN3corner_snd = eastN3corner_snd + 1
-                            map3CorEsnd(eastN3corner_snd) = localid
-                        endif
-
-                        if (j.lt.yl) then
-                            suthN3corner_rcv = suthN3corner_rcv + 1
-                            map3CorSrcv(suthN3corner_rcv) = localid
-                        elseif (j.gt.yu) then
-                            nothN3corner_rcv = nothN3corner_rcv + 1
-                            map3CorNrcv(nothN3corner_rcv) = localid
-                        elseif (j.ge.yl .and. (j.lt.(yl+ghostLayers))) then
-                            suthN3corner_snd = suthN3corner_snd + 1
-                            map3CorSsnd(suthN3corner_snd) = localid
-                        elseif (j.le.yu .and. (j.gt.(yu-ghostLayers))) then
-                            nothN3corner_snd = nothN3corner_snd + 1
-                            map3CorNsnd(nothN3corner_snd) = localid
-                        endif
-
-                        if (k.lt.zl) then
-                            backN3corner_rcv = backN3corner_rcv + 1
-                            map3CorBrcv(backN3corner_rcv) = localid
-                        elseif (k.gt.zu) then
-                            frntN3corner_rcv = frntN3corner_rcv + 1
-                            map3CorFrcv(frntN3corner_rcv) = localid
-                        elseif (k.ge.zl .and. (k.lt.(zl+ghostLayers))) then
-                            backN3corner_snd = backN3corner_snd + 1
-                            map3CorBsnd(backN3corner_snd) = localid
-                        elseif (k.le.zu .and. (k.gt.(zu-ghostLayers))) then
-                            frntN3corner_snd = frntN3corner_snd + 1
-                            map3CorFsnd(frntN3corner_snd) = localid
-                        endif
-                    endif
-                enddo
-            enddo
-        enddo
-        !done constructing map
-
-
         ! correct the number of boundary processors' N3corner
         ! MPI_Waitall require the snd and rcv buffer sizes to be the same
         ! even though the Y and Z direction is not periodical
@@ -803,6 +723,89 @@ contains
         if(zl == zmin) backN3corner_rcv = backGlbN3corner_rcv
         if(zu == zmax) frntN3corner_rcv = frntGlbN3corner_rcv
 
+        ! allocate maps for 3-fold corners
+        allocate(map3CorWsnd(westN3corner_snd))
+        allocate(map3CorWrcv(westN3corner_rcv))
+        allocate(map3CorEsnd(eastN3corner_snd))
+        allocate(map3CorErcv(eastN3corner_rcv))
+        allocate(map3CorSsnd(suthN3corner_snd))
+        allocate(map3CorSrcv(suthN3corner_rcv))
+        allocate(map3CorNsnd(nothN3corner_snd))
+        allocate(map3CorNrcv(nothN3corner_rcv))
+        allocate(map3CorBsnd(backN3corner_snd))
+        allocate(map3CorBrcv(backN3corner_rcv))
+        allocate(map3CorFsnd(frntN3corner_snd))
+        allocate(map3CorFrcv(frntN3corner_rcv))
+
+        ! construct the maps for 3-fold corners
+        eastN3corner_snd = 0
+        eastN3corner_rcv = 0
+        nothN3corner_snd = 0
+        nothN3corner_rcv = 0
+        frntN3corner_snd = 0
+        frntN3corner_rcv = 0
+        westN3corner_snd = 0
+        westN3corner_rcv = 0
+        suthN3corner_snd = 0
+        suthN3corner_rcv = 0
+        backN3corner_snd = 0
+        backN3corner_rcv = 0
+        nCorner = 0
+        do k=zlg, zug
+            do j=ylg, yug
+                do i=xlg, xug
+                    localid = (k-zlg)*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
+                    if(any(only3CornerLabels(:) == image(i,j,k))) then
+                        nCorner = nCorner + 1
+                        if (i.lt.xl) then
+                            westN3corner_rcv = westN3corner_rcv + 1
+                            map3CorWrcv(westN3corner_rcv) = nCorner
+                        elseif (i.gt.xu) then
+                            eastN3corner_rcv = eastN3corner_rcv + 1
+                            map3CorErcv(eastN3corner_rcv) = nCorner
+                        elseif (i.ge.xl .and. (i.lt.(xl+ghostLayers))) then
+                            westN3corner_snd = westN3corner_snd + 1
+                            map3CorWsnd(westN3corner_snd) = nCorner
+                        elseif (i.le.xu .and. (i.gt.(xu-ghostLayers))) then
+                            eastN3corner_snd = eastN3corner_snd + 1
+                            map3CorEsnd(eastN3corner_snd) = nCorner
+                        endif
+
+                        if (j.lt.yl) then
+                            suthN3corner_rcv = suthN3corner_rcv + 1
+                            map3CorSrcv(suthN3corner_rcv) = nCorner
+                        elseif (j.gt.yu) then
+                            nothN3corner_rcv = nothN3corner_rcv + 1
+                            map3CorNrcv(nothN3corner_rcv) = nCorner
+                        elseif (j.ge.yl .and. (j.lt.(yl+ghostLayers))) then
+                            suthN3corner_snd = suthN3corner_snd + 1
+                            map3CorSsnd(suthN3corner_snd) = nCorner
+                        elseif (j.le.yu .and. (j.gt.(yu-ghostLayers))) then
+                            nothN3corner_snd = nothN3corner_snd + 1
+                            map3CorNsnd(nothN3corner_snd) = nCorner
+                        endif
+
+                        if (k.lt.zl) then
+                            backN3corner_rcv = backN3corner_rcv + 1
+                            map3CorBrcv(backN3corner_rcv) = nCorner
+                        elseif (k.gt.zu) then
+                            frntN3corner_rcv = frntN3corner_rcv + 1
+                            map3CorFrcv(frntN3corner_rcv) = nCorner
+                        elseif (k.ge.zl .and. (k.lt.(zl+ghostLayers))) then
+                            backN3corner_snd = backN3corner_snd + 1
+                            map3CorBsnd(backN3corner_snd) = nCorner
+                        elseif (k.le.zu .and. (k.gt.(zu-ghostLayers))) then
+                            frntN3corner_snd = frntN3corner_snd + 1
+                            map3CorFsnd(frntN3corner_snd) = nCorner
+                        endif
+                    endif
+                enddo
+            enddo
+        enddo
+        !done constructing map
+
+
+
         ! allocate the array for wall extrapolation coefficient
         ALLOCATE(extCoef(nWall,2))
         ! default 2nd order
@@ -813,7 +816,6 @@ contains
             k = zlg + localid/Nxytotal
             j = ylg + (localid - (k-zlg)*Nxytotal)/Nxtotal
             i = xlg + localid - (k-zlg)*Nxytotal - (j-ylg)*Nxtotal
-
             if(any(wallHasW(:) == image(i,j,k))) then
                 if(i==xl+1 .and. image(xl,j,k) == fluid) then
                     extCoef(l,1) = 1.d0

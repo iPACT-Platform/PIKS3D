@@ -36,13 +36,13 @@ CALL setupFlow
 CALL allocateBuf
 
 
+
 ! set error
 error = 1.D0
 startTime = MPI_Wtime()
 ! Main iteration loop
 DO iStep = 1, MaxStep
 ! Save data if required
-    ! print*, "Before iterate"
     CALL iterate
     !if(proc==master) PRINT*, "STEP: ", iStep
     IF ( MOD(iStep,chkConvergeStep) == 0 ) CALL chkConverge

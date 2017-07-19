@@ -495,6 +495,7 @@ module solver
     enddo !k
 !$OMP END DO NOWAIT
 
+
 !$OMP DO COLLAPSE(3)
     ! pack/unpack Z dir buffer
     do k = 1, ghostLayers
@@ -578,7 +579,7 @@ module solver
     ! pack 3-fold corners send buffer at suth
     do m = 1, suthN3corner_snd
         do l = 1,8
-            locB = xfsize+(m-1)*Nc+(l-1)*Nc8
+            locB = yfsize+(m-1)*Nc+(l-1)*Nc8
             f_suth_snd(locB+1:locB+Nc8) = fw(map3CorSsnd(m),:,l)
         end do
     end do
@@ -589,7 +590,7 @@ module solver
     ! pack 3-fold corners send buffer at noth
     do m = 1, nothN3corner_snd
         do l = 1,8
-            locB = xfsize+(m-1)*Nc+(l-1)*Nc8
+            locB = yfsize+(m-1)*Nc+(l-1)*Nc8
             f_noth_snd(locB+1:locB+Nc8) = fw(map3CorNsnd(m),:,l)
         end do
     end do
@@ -600,7 +601,7 @@ module solver
     ! unpack 3-fold corners rcv buffer at suth
     do m = 1, suthN3corner_rcv
         do l = 1,8
-            locB = xfsize+(m-1)*Nc+(l-1)*Nc8
+            locB = yfsize+(m-1)*Nc+(l-1)*Nc8
             fw(map3CorSrcv(m),:,l) = f_suth_rcv(locB+1:locB+Nc8)
         end do
     end do
@@ -611,7 +612,7 @@ module solver
     ! unpack 3-fold corners rcv buffer at noth
     do m = 1, nothN3corner_rcv
         do l = 1,8
-            locB = xfsize+(m-1)*Nc+(l-1)*Nc8
+            locB = yfsize+(m-1)*Nc+(l-1)*Nc8
             fw(map3CorNrcv(m),:,l) = f_noth_rcv(locB+1:locB+Nc8)
         end do
     end do
@@ -625,7 +626,7 @@ module solver
     ! pack 3-fold corners send buffer at back
     do m = 1, backN3corner_snd
         do l = 1,8
-            locB = xfsize+(m-1)*Nc+(l-1)*Nc8
+            locB = zfsize+(m-1)*Nc+(l-1)*Nc8
             f_back_snd(locB+1:locB+Nc8) = fw(map3CorBsnd(m),:,l)
         end do
     end do
@@ -636,7 +637,7 @@ module solver
     ! pack 3-fold corners send buffer at frnt
     do m = 1, frntN3corner_snd
         do l = 1,8
-            locB = xfsize+(m-1)*Nc+(l-1)*Nc8
+            locB = zfsize+(m-1)*Nc+(l-1)*Nc8
             f_frnt_snd(locB+1:locB+Nc8) = fw(map3CorFsnd(m),:,l)
         end do
     end do
@@ -647,7 +648,7 @@ module solver
     ! unpack 3-fold corners rcv buffer at back
     do m = 1, backN3corner_rcv
         do l = 1,8
-            locB = xfsize+(m-1)*Nc+(l-1)*Nc8
+            locB = zfsize+(m-1)*Nc+(l-1)*Nc8
             fw(map3CorBrcv(m),:,l) = f_back_rcv(locB+1:locB+Nc8)
         end do
     end do
@@ -658,7 +659,7 @@ module solver
     ! unpack 3-fold corners rcv buffer at frnt
     do m = 1, frntN3corner_rcv
         do l = 1,8
-            locB = xfsize+(m-1)*Nc+(l-1)*Nc8
+            locB = zfsize+(m-1)*Nc+(l-1)*Nc8
             fw(map3CorFrcv(m),:,l) = f_frnt_rcv(locB+1:locB+Nc8)
         end do
     end do
