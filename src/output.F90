@@ -335,8 +335,6 @@ contains
                 enddo
             enddo
         enddo
-        print*, "fluidNodeCount = ", fluidNodeCount
-        print*, "totalNodeCount = ", totalNodeCount
 
         ! do MPI gather put fluidNodeCount to fluidNodeCountAll
         call MPI_GATHER(totalNodeCount, 1, MPI_INTEGER, totalNodeCountAll, 1, &
