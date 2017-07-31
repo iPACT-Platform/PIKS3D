@@ -34,7 +34,7 @@ CALL setupPhysicalGrid
 ! allocate flow data array and initialize
 CALL setupFlow
 CALL allocateBuf
-CALL saveNodeCounts
+!CALL saveNodeCounts
 
 
 
