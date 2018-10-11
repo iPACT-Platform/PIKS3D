@@ -13,12 +13,7 @@ For the compelete list of environment and aliases see `conf/bashrc`
 
 ### How to compile for the first time and the re-compilation
 
-Supposing your are current in the project directory (the one with src and config direcories in it),
-Copy the reference configure file for cmake to the current direcotry and name it as `CMakeListst.txt`.
-
-```bash
-cp conf/CMakeLists.txt.minh CMakeListst.txt
-```
+Supposing your are current in the project directory (the one with src and config direcories in it)
 
 #### For the Release mode compilation
 
@@ -49,6 +44,9 @@ or even more simply using the alias we have set,
 mb
 ```
 which means make for build. The actural command mb issues can be seen by `alias mb`. 
+
+To disable use of OpenMP, you can add the flag `-DDVM_OPENMP=OFF` to the
+CMake command.
 
 #### For the Debug mode compilation
 For Debug build, similarly, start from the project directory
