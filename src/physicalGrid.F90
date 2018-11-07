@@ -2,11 +2,11 @@
 !> @brief Physical space configurations
 !=======================================================================
 module physicalGrid
-IMPLICIT NONE
-SAVE
+implicit none
+save
 !--------------------------------------------------------------------
-! Domain size
-!domain defination, to be read from NML: velocityNml
+! domain size
+!domain defination, to be read from nml: velocityNml
 !--------------------------------------------------------------------
 ! Total domain size (the raw image dimension with possible repeation)
 integer :: Nx, Ny, Nz
@@ -29,7 +29,7 @@ integer :: Nx_base, Ny_base, Nz_base
 
 integer, parameter :: ghostLayers = 2
 integer, parameter :: translate = 0
-integer, parameter :: IMAGEFILE = 20
+integer, parameter :: IMAGEfile = 20
 
 ! need to be determined from mpi cood
 integer :: Nxtotal, Nytotal, Nztotal, Nxytotal, Nxsub, Nysub, Nzsub, Ntotal
@@ -102,14 +102,14 @@ double precision :: real_porosity
 ! number of wall points
 integer :: nWall 
 
-integer, DIMENSION(:), ALLOCATABLE :: vecWall
-integer, DIMENSION(:,:), ALLOCATABLE :: dir1, dir2, &
+integer, dimension(:), allocatable :: vecWall
+integer, dimension(:,:), allocatable :: dir1, dir2, &
     dir3, dir4, dir5, dir6, dir7, dir8
-double precision, DIMENSION(:,:), ALLOCATABLE :: coef1, coef2, coef3, coef4, &
+double precision, dimension(:,:), allocatable :: coef1, coef2, coef3, coef4, &
     coef5, coef6, coef7, coef8
-double precision, DIMENSION(:,:,:), ALLOCATABLE :: fw
+double precision, dimension(:,:,:), allocatable :: fw
 ! extrapolation coefficient for all wall points
-double precision, DIMENSION(:,:), ALLOCATABLE :: extCoef
+double precision, dimension(:,:), allocatable :: extCoef
 
 ! number of 3-fold corners to send/recv at each sides of the sub-domain
 integer :: westN3corner_snd, eastN3corner_snd
@@ -172,17 +172,17 @@ contains
         !-----------------------------------------------------------------
         !read base digital image, NOTE that all raw image dimension are NY^3. 
         !-----------------------------------------------------------------
-        Open(IMAGEFILE,file=imageFileName,status='OLD', &
+        open(IMAGEfile,file=imageFileName,status='OLD', &
             form='unformatted',ACCESS="STREAM")
-        Do k=1,Nz_base
-            Do j=1,Ny_base
-                Do i=fluidlayer+1,Nx_base-fluidlayer ! may need to be modified 
-                    read(IMAGEFILE) ctemp       
+        do k=1,Nz_base
+            do j=1,Ny_base
+                do i=fluidlayer+1,Nx_base-fluidlayer ! may need to be modified 
+                    read(IMAGEfile) ctemp       
                     !l=(i-translate+ghostLayer)+(j-translate+ghostLayer-1)*Nxtotal+(k-translate+ghostLayer-1)*Nxytotal
-                    if ((k>=1+translate).AND.(k<=Nz_base+translate) &
-                        .AND.(j>=1+translate).AND.(j<=Ny_base+translate) &
-                        .AND.(i>=fluidlayer+1+translate) &
-                        .AND.(i<=Nx_base-fluidlayer+translate) ) then
+                    if ((k>=1+translate).and.(k<=Nz_base+translate) &
+                        .and.(j>=1+translate).and.(j<=Ny_base+translate) &
+                        .and.(i>=fluidlayer+1+translate) &
+                        .and.(i<=Nx_base-fluidlayer+translate) ) then
                         if (ichar(ctemp)==0) then
                             array3D(i,j,k) = fluid
                         else if (ichar(ctemp)==1) then
@@ -192,10 +192,10 @@ contains
                             stop 0
                         endif
                     endif
-                Enddo  
-            Enddo
-        Enddo
-        Close(IMAGEFILE)
+                enddo  
+            enddo
+        enddo
+        Close(IMAGEfile)
 
         !-----------------------------------------------------------------
         ! Repeat the base block for weak scaling efficiency study. 
@@ -311,19 +311,19 @@ contains
         !-----------------------------------------------------------------
         ! 1st round remove 1-layer-thickness wall 
         !-----------------------------------------------------------------
-        Do k=1,Nz
-          Do j=1,Ny
-            Do i=1,Nx
-              If (array3Dg(i,j,k)==solid) then
-                If(   ((array3Dg(i+1,j,k)==fluid).AND.(array3Dg(i-1,j,k)==fluid)) &
-                  .OR.((array3Dg(i,j+1,k)==fluid).AND.(array3Dg(i,j-1,k)==fluid))&
-                  .OR.((array3Dg(i,j,k+1)==fluid).AND.(array3Dg(i,j,k-1)==fluid))) then
+        do k=1,Nz
+          do j=1,Ny
+            do i=1,Nx
+              if (array3Dg(i,j,k)==solid) then
+                if(   ((array3Dg(i+1,j,k)==fluid).and.(array3Dg(i-1,j,k)==fluid)) &
+                  .or.((array3Dg(i,j+1,k)==fluid).and.(array3Dg(i,j-1,k)==fluid))&
+                  .or.((array3Dg(i,j,k+1)==fluid).and.(array3Dg(i,j,k-1)==fluid))) then
                     array3Dg(i,j,k)=fluid
-                Endif       
-              Endif
-            Enddo
-          Enddo
-        Enddo  
+                endif       
+              endif
+            enddo
+          enddo
+        enddo  
 
         !-----------------------------------------------------------------   
         ! 1st round set ghost back to ghost
@@ -386,19 +386,19 @@ contains
         !-----------------------------------------------------------------
         ! 2nd round remove 1-layer-thickness wall 
         !-----------------------------------------------------------------
-        Do k=1,Nz
-          Do j=1,Ny
-            Do i=1,Nx
-              If (array3Dg(i,j,k)==solid) then
-                If(   ((array3Dg(i+1,j,k)==fluid).AND.(array3Dg(i-1,j,k)==fluid)) &
-                  .OR.((array3Dg(i,j+1,k)==fluid).AND.(array3Dg(i,j-1,k)==fluid))&
-                  .OR.((array3Dg(i,j,k+1)==fluid).AND.(array3Dg(i,j,k-1)==fluid))) then
+        do k=1,Nz
+          do j=1,Ny
+            do i=1,Nx
+              if (array3Dg(i,j,k)==solid) then
+                if(   ((array3Dg(i+1,j,k)==fluid).and.(array3Dg(i-1,j,k)==fluid)) &
+                  .or.((array3Dg(i,j+1,k)==fluid).and.(array3Dg(i,j-1,k)==fluid))&
+                  .or.((array3Dg(i,j,k+1)==fluid).and.(array3Dg(i,j,k-1)==fluid))) then
                     array3Dg(i,j,k)=fluid
-                Endif       
-              Endif
-            Enddo
-          Enddo
-        Enddo  
+                endif       
+              endif
+            enddo
+          enddo
+        enddo  
 
         !-----------------------------------------------------------------   
         ! 2nd round set ghost back to ghost
@@ -444,149 +444,149 @@ contains
         image(bxl:bxu, byl:byu, bzl:bzu) = array3Dg(bxl:bxu, byl:byu, bzl:bzu)
 
         !Assign the outerboarder layers (called ghost point in serial program)
-        If (ghostLayers>0) then
-            Do k=zlg,zug
-                Do j=ylg,yug
-                    Do i=xlg,xug
+        if (ghostLayers>0) then
+            do k=zlg,zug
+                do j=ylg,yug
+                    do i=xlg,xug
                         ! test if boundary processor, here the ghost flag doesn't means 
                         ! the communication boundary, but only means the true global 
                         ! outter boarder.
-                        If ((i<xmin).OR.(i>xmax).OR.(j<ymin).OR.(j>ymax) &
-                            .OR.(k<zmin).OR.(k>zmax)) then 
+                        if ((i<xmin).or.(i>xmax).or.(j<ymin).or.(j>ymax) &
+                            .or.(k<zmin).or.(k>zmax)) then 
                             image(i,j,k) = ghost
-                        End if
-                    Enddo
-                Enddo
-            Enddo
-        End if
+                        end if
+                    enddo
+                enddo
+            enddo
+        end if
 
         ! set wall points type based on sournding point type(f/s)
         nWall=0 ! count the wall points
-        Do k=bzl,bzu
-            Do j=byl,byu
-                Do i=bxl,bxu
+        do k=bzl,bzu
+            do j=byl,byu
+                do i=bxl,bxu
                     !ii = i-xl+1
                     !jj = j-yl+1
                     !localid = (j-ylg)*Nxtotal + i-xlg+1
-                    If (array3D(i,j,k)==solid) then
+                    if (array3D(i,j,k)==solid) then
                         NneighborFluid=1 !(1-2-3-4 in D2Q9 corresponding to 2-3-5-7)
-                        If (array3Dg(i+1, j, k)==fluid)  NneighborFluid=NneighborFluid*2   !Check neighbor on the East(2)
-                        If (array3Dg(i-1, j, k)==fluid)  NneighborFluid=NneighborFluid*3   !Check neighbor on the North(3)
-                        If (array3Dg(i, j+1, k)==fluid)  NneighborFluid=NneighborFluid*5   !Check neighbor on the West(5)
-                        If (array3Dg(i, j-1, k)==fluid)  NneighborFluid=NneighborFluid*7   !Check neighbor on the South(7)
-                        If (array3Dg(i, j, k+1)==fluid)  NneighborFluid=NneighborFluid*9   !Check neighbor on the West(5)
-                        If (array3Dg(i, j, k-1)==fluid)  NneighborFluid=NneighborFluid*11   !Check neighbor on the South(7)                        
+                        if (array3Dg(i+1, j, k)==fluid)  NneighborFluid=NneighborFluid*2   !Check neighbor on the East(2)
+                        if (array3Dg(i-1, j, k)==fluid)  NneighborFluid=NneighborFluid*3   !Check neighbor on the North(3)
+                        if (array3Dg(i, j+1, k)==fluid)  NneighborFluid=NneighborFluid*5   !Check neighbor on the West(5)
+                        if (array3Dg(i, j-1, k)==fluid)  NneighborFluid=NneighborFluid*7   !Check neighbor on the South(7)
+                        if (array3Dg(i, j, k+1)==fluid)  NneighborFluid=NneighborFluid*9   !Check neighbor on the West(5)
+                        if (array3Dg(i, j, k-1)==fluid)  NneighborFluid=NneighborFluid*11   !Check neighbor on the South(7)                        
     
-                        SELECT Case (NneighborFluid)
-                            CASE (2)
+                        select Case (NneighborFluid)
+                            case (2)
                                 image(i,j,k)=WallE
                                 if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
                                     k .ge. zl .and. k .le. zu) nWall=nWall+1
-                            CASE (3)
+                            case (3)
                                 image(i,j,k)=WallW
                                 if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
                                     k .ge. zl .and. k .le. zu) nWall=nWall+1
-                            CASE (5)
+                            case (5)
                                 image(i,j,k)=WallN
                                 if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
                                     k .ge. zl .and. k .le. zu) nWall=nWall+1
-                            CASE (7)
+                            case (7)
                                 image(i,j,k)=WallS
                                 if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
                                     k .ge. zl .and. k .le. zu) nWall=nWall+1
-                            CASE (9)
+                            case (9)
                                 image(i,j,k)=WallF
                                 if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
                                     k .ge. zl .and. k .le. zu) nWall=nWall+1
-                            CASE (11)
+                            case (11)
                                 image(i,j,k)=WallB
                                 if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
                                     k .ge. zl .and. k .le. zu) nWall=nWall+1
-                            CASE (10)
+                            case (10)
                                 image(i,j,k)=WallEN
                                 if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
                                     k .ge. zl .and. k .le. zu) nWall=nWall+1
-                            CASE (15)
+                            case (15)
                                 image(i,j,k)=WallWN
                                 if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
                                     k .ge. zl .and. k .le. zu) nWall=nWall+1
-                            CASE (14)
+                            case (14)
                                 image(i,j,k)=WallES
                                 if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
                                     k .ge. zl .and. k .le. zu) nWall=nWall+1
-                            CASE (21)
+                            case (21)
                                 image(i,j,k)=WallWS
                                 if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
                                     k .ge. zl .and. k .le. zu) nWall=nWall+1
-                            CASE (18)
+                            case (18)
                                 image(i,j,k)=WallEF
                                 if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
                                     k .ge. zl .and. k .le. zu) nWall=nWall+1
-                            CASE (22)
+                            case (22)
                                 image(i,j,k)=WallEB
                                 if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
                                     k .ge. zl .and. k .le. zu) nWall=nWall+1
-                            CASE (27)
+                            case (27)
                                 image(i,j,k)=WallWF
                                 if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
                                     k .ge. zl .and. k .le. zu) nWall=nWall+1
-                            CASE (33)
+                            case (33)
                                 image(i,j,k)=WallWB
                                 if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
                                     k .ge. zl .and. k .le. zu) nWall=nWall+1
-                            CASE (45)
+                            case (45)
                                 image(i,j,k)=WallNF
                                 if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
                                     k .ge. zl .and. k .le. zu) nWall=nWall+1
-                            CASE (55)
+                            case (55)
                                 image(i,j,k)=WallNB
                                 if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
                                     k .ge. zl .and. k .le. zu) nWall=nWall+1
-                            CASE (63)
+                            case (63)
                                 image(i,j,k)=WallSF
                                 if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
                                     k .ge. zl .and. k .le. zu) nWall=nWall+1
-                            CASE (77)
+                            case (77)
                                 image(i,j,k)=WallSB
                                 if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
                                     k .ge. zl .and. k .le. zu) nWall=nWall+1
-                            CASE (90)
+                            case (90)
                                 image(i,j,k)=WallENF
                                 if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
                                     k .ge. zl .and. k .le. zu) nWall=nWall+1
-                            CASE (110)
+                            case (110)
                                 image(i,j,k)=WallENB
                                 if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
                                     k .ge. zl .and. k .le. zu) nWall=nWall+1
-                            CASE (135)
+                            case (135)
                                 image(i,j,k)=WallWNF
                                 if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
                                     k .ge. zl .and. k .le. zu) nWall=nWall+1
-                            CASE (165)
+                            case (165)
                                 image(i,j,k)=WallWNB
                                 if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
                                     k .ge. zl .and. k .le. zu) nWall=nWall+1
-                            CASE (126)
+                            case (126)
                                 image(i,j,k)=WallESF
                                 if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
                                     k .ge. zl .and. k .le. zu) nWall=nWall+1
-                            CASE (154)
+                            case (154)
                                 image(i,j,k)=WallESB
                                 if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
                                     k .ge. zl .and. k .le. zu) nWall=nWall+1
-                            CASE (189)
+                            case (189)
                                 image(i,j,k)=WallWSF
                                 if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
                                     k .ge. zl .and. k .le. zu) nWall=nWall+1
-                            CASE (231)
+                            case (231)
                                 image(i,j,k)=WallWSB
                                 if(j .ge. yl .and. j .le. yu .and. i .ge. xl .and. i .le. xu .and. &
                                     k .ge. zl .and. k .le. zu) nWall=nWall+1                                                                                               
-                        END SELECT
-                    Endif
-                Enddo
-            Enddo
-        Enddo
+                        end select
+                    endif
+                enddo
+            enddo
+        enddo
 
         PRINT*, "nWall = ", nWall
 
@@ -597,7 +597,7 @@ contains
         !   Only non-corner wall nodes in ghost layers are not counted
         !
         !vecWall(walli) mark the global id of the walli'th wall in the image
-        ALLOCATE(vecWall(nWall))
+        allocate(vecWall(nWall))
 
 
         nWall=0
@@ -669,7 +669,7 @@ contains
 
         ! allocate fw only for 3-fold corner, here nCorner counts only 3-fold
         ! corners
-        ALLOCATE(fw(nCorner, Nc8,1:8))
+        allocate(fw(nCorner, Nc8,1:8))
 
         ! correct the number of boundary processors' N3corner
         ! MPI_Waitall require the snd and rcv buffer sizes to be the same
@@ -807,7 +807,7 @@ contains
 
 
         ! allocate the array for wall extrapolation coefficient
-        ALLOCATE(extCoef(nWall,2))
+        allocate(extCoef(nWall,2))
         ! default 2nd order
         extCoef(:, 1) =  2.d0
         extCoef(:, 2) = -1.d0
@@ -868,29 +868,29 @@ contains
 
         ! count fluid points
         Nfluid = 0
-        Do k=zl,zu
-            Do j=yl,yu
-                Do i=xl,xu
-                    If (image(i,j,k)==fluid) then
+        do k=zl,zu
+            do j=yl,yu
+                do i=xl,xu
+                    if (image(i,j,k)==fluid) then
                         Nfluid=Nfluid+1
-                    End if
-                End do
-            End do
-        End do
+                    end if
+                end do
+            end do
+        end do
         allocate(mapF(Nfluid))
 
         ! fill the map
         Nfluid = 0
-        Do k=zl,zu
-            Do j=yl,yu
-                Do i=xl,xu
-                    If (image(i,j,k)==fluid) then
+        do k=zl,zu
+            do j=yl,yu
+                do i=xl,xu
+                    if (image(i,j,k)==fluid) then
                         Nfluid=Nfluid+1
                         mapF(Nfluid) = (k-zlg)*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
-                    End if
-                End do
-            End do
-        End do
+                    end if
+                end do
+            end do
+        end do
 
         !Direction 1
         bxl = xl
@@ -903,28 +903,28 @@ contains
         if(yl == ymin) byl = yl+1 !if most south block
         if(zl == zmin) bzl = zl+1!if most back  block
         Nstencil1=0
-        Do k=bzl,bzu
-            Do j=byl,byu
-                Do i=bxl,bxu
-                    If (image(i,j,k)==fluid) then
+        do k=bzl,bzu
+            do j=byl,byu
+                do i=bxl,bxu
+                    if (image(i,j,k)==fluid) then
                         Nstencil1=Nstencil1+1
-                    End if
-                End do
-            End do
-        End do
+                    end if
+                end do
+            end do
+        end do
         !set the icount'th fluid node's localid in the 2D patch
         allocate(dir1(3, Nstencil1))
         icount=0
-        Do k=bzl,bzu
-            Do j=byl,byu
-                Do i=bxl,bxu
-                    If (image(i,j,k)==fluid) then
+        do k=bzl,bzu
+            do j=byl,byu
+                do i=bxl,bxu
+                    if (image(i,j,k)==fluid) then
                         icount=icount+1
                         dir1(:,icount)=(/i,j,k/)
-                    End if
-                End do
-            End do
-        End do
+                    end if
+                end do
+            end do
+        end do
 
         !Direction 2
         bxl = xl
@@ -937,28 +937,28 @@ contains
         if(yl == ymin) byl = yl+1 !if most south block
         if(zl == zmin) bzl = zl+1!if most back  block
         Nstencil2=0
-        Do k=bzl,bzu
-            Do j=byl,byu
-                Do i=bxu,bxl,-1
-                    If (image(i,j,k)==fluid) then
+        do k=bzl,bzu
+            do j=byl,byu
+                do i=bxu,bxl,-1
+                    if (image(i,j,k)==fluid) then
                         Nstencil2=Nstencil2+1
-                    End if
-                End do
-            End do
-        End do
+                    end if
+                end do
+            end do
+        end do
         !set the icount'th fluid node's localid in the 2D patch
         allocate(dir2(3, Nstencil2))
         icount=0
-        Do k=bzl,bzu
-            Do j=byl,byu
-                Do i=bxu,bxl,-1
-                    If (image(i,j,k)==fluid) then
+        do k=bzl,bzu
+            do j=byl,byu
+                do i=bxu,bxl,-1
+                    if (image(i,j,k)==fluid) then
                         icount=icount+1
                         dir2(:,icount)=(/i,j,k/)
-                    End if
-                End do
-            End do
-        End do
+                    end if
+                end do
+            end do
+        end do
 
         !Direction 3
         bxl = xl
@@ -971,28 +971,28 @@ contains
         if(yu == ymax) byu = yu-1 !if most south block
         if(zl == zmin) bzl = zl+1!if most back  block
         Nstencil3=0
-        Do k=bzl,bzu
-            Do j=byu,byl,-1
-                Do i=bxu,bxl,-1
-                    If (image(i,j,k)==fluid) then
+        do k=bzl,bzu
+            do j=byu,byl,-1
+                do i=bxu,bxl,-1
+                    if (image(i,j,k)==fluid) then
                         Nstencil3=Nstencil3+1
-                    End if
-                End do
-            End do
-        End do
+                    end if
+                end do
+            end do
+        end do
         !set the icount'th fluid node's localid in the 2D patch
         allocate(dir3(3, Nstencil3))
         icount=0
-        Do k=bzl,bzu
-            Do j=byu,byl,-1
-                Do i=bxu,bxl,-1
-                    If (image(i,j,k)==fluid) then
+        do k=bzl,bzu
+            do j=byu,byl,-1
+                do i=bxu,bxl,-1
+                    if (image(i,j,k)==fluid) then
                         icount=icount+1
                         dir3(:,icount)=(/i,j,k/)
-                    End if
-                End do
-            End do
-        End do
+                    end if
+                end do
+            end do
+        end do
 
         !Direction 4
         bxl = xl
@@ -1005,28 +1005,28 @@ contains
         if(yu == ymax) byu = yu-1 !if most south block
         if(zl == zmin) bzl = zl+1 !if most back  block
         Nstencil4=0
-        Do k=bzl,bzu
-            Do j=byu,byl,-1
-                Do i=bxl,bxu
-                    If (image(i,j,k)==fluid) then
+        do k=bzl,bzu
+            do j=byu,byl,-1
+                do i=bxl,bxu
+                    if (image(i,j,k)==fluid) then
                         Nstencil4=Nstencil4+1
-                    End if
-                End do
-            End do
-        End do
+                    end if
+                end do
+            end do
+        end do
         !set the icount'th fluid node's localid in the 2D patch
         allocate(dir4(3, Nstencil4))
         icount=0
-        Do k=bzl,bzu
-            Do j=byu,byl,-1
-                Do i=bxl,bxu
-                    If (image(i,j,k)==fluid) then
+        do k=bzl,bzu
+            do j=byu,byl,-1
+                do i=bxl,bxu
+                    if (image(i,j,k)==fluid) then
                         icount=icount+1
                         dir4(:,icount)=(/i,j,k/)
-                    End if
-                End do
-            End do
-        End do
+                    end if
+                end do
+            end do
+        end do
 
         !Direction 5
         bxl = xl
@@ -1039,28 +1039,28 @@ contains
         if(yl == ymin) byl = yl+1 !if most south block
         if(zu == zmax) bzu = zu-1!if most back  block
         Nstencil5=0
-        Do k=bzu,bzl,-1
-            Do j=byl,byu
-                Do i=bxl,bxu
-                    If (image(i,j,k)==fluid) then
+        do k=bzu,bzl,-1
+            do j=byl,byu
+                do i=bxl,bxu
+                    if (image(i,j,k)==fluid) then
                         Nstencil5=Nstencil5+1
-                    End if
-                End do
-            End do
-        End do
+                    end if
+                end do
+            end do
+        end do
         !set the icount'th fluid node's localid in the 2D patch
         allocate(dir5(3, Nstencil5))
         icount=0
-        Do k=bzu,bzl,-1
-            Do j=byl,byu
-                Do i=bxl,bxu
-                    If (image(i,j,k)==fluid) then
+        do k=bzu,bzl,-1
+            do j=byl,byu
+                do i=bxl,bxu
+                    if (image(i,j,k)==fluid) then
                         icount=icount+1
                         dir5(:,icount)=(/i,j,k/)
-                    End if
-                End do
-            End do
-        End do
+                    end if
+                end do
+            end do
+        end do
 
         !Direction 6
         bxl = xl
@@ -1073,28 +1073,28 @@ contains
         if(yl == ymin) byl = yl+1 !if most south block
         if(zu == zmax) bzu = zu-1!if most back  block
         Nstencil6=0
-        Do k=bzu,bzl,-1
-            Do j=byl,byu
-                Do i=bxu,bxl,-1
-                    If (image(i,j,k)==fluid) then
+        do k=bzu,bzl,-1
+            do j=byl,byu
+                do i=bxu,bxl,-1
+                    if (image(i,j,k)==fluid) then
                         Nstencil6=Nstencil6+1
-                    End if
-                End do
-            End do
-        End do
+                    end if
+                end do
+            end do
+        end do
         !set the icount'th fluid node's localid in the 2D patch
         allocate(dir6(3, Nstencil6))
         icount=0
-        Do k=bzu,bzl,-1
-            Do j=byl,byu
-                Do i=bxu,bxl,-1
-                    If (image(i,j,k)==fluid) then
+        do k=bzu,bzl,-1
+            do j=byl,byu
+                do i=bxu,bxl,-1
+                    if (image(i,j,k)==fluid) then
                         icount=icount+1
                         dir6(:,icount)=(/i,j,k/)
-                    End if
-                End do
-            End do
-        End do
+                    end if
+                end do
+            end do
+        end do
 
         !Direction 7
         bxl = xl
@@ -1107,28 +1107,28 @@ contains
         if(yu == ymax) byu = yu-1 !if most south block
         if(zu == zmax) bzu = zu-1!if most back  block
         Nstencil7=0
-        Do k=bzu,bzl,-1
-            Do j=byu,byl,-1
-                Do i=bxu,bxl,-1
-                    If (image(i,j,k)==fluid) then
+        do k=bzu,bzl,-1
+            do j=byu,byl,-1
+                do i=bxu,bxl,-1
+                    if (image(i,j,k)==fluid) then
                         Nstencil7=Nstencil7+1
-                    End if
-                End do
-            End do
-        End do
+                    end if
+                end do
+            end do
+        end do
         !set the icount'th fluid node's localid in the 2D patch
         allocate(dir7(3, Nstencil7))
         icount=0
-        Do k=bzu,bzl,-1
-            Do j=byu,byl,-1
-                Do i=bxu,bxl,-1
-                    If (image(i,j,k)==fluid) then
+        do k=bzu,bzl,-1
+            do j=byu,byl,-1
+                do i=bxu,bxl,-1
+                    if (image(i,j,k)==fluid) then
                         icount=icount+1
                         dir7(:,icount)=(/i,j,k/)
-                    End if
-                End do
-            End do
-        End do
+                    end if
+                end do
+            end do
+        end do
 
         !Direction 8
         bxl = xl
@@ -1141,36 +1141,36 @@ contains
         if(yu == ymax) byu = yu-1
         if(zu == zmax) bzu = zu-1
         Nstencil8=0
-        Do k=bzu,bzl,-1
-            Do j=byu,byl,-1
-                Do i=bxl,bxu
-                    If (image(i,j,k)==fluid) then
+        do k=bzu,bzl,-1
+            do j=byu,byl,-1
+                do i=bxl,bxu
+                    if (image(i,j,k)==fluid) then
                         Nstencil8=Nstencil8+1
-                    End if
-                End do
-            End do
-        End do
+                    end if
+                end do
+            end do
+        end do
         !set the icount'th fluid node's localid in the 2D patch
         allocate(dir8(3, Nstencil8))
         icount=0
-        Do k=bzu,bzl,-1
-            Do j=byu,byl,-1
-                Do i=bxl,bxu
-                    If (image(i,j,k)==fluid) then
+        do k=bzu,bzl,-1
+            do j=byu,byl,-1
+                do i=bxl,bxu
+                    if (image(i,j,k)==fluid) then
                         icount=icount+1
                         dir8(:,icount)=(/i,j,k/)
-                    End if
-                End do
-            End do
-        End do
+                    end if
+                end do
+            end do
+        end do
 
         !construct the deferencial coefficients
-        ALLOCATE(coef1(Nstencil1,9),coef2(Nstencil2,9),&
+        allocate(coef1(Nstencil1,9),coef2(Nstencil2,9),&
             coef3(Nstencil3,9),coef4(Nstencil4,9))
-        ALLOCATE(coef5(Nstencil5,9),coef6(Nstencil6,9),&
+        allocate(coef5(Nstencil5,9),coef6(Nstencil6,9),&
             coef7(Nstencil7,9),coef8(Nstencil8,9))
         
-        Do i=1,Nstencil1
+        do i=1,Nstencil1
             ii=dir1(1,i) 
             jj=dir1(2,i)
             kk=dir1(3,i)
@@ -1186,38 +1186,38 @@ contains
             coef1(i,9)=-0.5d0/ds   !z2n
             
             !1st order of accuracy in x
-            if ((image(ii-2,jj,kk)==ghost)  .OR.(image(ii-1,jj,kk)==wallE)  &
-            .OR.(image(ii-1,jj,kk)==wallES) .OR.(image(ii-1,jj,kk)==wallEN) &
-            .OR.(image(ii-1,jj,kk)==wallEF) .OR.(image(ii-1,jj,kk)==wallEB) &
-            .OR.(image(ii-1,jj,kk)==wallENF).OR.(image(ii-1,jj,kk)==wallENB)&
-            .OR.(image(ii-1,jj,kk)==wallESF).OR.(image(ii-1,jj,kk)==wallESB)) then
+            if ((image(ii-2,jj,kk)==ghost)  .or.(image(ii-1,jj,kk)==wallE)  &
+            .or.(image(ii-1,jj,kk)==wallES) .or.(image(ii-1,jj,kk)==wallEN) &
+            .or.(image(ii-1,jj,kk)==wallEF) .or.(image(ii-1,jj,kk)==wallEB) &
+            .or.(image(ii-1,jj,kk)==wallENF).or.(image(ii-1,jj,kk)==wallENB)&
+            .or.(image(ii-1,jj,kk)==wallESF).or.(image(ii-1,jj,kk)==wallESB)) then
                 coef1(i,1)=1.d0/ds  !x0n
                 coef1(i,2)=1.d0/ds  !x1n
                 coef1(i,3)=0.d0     !x2n
             end if
             !1st order of accuracy in y
-            if ((image(ii,jj-2,kk)==ghost)  .OR.(image(ii,jj-1,kk)==wallN)  &
-            .OR.(image(ii,jj-1,kk)==wallEN) .OR.(image(ii,jj-1,kk)==wallWN) &
-            .OR.(image(ii,jj-1,kk)==wallNF) .OR.(image(ii,jj-1,kk)==wallNB) &
-            .OR.(image(ii,jj-1,kk)==wallENF).OR.(image(ii,jj-1,kk)==wallENB)&
-            .OR.(image(ii,jj-1,kk)==wallWNF).OR.(image(ii,jj-1,kk)==wallWNB)) then
+            if ((image(ii,jj-2,kk)==ghost)  .or.(image(ii,jj-1,kk)==wallN)  &
+            .or.(image(ii,jj-1,kk)==wallEN) .or.(image(ii,jj-1,kk)==wallWN) &
+            .or.(image(ii,jj-1,kk)==wallNF) .or.(image(ii,jj-1,kk)==wallNB) &
+            .or.(image(ii,jj-1,kk)==wallENF).or.(image(ii,jj-1,kk)==wallENB)&
+            .or.(image(ii,jj-1,kk)==wallWNF).or.(image(ii,jj-1,kk)==wallWNB)) then
                 coef1(i,4)=1.d0/ds  !y0n
                 coef1(i,5)=1.d0/ds  !y1n
                 coef1(i,6)=0.d0     !y2n
             end if
             !1st order of accuracy in z
-            if ((image(ii,jj,kk-2)==ghost)  .OR.(image(ii,jj,kk-1)==wallF)  &
-            .OR.(image(ii,jj,kk-1)==wallNF) .OR.(image(ii,jj,kk-1)==wallSF) &
-            .OR.(image(ii,jj,kk-1)==wallEF) .OR.(image(ii,jj,kk-1)==wallWF) &
-            .OR.(image(ii,jj,kk-1)==wallENF).OR.(image(ii,jj,kk-1)==wallWNF)&
-            .OR.(image(ii,jj,kk-1)==wallESF).OR.(image(ii,jj,kk-1)==wallWSF)) then
+            if ((image(ii,jj,kk-2)==ghost)  .or.(image(ii,jj,kk-1)==wallF)  &
+            .or.(image(ii,jj,kk-1)==wallNF) .or.(image(ii,jj,kk-1)==wallSF) &
+            .or.(image(ii,jj,kk-1)==wallEF) .or.(image(ii,jj,kk-1)==wallWF) &
+            .or.(image(ii,jj,kk-1)==wallENF).or.(image(ii,jj,kk-1)==wallWNF)&
+            .or.(image(ii,jj,kk-1)==wallESF).or.(image(ii,jj,kk-1)==wallWSF)) then
                 coef1(i,7)=1.d0/ds  !z0n
                 coef1(i,8)=1.d0/ds  !z1n
                 coef1(i,9)=0.d0     !z2n
             end if
-        End do ! end of ceof for dir 1
+        end do ! end of ceof for dir 1
 
-        Do i=1,Nstencil2
+        do i=1,Nstencil2
             ii=dir2(1,i) 
             jj=dir2(2,i)
             kk=dir2(3,i)
@@ -1232,38 +1232,38 @@ contains
             coef2(i,8)=2.d0/ds  !z1n
             coef2(i,9)=-0.5d0/ds   !z2n
             !1st order of accuracy in x
-            if ((image(ii+2,jj,kk)==ghost)  .OR.(image(ii+1,jj,kk)==wallW)  &
-            .OR.(image(ii+1,jj,kk)==wallWS) .OR.(image(ii+1,jj,kk)==wallWN) &
-            .OR.(image(ii+1,jj,kk)==wallWF) .OR.(image(ii+1,jj,kk)==wallWB) &
-            .OR.(image(ii+1,jj,kk)==wallWNF).OR.(image(ii+1,jj,kk)==wallWNB)&
-            .OR.(image(ii+1,jj,kk)==wallWSF).OR.(image(ii+1,jj,kk)==wallWSB)) then
+            if ((image(ii+2,jj,kk)==ghost)  .or.(image(ii+1,jj,kk)==wallW)  &
+            .or.(image(ii+1,jj,kk)==wallWS) .or.(image(ii+1,jj,kk)==wallWN) &
+            .or.(image(ii+1,jj,kk)==wallWF) .or.(image(ii+1,jj,kk)==wallWB) &
+            .or.(image(ii+1,jj,kk)==wallWNF).or.(image(ii+1,jj,kk)==wallWNB)&
+            .or.(image(ii+1,jj,kk)==wallWSF).or.(image(ii+1,jj,kk)==wallWSB)) then
                 coef2(i,1)=-1.d0/ds  !x0n
                 coef2(i,2)=-1.d0/ds  !x1n
                 coef2(i,3)=0.d0     !x2n
             end if
             !1st order of accuracy in y
-            if ((image(ii,jj-2,kk)==ghost)  .OR.(image(ii,jj-1,kk)==wallN)  &
-            .OR.(image(ii,jj-1,kk)==wallEN) .OR.(image(ii,jj-1,kk)==wallWN) &
-            .OR.(image(ii,jj-1,kk)==wallNF) .OR.(image(ii,jj-1,kk)==wallNB) &
-            .OR.(image(ii,jj-1,kk)==wallENF).OR.(image(ii,jj-1,kk)==wallENB)&
-            .OR.(image(ii,jj-1,kk)==wallWNF).OR.(image(ii,jj-1,kk)==wallWNB)) then
+            if ((image(ii,jj-2,kk)==ghost)  .or.(image(ii,jj-1,kk)==wallN)  &
+            .or.(image(ii,jj-1,kk)==wallEN) .or.(image(ii,jj-1,kk)==wallWN) &
+            .or.(image(ii,jj-1,kk)==wallNF) .or.(image(ii,jj-1,kk)==wallNB) &
+            .or.(image(ii,jj-1,kk)==wallENF).or.(image(ii,jj-1,kk)==wallENB)&
+            .or.(image(ii,jj-1,kk)==wallWNF).or.(image(ii,jj-1,kk)==wallWNB)) then
                 coef2(i,4)=1.d0/ds  !y0n
                 coef2(i,5)=1.d0/ds  !y1n
                 coef2(i,6)=0.d0     !y2n
             end if
             !1st order of accuracy in z
-            if ((image(ii,jj,kk-2)==ghost)  .OR.(image(ii,jj,kk-1)==wallF)  &
-            .OR.(image(ii,jj,kk-1)==wallNF) .OR.(image(ii,jj,kk-1)==wallSF) &
-            .OR.(image(ii,jj,kk-1)==wallEF) .OR.(image(ii,jj,kk-1)==wallWF) &
-            .OR.(image(ii,jj,kk-1)==wallENF).OR.(image(ii,jj,kk-1)==wallWNF)&
-            .OR.(image(ii,jj,kk-1)==wallESF).OR.(image(ii,jj,kk-1)==wallWSF)) then
+            if ((image(ii,jj,kk-2)==ghost)  .or.(image(ii,jj,kk-1)==wallF)  &
+            .or.(image(ii,jj,kk-1)==wallNF) .or.(image(ii,jj,kk-1)==wallSF) &
+            .or.(image(ii,jj,kk-1)==wallEF) .or.(image(ii,jj,kk-1)==wallWF) &
+            .or.(image(ii,jj,kk-1)==wallENF).or.(image(ii,jj,kk-1)==wallWNF)&
+            .or.(image(ii,jj,kk-1)==wallESF).or.(image(ii,jj,kk-1)==wallWSF)) then
                 coef2(i,7)=1.d0/ds  !z0n
                 coef2(i,8)=1.d0/ds  !z1n
                 coef2(i,9)=0.d0     !z2n
             end if
-        End do
+        end do
 
-        Do i=1,Nstencil3
+        do i=1,Nstencil3
             ii=dir3(1,i) 
             jj=dir3(2,i)
             kk=dir3(3,i)
@@ -1278,38 +1278,38 @@ contains
             coef3(i,8)=2.d0/ds  !z1n
             coef3(i,9)=-0.5d0/ds   !z2n
             !1st order of accuracy in x
-            if ((image(ii+2,jj,kk)==ghost)  .OR.(image(ii+1,jj,kk)==wallW)  &
-            .OR.(image(ii+1,jj,kk)==wallWS) .OR.(image(ii+1,jj,kk)==wallWN) &
-            .OR.(image(ii+1,jj,kk)==wallWF) .OR.(image(ii+1,jj,kk)==wallWB) &
-            .OR.(image(ii+1,jj,kk)==wallWNF).OR.(image(ii+1,jj,kk)==wallWNB)&
-            .OR.(image(ii+1,jj,kk)==wallWSF).OR.(image(ii+1,jj,kk)==wallWSB)) then
+            if ((image(ii+2,jj,kk)==ghost)  .or.(image(ii+1,jj,kk)==wallW)  &
+            .or.(image(ii+1,jj,kk)==wallWS) .or.(image(ii+1,jj,kk)==wallWN) &
+            .or.(image(ii+1,jj,kk)==wallWF) .or.(image(ii+1,jj,kk)==wallWB) &
+            .or.(image(ii+1,jj,kk)==wallWNF).or.(image(ii+1,jj,kk)==wallWNB)&
+            .or.(image(ii+1,jj,kk)==wallWSF).or.(image(ii+1,jj,kk)==wallWSB)) then
                 coef3(i,1)=-1.d0/ds  !x0n
                 coef3(i,2)=-1.d0/ds  !x1n
                 coef3(i,3)=0.d0     !x2n
             end if
             !1st order of accuracy in y
-            if ((image(ii,jj+2,kk)==ghost)  .OR.(image(ii,jj+1,kk)==wallS)  &
-            .OR.(image(ii,jj+1,kk)==wallES) .OR.(image(ii,jj+1,kk)==wallWS) &
-            .OR.(image(ii,jj+1,kk)==wallSF) .OR.(image(ii,jj+1,kk)==wallSB) &
-            .OR.(image(ii,jj+1,kk)==wallESF).OR.(image(ii,jj+1,kk)==wallESB)&
-            .OR.(image(ii,jj+1,kk)==wallWSF).OR.(image(ii,jj+1,kk)==wallWSB)) then
+            if ((image(ii,jj+2,kk)==ghost)  .or.(image(ii,jj+1,kk)==wallS)  &
+            .or.(image(ii,jj+1,kk)==wallES) .or.(image(ii,jj+1,kk)==wallWS) &
+            .or.(image(ii,jj+1,kk)==wallSF) .or.(image(ii,jj+1,kk)==wallSB) &
+            .or.(image(ii,jj+1,kk)==wallESF).or.(image(ii,jj+1,kk)==wallESB)&
+            .or.(image(ii,jj+1,kk)==wallWSF).or.(image(ii,jj+1,kk)==wallWSB)) then
                 coef3(i,4)=-1.d0/ds  !y0n
                 coef3(i,5)=-1.d0/ds  !y1n
                 coef3(i,6)=0.d0     !y2n
             end if
             !1st order of accuracy in z
-            if ((image(ii,jj,kk-2)==ghost)  .OR.(image(ii,jj,kk-1)==wallF)  &
-            .OR.(image(ii,jj,kk-1)==wallNF) .OR.(image(ii,jj,kk-1)==wallSF) &
-            .OR.(image(ii,jj,kk-1)==wallEF) .OR.(image(ii,jj,kk-1)==wallWF) &
-            .OR.(image(ii,jj,kk-1)==wallENF).OR.(image(ii,jj,kk-1)==wallWNF)&
-            .OR.(image(ii,jj,kk-1)==wallESF).OR.(image(ii,jj,kk-1)==wallWSF)) then
+            if ((image(ii,jj,kk-2)==ghost)  .or.(image(ii,jj,kk-1)==wallF)  &
+            .or.(image(ii,jj,kk-1)==wallNF) .or.(image(ii,jj,kk-1)==wallSF) &
+            .or.(image(ii,jj,kk-1)==wallEF) .or.(image(ii,jj,kk-1)==wallWF) &
+            .or.(image(ii,jj,kk-1)==wallENF).or.(image(ii,jj,kk-1)==wallWNF)&
+            .or.(image(ii,jj,kk-1)==wallESF).or.(image(ii,jj,kk-1)==wallWSF)) then
                 coef3(i,7)=1.d0/ds  !z0n
                 coef3(i,8)=1.d0/ds  !z1n
                 coef3(i,9)=0.d0     !z2n
             end if
-        End do
+        end do
         
-        Do i=1,Nstencil4
+        do i=1,Nstencil4
             ii=dir4(1,i) 
             jj=dir4(2,i)
             kk=dir4(3,i)
@@ -1324,38 +1324,38 @@ contains
             coef4(i,8)=2.d0/ds  !z1n
             coef4(i,9)=-0.5d0/ds   !z2n
             !1st order of accuracy in x
-            if ((image(ii-2,jj,kk)==ghost)  .OR.(image(ii-1,jj,kk)==wallE)   &
-            .OR.(image(ii-1,jj,kk)==wallES) .OR.(image(ii-1,jj,kk)==wallEN)  &
-            .OR.(image(ii-1,jj,kk)==wallEF) .OR.(image(ii-1,jj,kk)==wallEB)  &
-            .OR.(image(ii-1,jj,kk)==wallENF).OR.(image(ii-1,jj,kk)==wallENB) &
-            .OR.(image(ii-1,jj,kk)==wallESF).OR.(image(ii-1,jj,kk)==wallESB))  then
+            if ((image(ii-2,jj,kk)==ghost)  .or.(image(ii-1,jj,kk)==wallE)   &
+            .or.(image(ii-1,jj,kk)==wallES) .or.(image(ii-1,jj,kk)==wallEN)  &
+            .or.(image(ii-1,jj,kk)==wallEF) .or.(image(ii-1,jj,kk)==wallEB)  &
+            .or.(image(ii-1,jj,kk)==wallENF).or.(image(ii-1,jj,kk)==wallENB) &
+            .or.(image(ii-1,jj,kk)==wallESF).or.(image(ii-1,jj,kk)==wallESB))  then
                 coef4(i,1)=1.d0/ds  !x0n
                 coef4(i,2)=1.d0/ds  !x1n
                 coef4(i,3)=0.d0     !x2n
             end if
             !1st order of accuracy in y
-            if ((image(ii,jj+2,kk)==ghost)  .OR.(image(ii,jj+1,kk)==wallS)  &
-            .OR.(image(ii,jj+1,kk)==wallES) .OR.(image(ii,jj+1,kk)==wallWS) &
-            .OR.(image(ii,jj+1,kk)==wallSF) .OR.(image(ii,jj+1,kk)==wallSB) &
-            .OR.(image(ii,jj+1,kk)==wallESF).OR.(image(ii,jj+1,kk)==wallESB)&
-            .OR.(image(ii,jj+1,kk)==wallWSF).OR.(image(ii,jj+1,kk)==wallWSB)) then
+            if ((image(ii,jj+2,kk)==ghost)  .or.(image(ii,jj+1,kk)==wallS)  &
+            .or.(image(ii,jj+1,kk)==wallES) .or.(image(ii,jj+1,kk)==wallWS) &
+            .or.(image(ii,jj+1,kk)==wallSF) .or.(image(ii,jj+1,kk)==wallSB) &
+            .or.(image(ii,jj+1,kk)==wallESF).or.(image(ii,jj+1,kk)==wallESB)&
+            .or.(image(ii,jj+1,kk)==wallWSF).or.(image(ii,jj+1,kk)==wallWSB)) then
                 coef4(i,4)=-1.d0/ds  !y0n
                 coef4(i,5)=-1.d0/ds  !y1n
                 coef4(i,6)=0.d0     !y2n
             end if
             !1st order of accuracy in z
-            if ((image(ii,jj,kk-2)==ghost)  .OR.(image(ii,jj,kk-1)==wallF)  &
-            .OR.(image(ii,jj,kk-1)==wallNF) .OR.(image(ii,jj,kk-1)==wallSF) &
-            .OR.(image(ii,jj,kk-1)==wallEF) .OR.(image(ii,jj,kk-1)==wallWF) &
-            .OR.(image(ii,jj,kk-1)==wallENF).OR.(image(ii,jj,kk-1)==wallWNF)&
-            .OR.(image(ii,jj,kk-1)==wallESF).OR.(image(ii,jj,kk-1)==wallWSF)) then
+            if ((image(ii,jj,kk-2)==ghost)  .or.(image(ii,jj,kk-1)==wallF)  &
+            .or.(image(ii,jj,kk-1)==wallNF) .or.(image(ii,jj,kk-1)==wallSF) &
+            .or.(image(ii,jj,kk-1)==wallEF) .or.(image(ii,jj,kk-1)==wallWF) &
+            .or.(image(ii,jj,kk-1)==wallENF).or.(image(ii,jj,kk-1)==wallWNF)&
+            .or.(image(ii,jj,kk-1)==wallESF).or.(image(ii,jj,kk-1)==wallWSF)) then
                 coef4(i,7)=1.d0/ds  !z0n
                 coef4(i,8)=1.d0/ds  !z1n
                 coef4(i,9)=0.d0     !z2n
             end if
-        End do
+        end do
         
-        Do i=1,Nstencil5
+        do i=1,Nstencil5
             ii=dir5(1,i) 
             jj=dir5(2,i)
             kk=dir5(3,i)
@@ -1370,38 +1370,38 @@ contains
             coef5(i,8)=-2.d0/ds  !z1n
             coef5(i,9)=0.5d0/ds   !z2n
             !1st order of accuracy in x
-            if ((image(ii-2,jj,kk)==ghost)  .OR.(image(ii-1,jj,kk)==wallE)  &
-            .OR.(image(ii-1,jj,kk)==wallES) .OR.(image(ii-1,jj,kk)==wallEN) &
-            .OR.(image(ii-1,jj,kk)==wallEF) .OR.(image(ii-1,jj,kk)==wallEB) &
-            .OR.(image(ii-1,jj,kk)==wallENF).OR.(image(ii-1,jj,kk)==wallENB)&
-            .OR.(image(ii-1,jj,kk)==wallESF).OR.(image(ii-1,jj,kk)==wallESB)) then
+            if ((image(ii-2,jj,kk)==ghost)  .or.(image(ii-1,jj,kk)==wallE)  &
+            .or.(image(ii-1,jj,kk)==wallES) .or.(image(ii-1,jj,kk)==wallEN) &
+            .or.(image(ii-1,jj,kk)==wallEF) .or.(image(ii-1,jj,kk)==wallEB) &
+            .or.(image(ii-1,jj,kk)==wallENF).or.(image(ii-1,jj,kk)==wallENB)&
+            .or.(image(ii-1,jj,kk)==wallESF).or.(image(ii-1,jj,kk)==wallESB)) then
                 coef5(i,1)=1.d0/ds  !x0n
                 coef5(i,2)=1.d0/ds  !x1n
                 coef5(i,3)=0.d0     !x2n
             end if
             !1st order of accuracy in y
-            if ((image(ii,jj-2,kk)==ghost)  .OR.(image(ii,jj-1,kk)==wallN)  &
-            .OR.(image(ii,jj-1,kk)==wallEN) .OR.(image(ii,jj-1,kk)==wallWN) &
-            .OR.(image(ii,jj-1,kk)==wallNF) .OR.(image(ii,jj-1,kk)==wallNB) &
-            .OR.(image(ii,jj-1,kk)==wallENF).OR.(image(ii,jj-1,kk)==wallENB)&
-            .OR.(image(ii,jj-1,kk)==wallWNF).OR.(image(ii,jj-1,kk)==wallWNB)) then
+            if ((image(ii,jj-2,kk)==ghost)  .or.(image(ii,jj-1,kk)==wallN)  &
+            .or.(image(ii,jj-1,kk)==wallEN) .or.(image(ii,jj-1,kk)==wallWN) &
+            .or.(image(ii,jj-1,kk)==wallNF) .or.(image(ii,jj-1,kk)==wallNB) &
+            .or.(image(ii,jj-1,kk)==wallENF).or.(image(ii,jj-1,kk)==wallENB)&
+            .or.(image(ii,jj-1,kk)==wallWNF).or.(image(ii,jj-1,kk)==wallWNB)) then
                 coef5(i,4)=1.d0/ds  !y0n
                 coef5(i,5)=1.d0/ds  !y1n
                 coef5(i,6)=0.d0     !y2n
             end if
             !1st order of accuracy in z
-            if ((image(ii,jj,kk+2)==ghost)  .OR.(image(ii,jj,kk+1)==wallB)  &
-            .OR.(image(ii,jj,kk+1)==wallNB) .OR.(image(ii,jj,kk+1)==wallSB) &
-            .OR.(image(ii,jj,kk+1)==wallEB) .OR.(image(ii,jj,kk+1)==wallWB) &
-            .OR.(image(ii,jj,kk+1)==wallENB).OR.(image(ii,jj,kk+1)==wallWNB)&
-            .OR.(image(ii,jj,kk+1)==wallESB).OR.(image(ii,jj,kk+1)==wallWSB)) then
+            if ((image(ii,jj,kk+2)==ghost)  .or.(image(ii,jj,kk+1)==wallB)  &
+            .or.(image(ii,jj,kk+1)==wallNB) .or.(image(ii,jj,kk+1)==wallSB) &
+            .or.(image(ii,jj,kk+1)==wallEB) .or.(image(ii,jj,kk+1)==wallWB) &
+            .or.(image(ii,jj,kk+1)==wallENB).or.(image(ii,jj,kk+1)==wallWNB)&
+            .or.(image(ii,jj,kk+1)==wallESB).or.(image(ii,jj,kk+1)==wallWSB)) then
                 coef5(i,7)=-1.d0/ds  !z0n
                 coef5(i,8)=-1.d0/ds  !z1n
                 coef5(i,9)=0.d0     !z2n
             end if
-        End do
+        end do
 
-        Do i=1,Nstencil6
+        do i=1,Nstencil6
             ii=dir6(1,i) 
             jj=dir6(2,i)
             kk=dir6(3,i)
@@ -1416,38 +1416,38 @@ contains
             coef6(i,8)=-2.d0/ds  !z1n
             coef6(i,9)=0.5d0/ds   !z2n
             !1st order of accuracy in x
-            if ((image(ii+2,jj,kk)==ghost)  .OR.(image(ii+1,jj,kk)==wallW)  &
-            .OR.(image(ii+1,jj,kk)==wallWS) .OR.(image(ii+1,jj,kk)==wallWN) &
-            .OR.(image(ii+1,jj,kk)==wallWF) .OR.(image(ii+1,jj,kk)==wallWB) &
-            .OR.(image(ii+1,jj,kk)==wallWNF).OR.(image(ii+1,jj,kk)==wallWNB)&
-            .OR.(image(ii+1,jj,kk)==wallWSF).OR.(image(ii+1,jj,kk)==wallWSB)) then
+            if ((image(ii+2,jj,kk)==ghost)  .or.(image(ii+1,jj,kk)==wallW)  &
+            .or.(image(ii+1,jj,kk)==wallWS) .or.(image(ii+1,jj,kk)==wallWN) &
+            .or.(image(ii+1,jj,kk)==wallWF) .or.(image(ii+1,jj,kk)==wallWB) &
+            .or.(image(ii+1,jj,kk)==wallWNF).or.(image(ii+1,jj,kk)==wallWNB)&
+            .or.(image(ii+1,jj,kk)==wallWSF).or.(image(ii+1,jj,kk)==wallWSB)) then
                 coef6(i,1)=-1.d0/ds  !x0n
                 coef6(i,2)=-1.d0/ds  !x1n
                 coef6(i,3)=0.d0     !x2n
             end if
             !1st order of accuracy in y
-            if ((image(ii,jj-2,kk)==ghost)  .OR.(image(ii,jj-1,kk)==wallN)  &
-            .OR.(image(ii,jj-1,kk)==wallEN) .OR.(image(ii,jj-1,kk)==wallWN) &
-            .OR.(image(ii,jj-1,kk)==wallNF) .OR.(image(ii,jj-1,kk)==wallNB) &
-            .OR.(image(ii,jj-1,kk)==wallENF).OR.(image(ii,jj-1,kk)==wallENB)&
-            .OR.(image(ii,jj-1,kk)==wallWNF).OR.(image(ii,jj-1,kk)==wallWNB))  then
+            if ((image(ii,jj-2,kk)==ghost)  .or.(image(ii,jj-1,kk)==wallN)  &
+            .or.(image(ii,jj-1,kk)==wallEN) .or.(image(ii,jj-1,kk)==wallWN) &
+            .or.(image(ii,jj-1,kk)==wallNF) .or.(image(ii,jj-1,kk)==wallNB) &
+            .or.(image(ii,jj-1,kk)==wallENF).or.(image(ii,jj-1,kk)==wallENB)&
+            .or.(image(ii,jj-1,kk)==wallWNF).or.(image(ii,jj-1,kk)==wallWNB))  then
                 coef6(i,4)=1.d0/ds  !y0n
                 coef6(i,5)=1.d0/ds  !y1n
                 coef6(i,6)=0.d0     !y2n
             end if
             !1st order of accuracy in z
-            if ((image(ii,jj,kk+2)==ghost)  .OR.(image(ii,jj,kk+1)==wallB)  &
-            .OR.(image(ii,jj,kk+1)==wallNB) .OR.(image(ii,jj,kk+1)==wallSB) &
-            .OR.(image(ii,jj,kk+1)==wallEB) .OR.(image(ii,jj,kk+1)==wallWB) &
-            .OR.(image(ii,jj,kk+1)==wallENB).OR.(image(ii,jj,kk+1)==wallWNB)&
-            .OR.(image(ii,jj,kk+1)==wallESB).OR.(image(ii,jj,kk+1)==wallWSB)) then
+            if ((image(ii,jj,kk+2)==ghost)  .or.(image(ii,jj,kk+1)==wallB)  &
+            .or.(image(ii,jj,kk+1)==wallNB) .or.(image(ii,jj,kk+1)==wallSB) &
+            .or.(image(ii,jj,kk+1)==wallEB) .or.(image(ii,jj,kk+1)==wallWB) &
+            .or.(image(ii,jj,kk+1)==wallENB).or.(image(ii,jj,kk+1)==wallWNB)&
+            .or.(image(ii,jj,kk+1)==wallESB).or.(image(ii,jj,kk+1)==wallWSB)) then
                 coef6(i,7)=-1.d0/ds  !z0n
                 coef6(i,8)=-1.d0/ds  !z1n
                 coef6(i,9)=0.d0     !z2n
             end if
-        End do
+        end do
 
-        Do i=1,Nstencil7
+        do i=1,Nstencil7
             ii=dir7(1,i) 
             jj=dir7(2,i)
             kk=dir7(3,i)
@@ -1462,39 +1462,39 @@ contains
             coef7(i,8)=-2.d0/ds  !z1n
             coef7(i,9)=0.5d0/ds   !z2n
             !1st order of accuracy in x
-            if ((image(ii+2,jj,kk)==ghost)  .OR.(image(ii+1,jj,kk)==wallW)  &
-            .OR.(image(ii+1,jj,kk)==wallWS) .OR.(image(ii+1,jj,kk)==wallWN) &
-            .OR.(image(ii+1,jj,kk)==wallWF) .OR.(image(ii+1,jj,kk)==wallWB) &
-            .OR.(image(ii+1,jj,kk)==wallWNF).OR.(image(ii+1,jj,kk)==wallWNB)&
-            .OR.(image(ii+1,jj,kk)==wallWSF).OR.(image(ii+1,jj,kk)==wallWSB)) then
+            if ((image(ii+2,jj,kk)==ghost)  .or.(image(ii+1,jj,kk)==wallW)  &
+            .or.(image(ii+1,jj,kk)==wallWS) .or.(image(ii+1,jj,kk)==wallWN) &
+            .or.(image(ii+1,jj,kk)==wallWF) .or.(image(ii+1,jj,kk)==wallWB) &
+            .or.(image(ii+1,jj,kk)==wallWNF).or.(image(ii+1,jj,kk)==wallWNB)&
+            .or.(image(ii+1,jj,kk)==wallWSF).or.(image(ii+1,jj,kk)==wallWSB)) then
                 coef7(i,1)=-1.d0/ds  !x0n
                 coef7(i,2)=-1.d0/ds  !x1n
                 coef7(i,3)=0.d0     !x2n
             end if
             !1st order of accuracy in y
-            if ((image(ii,jj+2,kk)==ghost)  .OR.(image(ii,jj+1,kk)==wallS)  &
-            .OR.(image(ii,jj+1,kk)==wallES) .OR.(image(ii,jj+1,kk)==wallWS) &
-            .OR.(image(ii,jj+1,kk)==wallSF) .OR.(image(ii,jj+1,kk)==wallSB) &
-            .OR.(image(ii,jj+1,kk)==wallESF).OR.(image(ii,jj+1,kk)==wallESB)&
-            .OR.(image(ii,jj+1,kk)==wallWSF).OR.(image(ii,jj+1,kk)==wallWSB)) then
+            if ((image(ii,jj+2,kk)==ghost)  .or.(image(ii,jj+1,kk)==wallS)  &
+            .or.(image(ii,jj+1,kk)==wallES) .or.(image(ii,jj+1,kk)==wallWS) &
+            .or.(image(ii,jj+1,kk)==wallSF) .or.(image(ii,jj+1,kk)==wallSB) &
+            .or.(image(ii,jj+1,kk)==wallESF).or.(image(ii,jj+1,kk)==wallESB)&
+            .or.(image(ii,jj+1,kk)==wallWSF).or.(image(ii,jj+1,kk)==wallWSB)) then
                 coef7(i,4)=-1.d0/ds  !y0n
                 coef7(i,5)=-1.d0/ds  !y1n
                 coef7(i,6)=0.d0     !y2n
             end if
             !1st order of accuracy in z
-            if ((image(ii,jj,kk+2)==ghost)  .OR.(image(ii,jj,kk+1)==wallB)  &
-            .OR.(image(ii,jj,kk+1)==wallNB) .OR.(image(ii,jj,kk+1)==wallSB) &
-            .OR.(image(ii,jj,kk+1)==wallEB) .OR.(image(ii,jj,kk+1)==wallWB) &
-            .OR.(image(ii,jj,kk+1)==wallENB).OR.(image(ii,jj,kk+1)==wallWNB)&
-            .OR.(image(ii,jj,kk+1)==wallESB).OR.(image(ii,jj,kk+1)==wallWSB)) then
+            if ((image(ii,jj,kk+2)==ghost)  .or.(image(ii,jj,kk+1)==wallB)  &
+            .or.(image(ii,jj,kk+1)==wallNB) .or.(image(ii,jj,kk+1)==wallSB) &
+            .or.(image(ii,jj,kk+1)==wallEB) .or.(image(ii,jj,kk+1)==wallWB) &
+            .or.(image(ii,jj,kk+1)==wallENB).or.(image(ii,jj,kk+1)==wallWNB)&
+            .or.(image(ii,jj,kk+1)==wallESB).or.(image(ii,jj,kk+1)==wallWSB)) then
                 coef7(i,7)=-1.d0/ds  !z0n
                 coef7(i,8)=-1.d0/ds  !z1n
                 coef7(i,9)=0.d0     !z2n
             end if
-        End do
+        end do
 
 
-        Do i=1,Nstencil8
+        do i=1,Nstencil8
             ii=dir8(1,i) 
             jj=dir8(2,i)
             kk=dir8(3,i)
@@ -1509,36 +1509,36 @@ contains
             coef8(i,8)=-2.d0/ds  !z1n
             coef8(i,9)=0.5d0/ds   !z2n
             !1st order of accuracy in x
-            if ((image(ii-2,jj,kk)==ghost)  .OR.(image(ii-1,jj,kk)==wallE)  &
-            .OR.(image(ii-1,jj,kk)==wallES) .OR.(image(ii-1,jj,kk)==wallEN) &
-            .OR.(image(ii-1,jj,kk)==wallEF) .OR.(image(ii-1,jj,kk)==wallEB) &
-            .OR.(image(ii-1,jj,kk)==wallENF).OR.(image(ii-1,jj,kk)==wallENB)&
-            .OR.(image(ii-1,jj,kk)==wallESF).OR.(image(ii-1,jj,kk)==wallESB)) then
+            if ((image(ii-2,jj,kk)==ghost)  .or.(image(ii-1,jj,kk)==wallE)  &
+            .or.(image(ii-1,jj,kk)==wallES) .or.(image(ii-1,jj,kk)==wallEN) &
+            .or.(image(ii-1,jj,kk)==wallEF) .or.(image(ii-1,jj,kk)==wallEB) &
+            .or.(image(ii-1,jj,kk)==wallENF).or.(image(ii-1,jj,kk)==wallENB)&
+            .or.(image(ii-1,jj,kk)==wallESF).or.(image(ii-1,jj,kk)==wallESB)) then
                 coef8(i,1)=1.d0/ds  !x0n
                 coef8(i,2)=1.d0/ds  !x1n
                 coef8(i,3)=0.d0     !x2n
             end if
             !1st order of accuracy in y
-            if ((image(ii,jj+2,kk)==ghost)  .OR.(image(ii,jj+1,kk)==wallS)  &
-            .OR.(image(ii,jj+1,kk)==wallES) .OR.(image(ii,jj+1,kk)==wallWS) &
-            .OR.(image(ii,jj+1,kk)==wallSF) .OR.(image(ii,jj+1,kk)==wallSB) &
-            .OR.(image(ii,jj+1,kk)==wallESF).OR.(image(ii,jj+1,kk)==wallESB)&
-            .OR.(image(ii,jj+1,kk)==wallWSF).OR.(image(ii,jj+1,kk)==wallWSB)) then
+            if ((image(ii,jj+2,kk)==ghost)  .or.(image(ii,jj+1,kk)==wallS)  &
+            .or.(image(ii,jj+1,kk)==wallES) .or.(image(ii,jj+1,kk)==wallWS) &
+            .or.(image(ii,jj+1,kk)==wallSF) .or.(image(ii,jj+1,kk)==wallSB) &
+            .or.(image(ii,jj+1,kk)==wallESF).or.(image(ii,jj+1,kk)==wallESB)&
+            .or.(image(ii,jj+1,kk)==wallWSF).or.(image(ii,jj+1,kk)==wallWSB)) then
                 coef8(i,4)=-1.d0/ds  !y0n
                 coef8(i,5)=-1.d0/ds  !y1n
                 coef8(i,6)=0.d0     !y2n
             end if
             !1st order of accuracy in z
-            if ((image(ii,jj,kk+2)==ghost  ).OR.(image(ii,jj,kk+1)==wallB)  &
-            .OR.(image(ii,jj,kk+1)==wallNB ).OR.(image(ii,jj,kk+1)==wallSB) &
-            .OR.(image(ii,jj,kk+1)==wallEB ).OR.(image(ii,jj,kk+1)==wallWB) &
-            .OR.(image(ii,jj,kk+1)==wallENB).OR.(image(ii,jj,kk+1)==wallWNB)&
-            .OR.(image(ii,jj,kk+1)==wallESB).OR.(image(ii,jj,kk+1)==wallWSB)) then
+            if ((image(ii,jj,kk+2)==ghost  ).or.(image(ii,jj,kk+1)==wallB)  &
+            .or.(image(ii,jj,kk+1)==wallNB ).or.(image(ii,jj,kk+1)==wallSB) &
+            .or.(image(ii,jj,kk+1)==wallEB ).or.(image(ii,jj,kk+1)==wallWB) &
+            .or.(image(ii,jj,kk+1)==wallENB).or.(image(ii,jj,kk+1)==wallWNB)&
+            .or.(image(ii,jj,kk+1)==wallESB).or.(image(ii,jj,kk+1)==wallWSB)) then
                 coef8(i,7)=-1.d0/ds  !z0n
                 coef8(i,8)=-1.d0/ds  !z1n
                 coef8(i,9)=0.d0     !z2n
             end if
-        End do
+        end do
 
         fw=0.d0
     end subroutine setupPhysicalGrid

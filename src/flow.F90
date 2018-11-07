@@ -6,7 +6,7 @@ use velocityGrid, only: PI
 implicit none
 save
 
-! flow parameters, to be read from NML: flowNml
+! flow parameters, to be read from nml: flowNml
 double precision :: Kn, pressDrop, accom
 
 double precision :: mu
@@ -16,8 +16,8 @@ double precision :: mu
 ! double precision, parameter :: PressDrop=1.0d-1
 ! double precision, parameter :: accom = 1.d0
 
-double precision, DIMENSION(:,:,:), ALLOCATABLE :: f
-double precision, DIMENSION(:), ALLOCATABLE :: Rho, Ux, Uy, Uz
+double precision, dimension(:,:,:), allocatable :: f
+double precision, dimension(:), allocatable :: Rho, Ux, Uy, Uz
 double precision :: mass
 
 contains
@@ -30,10 +30,10 @@ contains
         implicit none
         integer :: i, j, k, l, ll
 
-        ALLOCATE(f(Ntotal,Nc8,1:8))
+        allocate(f(Ntotal,Nc8,1:8))
 
 
-        ALLOCATE(Rho(Ntotal), Ux(Ntotal), Uy(Ntotal), Uz(Ntotal))
+        allocate(Rho(Ntotal), Ux(Ntotal), Uy(Ntotal), Uz(Ntotal))
 
         mu = dsqrt(PI/2.d0)/Kn
 
@@ -45,9 +45,9 @@ contains
         mass = 1.d0
 
 
-        Do k=zlg,zug
-            Do j=ylg,yug
-                Do i=xlg,xug
+        do k=zlg,zug
+            do j=ylg,yug
+                do i=xlg,xug
                     l=(i-xlg+1)+(j-ylg)*Nxtotal+(k-zlg)*Nxytotal
                     if (image(i,j,k)/=solid) then
             !           Rho(l)=pressDrop*(i/2.d0-Nx)/Nx
@@ -56,9 +56,9 @@ contains
                     do ll=1,8
                         f(l,:,ll)=w(:)*Rho(l) !Check
                     enddo
-                 Enddo
-            Enddo
-        Enddo
+                 enddo
+            enddo
+        enddo
     end subroutine setupFlow
 
     subroutine allocateBuf
@@ -68,7 +68,7 @@ contains
         implicit none
 
         ! Now we calculate the snd/rcv buffer sizes then we can allocate them
-        ! Send buffer contains f* of first two real layers AND ALSO f*w of 
+        ! Send buffer contains f* of first two real layers and ALSO f*w of 
         ! 3-fold corners that inside the first two layers
         westSndSize = Nytotal*Nztotal*ghostLayers*Nc + westN3corner_snd*Nc
         westRcvSize = Nytotal*Nztotal*ghostLayers*Nc + westN3corner_rcv*Nc

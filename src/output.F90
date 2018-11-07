@@ -94,7 +94,7 @@ contains
                 !+ massSB + massSF + massNB + massNF)*dsqrt(1.d0/2.d0)*4.d0/1.d0
 
             ! reduction
-            call MPI_ALLREDUCE(massLocal, mass2, 1, MPI_DOUBLE_PRECISION, MPI_SUM, &
+            call MPI_ALLREDUCE(massLocal, mass2, 1, MPI_doUBLE_PRECISION, MPI_SUM, &
                                mpi_comm_inlet, MPI_ERR)
 
             !PRINT*, "mass = ", mass
@@ -110,8 +110,8 @@ contains
                 ! close(22)
             endif
         endif ! xl==xmin
-        !bcast error so every process in WORLD can stop
-        CALL MPI_BCAST(error, 1, MPI_DOUBLE_PRECISION, master, MPI_COMM_VGRID, MPI_ERR)
+        !bcast error so every process in WorLD can stop
+        call MPI_BCAST(error, 1, MPI_doUBLE_PRECISION, master, MPI_COMM_VGRID, MPI_ERR)
     end subroutine chkConverge
 
     subroutine saveFlowField
@@ -120,86 +120,86 @@ contains
         character(9) ztitle
         write(fname, '(A, I0.3, A)') 'Field_', proc, '.dat'
         write(ztitle, '(A, I0.3,A)') '"proc', proc, '"'
-        open(20,file=fname,STATUS="REPLACE")
+        open(20,file=fname,status="REPLACE")
         write(20,*) ' TITLE=" Field"'
         write(20,*) ' VARIABLES=x,y,z,flag,Rho,Ux,Uy,Uz'
         write(20,'(A,A,A,I,A,I,A,I,A)') ' ZONE T=', ztitle, ', I=', Nxsub,', J=', Nysub, ', K=', Nzsub, ' F=POINT'
-        Do k=zl,zu
-            Do j=yl,yu
-                Do i=xl,xu
+        do k=zl,zu
+            do j=yl,yu
+                do i=xl,xu
                     l= (k-zlg)*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
-                    If (image(i,j,k)==fluid) then
+                    if (image(i,j,k)==fluid) then
                         write(20,'(4I10,4ES15.6)') i, j, k, 0, Rho(l)+1.d0, Ux(l), Uy(l), Uz(l)
                     else
                         write(20,'(4I10,4ES15.6)') i, j, k, 1, 0.d0, 0.d0, 0.d0, 0.d0
-                    Endif   
-                Enddo
-            Enddo
-        Enddo
+                    endif   
+                enddo
+            enddo
+        enddo
         close(20)
     end subroutine saveFlowField
 
 
-    SUBROUTINE saveFlowFieldVTK
-        IMPLICIT NONE
-        INTEGER :: i, j, k, l,MPI_ERR, IO_ERR
+    subroutine saveFlowFieldVTK
+        implicit none
+        integer :: i, j, k, l,MPI_ERR, IO_ERR
         character(13) fname
 
         write(fname, '(A, I0.3, A)') 'Field_', proc, '.vtk'
-        OPEN(UNIT = 12, FILE = fname, STATUS = "REPLACE", POSITION = "APPEND", &
-          IOSTAT = IO_ERR)
-        IF ( IO_ERR == 0 ) THEN
-            WRITE(12,'(A)')"# vtk DataFile Version 2.0"
-            WRITE(12,'(A)')"DVM MPI"
-            WRITE(12,'(A)')"ASCII"
-            WRITE(12,*)
-            WRITE(12,'(A)')"DATASET STRUCTURED_POINTS"
-            WRITE(12,*)"DIMENSIONS",Nxsub,Nysub,Nzsub
-            WRITE(12,*)"ORIGIN",xl,yl,zl
-            WRITE(12,*)"SPACING",1,1,1
-            WRITE(12,*)
-            WRITE(12,*)"POINT_DATA",Nxsub*Nysub*Nzsub
-            WRITE(12,*)
-            WRITE(12,'(A)')"SCALARS Rho double"
-            WRITE(12,'(A)')"LOOKUP_TABLE default"
-            DO k = zl, zu
-                DO j = yl, yu
-                    DO i = xl, xu
+        open(unit = 12, file = fname, status = "REPLACE", position = "APPend", &
+          iostat = IO_ERR)
+        if ( IO_ERR == 0 ) then
+            write(12,'(A)')"# vtk DataFile Version 2.0"
+            write(12,'(A)')"DVM MPI"
+            write(12,'(A)')"ASCII"
+            write(12,*)
+            write(12,'(A)')"DATASET STRUCTURED_POINTS"
+            write(12,*)"dimensionS",Nxsub,Nysub,Nzsub
+            write(12,*)"orIGIN",xl,yl,zl
+            write(12,*)"SPACING",1,1,1
+            write(12,*)
+            write(12,*)"POINT_DATA",Nxsub*Nysub*Nzsub
+            write(12,*)
+            write(12,'(A)')"SCALARS Rho double"
+            write(12,'(A)')"LOOKUP_TABLE default"
+            do k = zl, zu
+                do j = yl, yu
+                    do i = xl, xu
                         l= (k-zlg)*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
-                        If (image(i,j,k)==fluid) then
+                        if (image(i,j,k)==fluid) then
                             write(12,'(ES15.6)') Rho(l)+1.d0
                         else
                             write(12,'(ES15.6)') 0.d0
-                        Endif   
-                    END DO
-                END DO
-            END DO
-            WRITE(12,*)
-            WRITE(12,'(A)')"VECTORS Velocity double"
-            DO k = zl, zu
-               DO j = yl, yu
-                  DO i = xl, xu
+                        endif   
+                    end do
+                end do
+            end do
+            write(12,*)
+            write(12,'(A)')"VECTorS Velocity double"
+            do k = zl, zu
+               do j = yl, yu
+                  do i = xl, xu
                      l= (k-zlg)*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
-                     If (image(i,j,k)==fluid) then
+                     if (image(i,j,k)==fluid) then
                          write(12,'(3ES15.6)') Ux(l), Uy(l), Uz(l)
                      else
                          write(12,'(3ES15.6)') 0.d0, 0.d0, 0.d0
-                     Endif  
-                  END DO
-               END DO
-            END DO
-            CLOSE(UNIT = 12)
+                     endif  
+                  end do
+               end do
+            end do
+            close(unit = 12)
         ELSE
-            CALL memFree
-            CALL MPI_FINALIZE(MPI_ERR)
-            STOP "Error: Unable to open output vtk file."
-        END IF
+            call memFree
+            call MPI_FINALIZE(MPI_ERR)
+            stop "Error: Unable to open output vtk file."
+        end if
 
-        RETURN
-    END SUBROUTINE saveFlowFieldVTK
+        return
+    end subroutine saveFlowFieldVTK
 
-    SUBROUTINE saveFlowFieldVTI
-        INTEGER :: i, j, k, l,MPI_ERR, IO_ERR
+    subroutine saveFlowFieldVTI
+        integer :: i, j, k, l,MPI_ERR, IO_ERR
         character(13) fname
         character(10) pfname
         integer :: exl, exu, eyl, eyu, ezl, ezu
@@ -218,80 +218,80 @@ contains
         ezu = zu
 
         write(fname, '(A, I0.3, A)') 'Field_', proc, '.vti'
-        OPEN(UNIT = 13, FILE = fname, STATUS = "REPLACE", POSITION = "APPEND", &
-          IOSTAT = IO_ERR)
-        IF ( IO_ERR == 0 ) THEN
-            WRITE(13,'(A)') '<?xml version="1.0"?>'
-            WRITE(13,'(A)') '<VTKFile type="ImageData">'
-            WRITE(13,'(A, 6I4, A)') '<ImageData WholeExtent="', exl, exu, & 
+        open(unit = 13, file = fname, status = "REPLACE", position = "APPend", &
+          iostat = IO_ERR)
+        if ( IO_ERR == 0 ) then
+            write(13,'(A)') '<?xml version="1.0"?>'
+            write(13,'(A)') '<VTKFile type="ImageData">'
+            write(13,'(A, 6I4, A)') '<ImageData WholeExtent="', exl, exu, & 
                 eyl, eyu, ezl, ezu, ' " Origin="0 0 0" Spacing="1 1 1">'
-            WRITE(13, '(A, 6I4, A)') '<Piece Extent="', exl, exu, eyl, eyu, &
+            write(13, '(A, 6I4, A)') '<Piece Extent="', exl, exu, eyl, eyu, &
                 ezl, ezu, '">'
-            WRITE(13, '(A)') '<CellData Scalars="flag Rho" Vectors ="U">'
-            WRITE(13, '(A)') '<DataArray type="Int32" Name="flag" format="ascii">'
-            DO k = zl, zu
-                DO j = yl, yu
-                    DO i = xl, xu
+            write(13, '(A)') '<CellData Scalars="flag Rho" Vectors ="U">'
+            write(13, '(A)') '<DataArray type="Int32" Name="flag" format="ascii">'
+            do k = zl, zu
+                do j = yl, yu
+                    do i = xl, xu
                         write(13,'(I)') image(i,j,k)
-                    END DO
-                END DO
-            END DO
-            WRITE(13, '(A)') '</DataArray>'
-            WRITE(13, '(A)') '<DataArray type="Float32" Name="Rho" format="ascii">'
-            DO k = zl, zu
-                DO j = yl, yu
-                    DO i = xl, xu
+                    end do
+                end do
+            end do
+            write(13, '(A)') '</DataArray>'
+            write(13, '(A)') '<DataArray type="Float32" Name="Rho" format="ascii">'
+            do k = zl, zu
+                do j = yl, yu
+                    do i = xl, xu
                         l= (k-zlg)*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
-                        If (image(i,j,k)==fluid) then
+                        if (image(i,j,k)==fluid) then
                             write(13,'(ES15.6)') Rho(l)+1.d0
                         else
                             write(13,'(ES15.6)') 0.d0
-                        Endif   
-                    END DO
-                END DO
-            END DO
-            WRITE(13, '(A)') '</DataArray>'
-            WRITE(13, '(A)') '<DataArray type="Float32" Name="U" format="ascii" &
+                        endif   
+                    end do
+                end do
+            end do
+            write(13, '(A)') '</DataArray>'
+            write(13, '(A)') '<DataArray type="Float32" Name="U" format="ascii" &
                 & NumberOfComponents="3">'
-            DO k = zl, zu
-               DO j = yl, yu
-                  DO i = xl, xu
+            do k = zl, zu
+               do j = yl, yu
+                  do i = xl, xu
                      l= (k-zlg)*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
-                     If (image(i,j,k)==fluid) then
+                     if (image(i,j,k)==fluid) then
                          write(13,'(3ES15.6)') Ux(l), Uy(l), Uz(l)
                      else
                          write(13,'(3ES15.6)') 0.d0, 0.d0, 0.d0
-                     Endif  
-                  END DO
-               END DO
-            END DO
-            WRITE(13, '(A)') '</DataArray>'
-            WRITE(13, '(A)') '</CellData>'
-            WRITE(13, '(A)') '</Piece>'
-            WRITE(13, '(A)') '</ImageData>'
-            WRITE(13, '(A)') '</VTKFile>'
-            CLOSE(UNIT = 13)
+                     endif  
+                  end do
+               end do
+            end do
+            write(13, '(A)') '</DataArray>'
+            write(13, '(A)') '</CellData>'
+            write(13, '(A)') '</Piece>'
+            write(13, '(A)') '</ImageData>'
+            write(13, '(A)') '</VTKFile>'
+            close(unit = 13)
         ELSE
-            CALL memFree
-            CALL MPI_FINALIZE(MPI_ERR)
-            STOP "Error: Unable to open output vti file."
-        END IF
+            call memFree
+            call MPI_FINALIZE(MPI_ERR)
+            stop "Error: Unable to open output vti file."
+        end if
 
 
         if (proc == master) then  
             write(pfname, '(A)') 'Field.pvti'
-            OPEN(UNIT = 14, FILE = pfname, STATUS = "REPLACE", POSITION = "APPEND", &
-              IOSTAT = IO_ERR)
-            WRITE(14,'(A)') '<?xml version="1.0"?>'
-            WRITE(14,'(A)') '<VTKFile type="PImageData">'
-            WRITE(14,'(A, 6I4, A)') '<PImageData WholeExtent="', wexl, wexu, & 
+            open(unit = 14, file = pfname, status = "REPLACE", position = "APPend", &
+              iostat = IO_ERR)
+            write(14,'(A)') '<?xml version="1.0"?>'
+            write(14,'(A)') '<VTKFile type="PImageData">'
+            write(14,'(A, 6I4, A)') '<PImageData WholeExtent="', wexl, wexu, & 
                 weyl, weyu, wezl, wezu, ' " Origin="0 0 0" Spacing="1 1 1">'
-            WRITE(14,'(A)') '<PCellData Scalars="flag Rho" Vectors ="U">'
-            WRITE(14, '(A)') '<DataArray type="Int32" Name="flag" format="ascii"/>'
-            WRITE(14, '(A)') '<DataArray type="Float32" Name="Rho" format="ascii"/>'
-            WRITE(14, '(A)') '<DataArray type="Float32" Name="U" format="ascii" &
+            write(14,'(A)') '<PCellData Scalars="flag Rho" Vectors ="U">'
+            write(14, '(A)') '<DataArray type="Int32" Name="flag" format="ascii"/>'
+            write(14, '(A)') '<DataArray type="Float32" Name="Rho" format="ascii"/>'
+            write(14, '(A)') '<DataArray type="Float32" Name="U" format="ascii" &
                 & NumberOfComponents="3"/>'
-            WRITE(14, '(A)') '</PCellData>'
+            write(14, '(A)') '</PCellData>'
             do l=1, nprocs
                 exl = sub_ext(1,l) - 1
                 exu = sub_ext(2,l)
@@ -300,15 +300,15 @@ contains
                 ezl = sub_ext(5,l) - 1
                 ezu = sub_ext(6,l)
                 write(fname, '(A, I0.3, A)') 'Field_', l-1, '.vti'
-                WRITE(14, '(A, 6I4, A)') '<Piece Extent="', exl, exu, eyl, eyu, &
+                write(14, '(A, 6I4, A)') '<Piece Extent="', exl, exu, eyl, eyu, &
                     ezl, ezu, '" Source="'//fname//'"/>'
             enddo
-            WRITE(14, '(A)') '</PImageData>'
-            WRITE(14, '(A)') '</VTKFile>'
-            CLOSE(UNIT=14)
+            write(14, '(A)') '</PImageData>'
+            write(14, '(A)') '</VTKFile>'
+            close(unit=14)
         endif
 
-    END SUBROUTINE saveFlowFieldVTI
+    end subroutine saveFlowFieldVTI
 
     !----------------------------------------------------------------------
     ! cal and output fluidNodeCount and totalFluidCount
@@ -337,13 +337,13 @@ contains
         enddo
 
         ! do MPI gather put fluidNodeCount to fluidNodeCountAll
-        call MPI_GATHER(totalNodeCount, 1, MPI_INTEGER, totalNodeCountAll, 1, &
-            MPI_INTEGER, master, MPI_COMM_VGRID, MPI_ERR)
-        call MPI_GATHER(fluidNodeCount, 1, MPI_INTEGER, fluidNodeCountAll, 1, &
-            MPI_INTEGER, master, MPI_COMM_VGRID, MPI_ERR)
+        call MPI_GATHER(totalNodeCount, 1, MPI_integer, totalNodeCountAll, 1, &
+            MPI_integer, master, MPI_COMM_VGRID, MPI_ERR)
+        call MPI_GATHER(fluidNodeCount, 1, MPI_integer, fluidNodeCountAll, 1, &
+            MPI_integer, master, MPI_COMM_VGRID, MPI_ERR)
         ! master process write to file
         if(proc == master) then
-            open(unit=15, file="nodeCounts", status="replace", IOSTAT=IO_ERR)
+            open(unit=15, file="nodeCounts", status="replace", iostat=IO_ERR)
             write(15,'(A)') "totalNodeCount fluidNodeCount localPorosity"
             do i=1,nprocs
                 write(15,'(2I12, ES15.6)') &

@@ -12,7 +12,7 @@ namelist /mpiNml/ mpi_xdim, mpi_ydim, mpi_zdim, block_repx, block_repy, block_re
 namelist /solverNml/ maxStep, chkConvergeStep, saveStep, eps, saveLast, saveFormat
 namelist /flowNml/ Kn, pressDrop, accom
 ! file units
-integer, parameter :: PARAFILE = 10
+integer, parameter :: PARAfile = 10
 
 contains 
     subroutine initParams
@@ -29,23 +29,23 @@ contains
         saveFormat = 1 ! default saving format is vti
 
         ! read file called "para.in" using namelist of Fortran 90
-        open(unit=PARAFILE,file='para.in',status='old',iostat=ios)
+        open(unit=PARAfile,file='para.in',status='old',iostat=ios)
         if (ios /= 0) then
-            print*,'ERROR: could not open namelist file'
+            print*,'ERRor: could not open namelist file'
             stop
         end if
 
         ! read data into the declared namelist
-        read(UNIT=PARAFILE,NML=physicalNml,IOSTAT=ios)
-        read(UNIT=PARAFILE,NML=velocityNml,IOSTAT=ios)
-        read(UNIT=PARAFILE,NML=mpiNml,IOSTAT=ios)
-        read(UNIT=PARAFILE,NML=solverNml,IOSTAT=ios)
-        read(UNIT=PARAFILE,NML=flowNml,IOSTAT=ios) 
+        read(unit=PARAfile,nml=physicalNml,iostat=ios)
+        read(unit=PARAfile,nml=velocityNml,iostat=ios)
+        read(unit=PARAfile,nml=mpiNml,iostat=ios)
+        read(unit=PARAfile,nml=solverNml,iostat=ios)
+        read(unit=PARAfile,nml=flowNml,iostat=ios) 
         if (ios /= 0) then
-            print*,'ERROR: could not read example namelist'
+            print*,'ERRor: could not read example namelist'
             stop
         else 
-            close(PARAFILE)
+            close(PARAfile)
         end if
 
         ! set varialbes, for weak scaling study
