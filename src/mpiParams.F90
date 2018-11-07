@@ -79,8 +79,8 @@ contains
         intege :: complete, direction, partial, shift
         intege :: MPI_ERR
         intege, dimension(1:mpi_dim) :: dims, mpi_coords
-        LOGICAL, dimension(1:mpi_dim) :: peiodic
-        LOGICAL :: eorder
+        logical, dimension(1:mpi_dim) :: peiodic
+        logical :: eorder
         intege :: j, k
         intege, dimension(6) :: my_ext
         
