@@ -27,14 +27,14 @@ module solver
         integer :: localidMsnd, localidPsnd, localidMrcv, localidPrcv, packid
         integer :: MPI_ERR
         integer :: MPI_REQ_X(4), MPI_REQ_Y(4), MPI_REQ_Z(4)
-        integer :: MPI_STAT(MPI_STATUS_SIZE,6)
+        integer :: MPI_STAT(MPI_status_SIZE,6)
         integer :: xfsize, yfsize, zfsize, locB
         double precision :: fEq, RhoWall, RhoWall2, RhoWall3
         double precision, dimension(Nc8,1:8) :: fwZ
         
         ! for mpi error handling
         integer :: errMsgLen, errTmp
-        character(len=MPI_MAX_ERROR_STRING) :: errMsg 
+        character(len=MPI_MAX_ERRor_STRING) :: errMsg 
 
         ! The size for storing two layers of nodes in buffer 
         xfsize = Nytotal*Nztotal*Nc*ghostLayers
@@ -54,37 +54,37 @@ module solver
 
 !$OMP SINGLE
         ! Start Recieving
-        call MPI_IRECV( f_east_rcv, eastRcvSize, MPI_DOUBLE_PRECISION, east, TAG1, &
+        call MPI_IRECV( f_east_rcv, eastRcvSize, MPI_doUBLE_PRECISION, east, TAG1, &
                         MPI_COMM_VGRID, MPI_REQ_X(1), MPI_ERR )
-        call MPI_IRECV( f_west_rcv, westRcvSize, MPI_DOUBLE_PRECISION, west, TAG2, &
+        call MPI_IRECV( f_west_rcv, westRcvSize, MPI_doUBLE_PRECISION, west, TAG2, &
                         MPI_COMM_VGRID, MPI_REQ_X(2), MPI_ERR )
-        call MPI_IRECV( f_noth_rcv, nothRcvSize, MPI_DOUBLE_PRECISION, noth, TAG3, &
+        call MPI_IRECV( f_noth_rcv, nothRcvSize, MPI_doUBLE_PRECISION, noth, TAG3, &
                         MPI_COMM_VGRID, MPI_REQ_Y(1), MPI_ERR )
-        call MPI_IRECV( f_suth_rcv, suthRcvSize, MPI_DOUBLE_PRECISION, suth, TAG4, &
+        call MPI_IRECV( f_suth_rcv, suthRcvSize, MPI_doUBLE_PRECISION, suth, TAG4, &
                         MPI_COMM_VGRID, MPI_REQ_Y(2), MPI_ERR )
-        call MPI_IRECV( f_frnt_rcv, frntRcvSize, MPI_DOUBLE_PRECISION, frnt, TAG5, &
+        call MPI_IRECV( f_frnt_rcv, frntRcvSize, MPI_doUBLE_PRECISION, frnt, TAG5, &
                         MPI_COMM_VGRID, MPI_REQ_Z(1), MPI_ERR )
-        call MPI_IRECV( f_back_rcv, backRcvSize, MPI_DOUBLE_PRECISION, back, TAG6, &
+        call MPI_IRECV( f_back_rcv, backRcvSize, MPI_doUBLE_PRECISION, back, TAG6, &
                         MPI_COMM_VGRID, MPI_REQ_Z(2), MPI_ERR )
 
-        call MPI_ISEND( f_west_snd, westSndSize, MPI_DOUBLE_PRECISION, west, TAG1, &
+        call MPI_ISend( f_west_snd, westSndSize, MPI_doUBLE_PRECISION, west, TAG1, &
                         MPI_COMM_VGRID, MPI_REQ_X(3), MPI_ERR )
-        call MPI_ISEND( f_east_snd, eastSndSize, MPI_DOUBLE_PRECISION, east, TAG2, &
+        call MPI_ISend( f_east_snd, eastSndSize, MPI_doUBLE_PRECISION, east, TAG2, &
                         MPI_COMM_VGRID, MPI_REQ_X(4), MPI_ERR )
-        call MPI_ISEND( f_suth_snd, suthSndSize, MPI_DOUBLE_PRECISION, suth, TAG3, &
+        call MPI_ISend( f_suth_snd, suthSndSize, MPI_doUBLE_PRECISION, suth, TAG3, &
                         MPI_COMM_VGRID, MPI_REQ_Y(3), MPI_ERR )
-        call MPI_ISEND( f_noth_snd, nothSndSize, MPI_DOUBLE_PRECISION, noth, TAG4, &
+        call MPI_ISend( f_noth_snd, nothSndSize, MPI_doUBLE_PRECISION, noth, TAG4, &
                         MPI_COMM_VGRID, MPI_REQ_Y(4), MPI_ERR )
-        call MPI_ISEND( f_back_snd, backSndSize, MPI_DOUBLE_PRECISION, back, TAG5, &
+        call MPI_ISend( f_back_snd, backSndSize, MPI_doUBLE_PRECISION, back, TAG5, &
                         MPI_COMM_VGRID, MPI_REQ_Z(3), MPI_ERR )
-        call MPI_ISEND( f_frnt_snd, frntSndSize, MPI_DOUBLE_PRECISION, frnt, TAG6, &
+        call MPI_ISend( f_frnt_snd, frntSndSize, MPI_doUBLE_PRECISION, frnt, TAG6, &
                         MPI_COMM_VGRID, MPI_REQ_Z(4), MPI_ERR )
-!$OMP END SINGLE NOWAIT
+!$OMP end SINGLE NOWAIT
 
 !------------------------------------------------------------------------
 !           In the 1st group of direction cx>0 & cy>0 & cz>0
 !------------------------------------------------------------------------
-!$OMP DO SCHEDULE(STATIC) 
+!$OMP do SCHEDULE(STATIC) 
     do l=1,Nc8
         do i=1,Nstencil1
             !k=dir1(i)
@@ -125,12 +125,12 @@ module solver
             & )/(0.5d0*mu+cx(l)*coef1(i,1)+cy(l)*coef1(i,4)+cz(l)*coef1(i,7))
         end do
     end do
-!$OMP END DO NOWAIT
+!$OMP end do NOWAIT
 
 !------------------------------------------------------------------------
 !           In the 2nd group of direction cx<0 & cy>0 & cz>0
 !------------------------------------------------------------------------
-!$OMP DO SCHEDULE(STATIC)
+!$OMP do SCHEDULE(STATIC)
     do l=1,Nc8
         do i=1,Nstencil2
             !k=dir1(i)
@@ -170,12 +170,12 @@ module solver
             & )/(0.5d0*mu-cx(l)*coef2(i,1)+cy(l)*coef2(i,4)+cz(l)*coef2(i,7))
         end do
     end do
-!$OMP END DO NOWAIT
+!$OMP end do NOWAIT
 
 !------------------------------------------------------------------------
 !           In the 3rd group of direction cx<0 & cy<0 & cz>0
 !------------------------------------------------------------------------
-!$OMP DO SCHEDULE(STATIC)
+!$OMP do SCHEDULE(STATIC)
     do l=1,Nc8
         do i=1,Nstencil3
             ii = dir3(1,i)
@@ -214,12 +214,12 @@ module solver
             & )/(0.5d0*mu-cx(l)*coef3(i,1)-cy(l)*coef3(i,4)+cz(l)*coef3(i,7))
         end do
     end do
-!$OMP END DO NOWAIT
+!$OMP end do NOWAIT
 
 !------------------------------------------------------------------------
 !           In the 4th group of direction cx>0 & cy<0 & cz>0
 !------------------------------------------------------------------------
-!$OMP DO SCHEDULE(STATIC)
+!$OMP do SCHEDULE(STATIC)
     do l=1,Nc8
         do i=1,Nstencil4
             ii = dir4(1,i)
@@ -258,12 +258,12 @@ module solver
             & )/(0.5d0*mu+cx(l)*coef4(i,1)-cy(l)*coef4(i,4)+cz(l)*coef4(i,7))
         end do
     end do
-!$OMP END DO NOWAIT
+!$OMP end do NOWAIT
 
 !------------------------------------------------------------------------
 !           In the 5th group of direction cx>0 & cy>0 & cz<0
 !------------------------------------------------------------------------
-!$OMP DO SCHEDULE(STATIC)
+!$OMP do SCHEDULE(STATIC)
     do l=1,Nc8
         do i=1,Nstencil5
             ii = dir5(1,i)
@@ -302,12 +302,12 @@ module solver
             & )/(0.5d0*mu+cx(l)*coef5(i,1)+cy(l)*coef5(i,4)-cz(l)*coef5(i,7))
         end do
     end do
-!$OMP END DO NOWAIT
+!$OMP end do NOWAIT
 
 !------------------------------------------------------------------------
 !           In the 6th group of direction cx<0 & cy>0 & cz<0
 !------------------------------------------------------------------------
-!$OMP DO SCHEDULE(STATIC)
+!$OMP do SCHEDULE(STATIC)
     do l=1,Nc8
         do i=1,Nstencil6
             ii = dir6(1,i)
@@ -346,12 +346,12 @@ module solver
             & )/(0.5d0*mu-cx(l)*coef6(i,1)+cy(l)*coef6(i,4)-cz(l)*coef6(i,7))
         end do
     end do
-!$OMP END DO NOWAIT
+!$OMP end do NOWAIT
 
 !------------------------------------------------------------------------
 !           In the 7th group of direction cx<0 & cy<0 & cz<0
 !------------------------------------------------------------------------
-!$OMP DO SCHEDULE(STATIC)
+!$OMP do SCHEDULE(STATIC)
     do l=1,Nc8
         do i=1,Nstencil7
             ii = dir7(1,i)
@@ -390,12 +390,12 @@ module solver
             & )/(0.5d0*mu-cx(l)*coef7(i,1)-cy(l)*coef7(i,4)-cz(l)*coef7(i,7))
         end do
     end do
-!$OMP END DO NOWAIT
+!$OMP end do NOWAIT
 
 !------------------------------------------------------------------------
 !           In the 8th group of direction cx>0 & cy<0 & cz<0
 !------------------------------------------------------------------------
-!$OMP DO SCHEDULE(STATIC)
+!$OMP do SCHEDULE(STATIC)
     do l=1,Nc8
         do i=1,Nstencil8
             ii = dir8(1,i)
@@ -434,16 +434,16 @@ module solver
             & )/(0.5d0*mu+cx(l)*coef8(i,1)-cy(l)*coef8(i,4)-cz(l)*coef8(i,7))
         end do
     end do
-!$OMP END DO 
+!$OMP end do 
 
 !$OMP SINGLE
         ! Wait until send and recv done
         call MPI_WAITALL(4, MPI_REQ_X, MPI_STAT, MPI_ERR)
         call MPI_WAITALL(4, MPI_REQ_Y, MPI_STAT, MPI_ERR)
         call MPI_WAITALL(4, MPI_REQ_Z, MPI_STAT, MPI_ERR)
-!$OMP END SINGLE 
+!$OMP end SINGLE 
 
-!$OMP DO COLLAPSE(3)
+!$OMP do COLLAPSE(3)
     ! pack/unpack X dir buffer
     do k = 1,Nztotal
         do j = 1, Nytotal
@@ -468,9 +468,9 @@ module solver
             enddo !i
         enddo !j
     enddo !k
-!$OMP END DO NOWAIT
+!$OMP end do NOWAIT
 
-!$OMP DO COLLAPSE(3)
+!$OMP do COLLAPSE(3)
     ! pack/unpack Y dir buffer
     do k = 1, Nztotal
         do j = 1, ghostLayers
@@ -493,10 +493,10 @@ module solver
             enddo !i
         enddo !j
     enddo !k
-!$OMP END DO NOWAIT
+!$OMP end do NOWAIT
 
 
-!$OMP DO COLLAPSE(3)
+!$OMP do COLLAPSE(3)
     ! pack/unpack Z dir buffer
     do k = 1, ghostLayers
         do j = 1, Nytotal
@@ -520,7 +520,7 @@ module solver
             enddo !i
         enddo !j
     enddo !k
-!$OMP END DO NOWAIT
+!$OMP end do NOWAIT
 
 
 !------------------------------------------------------------------------
@@ -528,7 +528,7 @@ module solver
 !------------------------------------------------------------------------
 !$OMP SECTIONS
 !$OMP SECTION
-!!$OMP DO
+!!$OMP do
     ! pack 3-fold corners send buffer at west
     do m = 1, westN3corner_snd
         do l = 1,8
@@ -536,10 +536,10 @@ module solver
             f_west_snd(locB+1:locB+Nc8) = fw(map3CorWsnd(m),:,l)
         end do
     end do
-!!$OMP ENDDO NOWAIT
+!!$OMP enddo NOWAIT
 
 !$OMP SECTION
-!!$OMP DO
+!!$OMP do
     ! pack 3-fold corners send buffer at east
     do m = 1, eastN3corner_snd
         do l = 1,8
@@ -547,10 +547,10 @@ module solver
             f_east_snd(locB+1:locB+Nc8) = fw(map3CorEsnd(m),:,l)
         end do
     end do
-!!$OMP ENDDO NOWAIT
+!!$OMP enddo NOWAIT
 
 !$OMP SECTION
-!!$OMP DO
+!!$OMP do
     ! unpack 3-fold corners rcv buffer at west
     do m = 1, westN3corner_rcv
         do l = 1,8
@@ -558,10 +558,10 @@ module solver
             fw(map3CorWrcv(m),:,l) = f_west_rcv(locB+1:locB+Nc8)
         end do
     end do
-!!$OMP ENDDO NOWAIT
+!!$OMP enddo NOWAIT
 
 !$OMP SECTION
-!!$OMP DO
+!!$OMP do
     ! unpack 3-fold corners rcv buffer at east
     do m = 1, eastN3corner_rcv
         do l = 1,8
@@ -569,13 +569,13 @@ module solver
             fw(map3CorErcv(m),:,l) = f_east_rcv(locB+1:locB+Nc8)
         end do
     end do
-!!$OMP ENDDO NOWAIT
+!!$OMP enddo NOWAIT
 
 !------------------------------------------------------------------------
 ! pack/unpack 3-fold corners at noth/suth
 !------------------------------------------------------------------------
 !$OMP SECTION
-!!$OMP DO
+!!$OMP do
     ! pack 3-fold corners send buffer at suth
     do m = 1, suthN3corner_snd
         do l = 1,8
@@ -583,10 +583,10 @@ module solver
             f_suth_snd(locB+1:locB+Nc8) = fw(map3CorSsnd(m),:,l)
         end do
     end do
-!!$OMP ENDDO
+!!$OMP enddo
 
 !$OMP SECTION
-!!$OMP DO
+!!$OMP do
     ! pack 3-fold corners send buffer at noth
     do m = 1, nothN3corner_snd
         do l = 1,8
@@ -594,10 +594,10 @@ module solver
             f_noth_snd(locB+1:locB+Nc8) = fw(map3CorNsnd(m),:,l)
         end do
     end do
-!!$OMP ENDDO
+!!$OMP enddo
 
 !$OMP SECTION
-!!$OMP DO
+!!$OMP do
     ! unpack 3-fold corners rcv buffer at suth
     do m = 1, suthN3corner_rcv
         do l = 1,8
@@ -605,10 +605,10 @@ module solver
             fw(map3CorSrcv(m),:,l) = f_suth_rcv(locB+1:locB+Nc8)
         end do
     end do
-!!$OMP ENDDO
+!!$OMP enddo
 
 !$OMP SECTION
-!!$OMP DO
+!!$OMP do
     ! unpack 3-fold corners rcv buffer at noth
     do m = 1, nothN3corner_rcv
         do l = 1,8
@@ -616,13 +616,13 @@ module solver
             fw(map3CorNrcv(m),:,l) = f_noth_rcv(locB+1:locB+Nc8)
         end do
     end do
-!!$OMP ENDDO
+!!$OMP enddo
 
 !------------------------------------------------------------------------
 ! pack/unpack 3-fold corners at back/frnt
 !------------------------------------------------------------------------
 !$OMP SECTION
-!!$OMP DO
+!!$OMP do
     ! pack 3-fold corners send buffer at back
     do m = 1, backN3corner_snd
         do l = 1,8
@@ -630,10 +630,10 @@ module solver
             f_back_snd(locB+1:locB+Nc8) = fw(map3CorBsnd(m),:,l)
         end do
     end do
-!!$OMP ENDDO NOWAIT
+!!$OMP enddo NOWAIT
 
 !$OMP SECTION
-!!$OMP DO
+!!$OMP do
     ! pack 3-fold corners send buffer at frnt
     do m = 1, frntN3corner_snd
         do l = 1,8
@@ -641,10 +641,10 @@ module solver
             f_frnt_snd(locB+1:locB+Nc8) = fw(map3CorFsnd(m),:,l)
         end do
     end do
-!!$OMP ENDDO NOWAIT
+!!$OMP enddo NOWAIT
 
 !$OMP SECTION
-!!$OMP DO
+!!$OMP do
     ! unpack 3-fold corners rcv buffer at back
     do m = 1, backN3corner_rcv
         do l = 1,8
@@ -652,10 +652,10 @@ module solver
             fw(map3CorBrcv(m),:,l) = f_back_rcv(locB+1:locB+Nc8)
         end do
     end do
-!!$OMP ENDDO NOWAIT
+!!$OMP enddo NOWAIT
 
 !$OMP SECTION
-!!$OMP DO
+!!$OMP do
     ! unpack 3-fold corners rcv buffer at frnt
     do m = 1, frntN3corner_rcv
         do l = 1,8
@@ -663,13 +663,13 @@ module solver
             fw(map3CorFrcv(m),:,l) = f_frnt_rcv(locB+1:locB+Nc8)
         end do
     end do
-!!$OMP ENDDO NOWAIT
-!$OMP END SECTIONS
+!!$OMP enddo NOWAIT
+!$OMP end SECTIONS
 
 !=======================================================================
 !     Boundary condition on the flat wall
 !=======================================================================
-!$OMP DO SCHEDULE(STATIC)
+!$OMP do SCHEDULE(STATIC)
     do i=1,nWall
         k=vecWall(i)
         kk = k/Nxytotal + zlg ! to be checked
@@ -1734,14 +1734,14 @@ module solver
                 enddo
         end select
     end do
-!$OMP END DO   
+!$OMP end do   
 
 
 !--------------------------------------------------------
 !> inlet/outlet
 !--------------------------------------------------------
     if(xl==xmin) then ! inlet block (west most processor)
-!$OMP DO
+!$OMP do
         do k=zlg,zug
             do j=ylg,yug
                 i = xl
@@ -1753,11 +1753,11 @@ module solver
                 f(l,:,8)=f(l-1,:,8) + w(:)*PressDrop
             end do
         end do
-!$OMP END DO
+!$OMP end do
     endif
 
     if(xu==xmax) then ! outlet block (east most processor)
-!$OMP DO
+!$OMP do
         do k=zlg,zug
             do j=ylg,yug
                 i = xu
@@ -1769,14 +1769,14 @@ module solver
                 f(l,:,7)=f(l+1,:,7) - w(:)*PressDrop
             enddo
         end do
-!$OMP END DO            
+!$OMP end do            
     endif
 
 !----------------------------------------------------
 !> Symmetric BC
 !----------------------------------------------------
     if(yl==ymin) then ! south sym BC
-!$OMP DO
+!$OMP do
         do k=zl,zu
             do i=xl,xu
                 l = (k-zlg)*Nxytotal + ghostLayers*Nxtotal + i-xlg+1
@@ -1786,10 +1786,10 @@ module solver
                 f(l,:,5)=f(l,:,8)
             enddo
         end do
-!$OMP END DO 
+!$OMP end do 
     endif
     if(yu==ymax) then ! north sym BC
-!$OMP DO
+!$OMP do
         do k=zl,zu
             do i=xl,xu
                 l = (k-zlg)*Nxytotal + (ghostLayers+Nysub-1)*Nxtotal + i-xlg+1
@@ -1799,10 +1799,10 @@ module solver
                 f(l,:,8)=f(l,:,5)
             end do
         end do
-!$OMP END DO
+!$OMP end do
     endif
     if(zl==zmin) then ! back sym BC
-!$OMP DO
+!$OMP do
         do j=yl,yu
             do i=xl,xu
                 l = ghostLayers*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
@@ -1812,10 +1812,10 @@ module solver
                 f(l,:,4)=f(l,:,8)
             enddo
         end do
-!$OMP END DO 
+!$OMP end do 
     endif
     if(zu==zmax) then ! front sym BC
-!$OMP DO
+!$OMP do
         do j=yl,yu
             do i=xl,xu
                 l = (ghostLayers+Nzsub-1)*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
@@ -1825,13 +1825,13 @@ module solver
                 f(l,:,8)=f(l,:,4)
             end do
         end do
-!$OMP END DO
+!$OMP end do
     endif
 
 !----------------------------------------------------
 !> Update Macro
 !----------------------------------------------------
-!$OMP DO SCHEDULE(STATIC) 
+!$OMP do SCHEDULE(STATIC) 
     !do k=1,Ntotal
     do i=1,Nfluid
         k=mapF(i)
@@ -1846,7 +1846,7 @@ module solver
             Uz(k)=Uz(k)+cz(l)*(f(k,l,1)+f(k,l,2)+f(k,l,3)+f(k,l,4)-f(k,l,5)-f(k,l,6)-f(k,l,7)-f(k,l,8))
         end do
     end do
-!$OMP END DO 
-!$OMP END PARALLEL  
+!$OMP end do 
+!$OMP end PARALLEL  
     end subroutine iterate
 end module solver

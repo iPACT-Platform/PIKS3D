@@ -15,8 +15,8 @@ double precision :: startTime, endTime
 
 ! Initialize MPI environment
 call MPI_INIT_THREAD(MPI_THREAD_FUNNELED, MPI_PROVIDED, MPI_ERR)
-call MPI_COMM_SIZE(MPI_COMM_WORLD, nprocs, MPI_ERR)
-call MPI_COMM_RANK(MPI_COMM_WORLD, proc, MPI_ERR)
+call MPI_COMM_SIZE(MPI_COMM_WorLD, nprocs, MPI_ERR)
+call MPI_COMM_RANK(MPI_COMM_WorLD, proc, MPI_ERR)
 
 ! initialize (read) user input parmeters
 call initParams
@@ -46,8 +46,8 @@ do iStep = 1, MaxStep
 ! Save data if required
     call iterate
     !if(proc==master) PRINT*, "STEP: ", iStep
-    if ( mod(iStep,chkConvergeStep) == 0 ) call chkConverge
-    if ( mod(iStep,saveStep) == 0 ) then
+    if ( MOD(iStep,chkConvergeStep) == 0 ) call chkConverge
+    if ( MOD(iStep,saveStep) == 0 ) then
         select case (saveFormat)
             case (1) 
                 call saveFlowFieldVTI
@@ -86,6 +86,6 @@ endif
 ! Free memory, close MPI environment and end program
 call memFree
 call mpiFree
-call MPI_BARRIER(MPI_COMM_WORLD, MPI_ERR)
+call MPI_BARRIER(MPI_COMM_WorLD, MPI_ERR)
 call MPI_FINALIZE(MPI_ERR)
 end program
