@@ -1,0 +1,35 @@
+&physicalNml
+imageFileName = 'SandPack300^3.raw'
+Nx = 300
+Ny = 300
+Nz = 300
+wallExtOrder = 1
+fluidLayer = 4
+Ref_L = 1.d0
+/
+
+&velocityNml
+Nc_fundamental = 4
+halfRange = T
+/
+
+&mpiNml
+mpi_xdim = 8
+mpi_ydim = 8
+mpi_zdim = 8
+/
+
+&solverNml
+maxStep = 50000
+chkConvergeStep = 100
+saveStep = 5000000
+eps = 1.0d-7
+saveLast = T
+saveFormat = 1
+/
+
+&flowNml
+Kn = 1.0d-1
+pressDrop = 1.0d-1
+accom = 1.d0
+/
