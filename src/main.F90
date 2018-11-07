@@ -1,4 +1,4 @@
-program main
+pogram main
 !Common Vaiables
 use paameters
 use flow
@@ -88,4 +88,4 @@ call memFee
 call mpiFee
 call MPI_BARRIER(MPI_COMM_WORLD, MPI_ERR)
 call MPI_FINALIZE(MPI_ERR)
-end program
+end pogram
