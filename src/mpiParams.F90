@@ -14,14 +14,14 @@ save
 integer :: mpi_xdim, mpi_ydim, mpi_zdim
 
 ! Constant tags used in the mpi exchanges
-integer, PARAMETER :: TAG1 = 1, TAG2 = 2, TAG3 = 3, TAG4 = 4, TAG5=5, TAG6=6
+integer, parameter :: TAG1 = 1, TAG2 = 2, TAG3 = 3, TAG4 = 4, TAG5=5, TAG6=6
 
 ! Communication parameters
 integer :: nprocs, proc, vproc
 
 integer :: east, west, noth, suth, frnt, back, MPI_COMM_VGRID
-integer, PARAMETER :: master  = 0
-integer, PARAMETER :: mpi_dim = 3
+integer, parameter :: master  = 0
+integer, parameter :: mpi_dim = 3
 
 
 ! Information exchange buffers (x direction)
@@ -96,13 +96,13 @@ contains
         reorder     = .true.
         
         !Create the new virtual connectivity grid
-        call MPI_CART_CREATE(MPI_COMM_WorLD, mpi_dim, dims, periodic, reorder, MPI_COMM_VGRID, MPI_ERR)
+        call MPI_CART_CREATE(MPI_COMM_WORLD, mpi_dim, dims, periodic, reorder, MPI_COMM_VGRID, MPI_ERR)
         
         !Get this processor ID within the virtual grid
         call MPI_COMM_RANK(MPI_COMM_VGRID, vproc, MPI_ERR)
         !write(*,*) "vproc = ",  vproc
 
-        call MPI_CART_COorDS(MPI_COMM_VGRID, vproc, mpi_dim, mpi_coords, MPI_ERR)
+        call MPI_CART_COORDS(MPI_COMM_VGRID, vproc, mpi_dim, mpi_coords, MPI_ERR)
         
         !------- Compute the limits [(xl,xu),(yl,yu)] assigned to this processor ------
         !Partitioning in the x direction
@@ -111,11 +111,11 @@ contains
         if(mpi_coords(1) + 1 <= partial) then
           xl = xmin + (complete + 1)*mpi_coords(1)
           xu = xmin + (complete + 1)*(mpi_coords(1) + 1) - 1
-        ELSE
+        else
           xl = xmin + complete*mpi_coords(1) + partial
           xu = xmin + complete*(mpi_coords(1) + 1) + partial - 1
         end if
-        if(MOD(mpi_coords(1) + 1,dims(1)) == 0) xu = xu + 1
+        if(mod(mpi_coords(1) + 1,dims(1)) == 0) xu = xu + 1
         
         !Partitioning in the y direction
         complete = (ymax - ymin) / dims(2)
@@ -123,11 +123,11 @@ contains
         if(mpi_coords(2) + 1 <= partial) then
           yl = ymin + (complete + 1)*mpi_coords(2)
           yu = ymin + (complete + 1)*(mpi_coords(2) + 1) - 1
-        ELSE
+        else
           yl = ymin + complete*mpi_coords(2) + partial
           yu = ymin + complete*(mpi_coords(2) + 1) + partial - 1
         end if
-        if(MOD(mpi_coords(2) + 1,dims(2)) == 0) yu = yu + 1
+        if(mod(mpi_coords(2) + 1,dims(2)) == 0) yu = yu + 1
 
 
         !  Partitioning in the y direction
@@ -136,11 +136,11 @@ contains
         if(mpi_coords(3) + 1 <= partial) then
           zl = zmin + (complete + 1)*mpi_coords(3)
           zu = zmin + (complete + 1)*(mpi_coords(3) + 1) - 1
-        ELSE
+        else
           zl = zmin + complete*mpi_coords(3) + partial
           zu = zmin + complete*(mpi_coords(3) + 1) + partial - 1
         end if
-        if(MOD(mpi_coords(3) + 1,dims(3)) == 0) zu = zu + 1
+        if(mod(mpi_coords(3) + 1,dims(3)) == 0) zu = zu + 1
             
         !Ghost layers
         xlg = xl - ghostLayers
@@ -161,7 +161,7 @@ contains
          !gahter sub-domain extnet to sub_ext
         allocate(sub_ext(6,nprocs))
 
-        call MPI_GATHER(my_ext, 6, MPI_INT, sub_ext, 6, MPI_INT, master, MPI_COMM_WorLD, MPI_ERR)
+        call MPI_GATHER(my_ext, 6, MPI_INT, sub_ext, 6, MPI_INT, master, MPI_COMM_WORLD, MPI_ERR)
 
         !------- Determine neighbours of this processor -------------------------------
         !MPI_CART counts dimensions using 0-based arithmetic so that
@@ -169,11 +169,11 @@ contains
         !Ranks of neighbours of this processor in the x and y directions
         shift     = 1
         direction = 0
-        call MPI_CART_SHifT(MPI_COMM_VGRID, direction, shift, west, east, MPI_ERR)
+        call MPI_CART_shift(MPI_COMM_VGRID, direction, shift, west, east, MPI_ERR)
         direction = 1
-        call MPI_CART_SHifT(MPI_COMM_VGRID, direction, shift, suth, noth, MPI_ERR)
+        call MPI_CART_shift(MPI_COMM_VGRID, direction, shift, suth, noth, MPI_ERR)
         direction = 2
-        call MPI_CART_SHifT(MPI_COMM_VGRID, direction, shift, back, frnt, MPI_ERR)
+        call MPI_CART_shift(MPI_COMM_VGRID, direction, shift, back, frnt, MPI_ERR)
 
         allocate(inlet_rank(mpi_ydim*mpi_zdim))
 

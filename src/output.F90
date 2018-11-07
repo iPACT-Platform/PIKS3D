@@ -94,7 +94,7 @@ contains
                 !+ massSB + massSF + massNB + massNF)*dsqrt(1.d0/2.d0)*4.d0/1.d0
 
             ! reduction
-            call MPI_ALLREDUCE(massLocal, mass2, 1, MPI_doUBLE_PRECISION, MPI_SUM, &
+            call MPI_ALLREDUCE(massLocal, mass2, 1, MPI_DOUBLE_PRECISION, MPI_SUM, &
                                mpi_comm_inlet, MPI_ERR)
 
             !PRINT*, "mass = ", mass
@@ -110,8 +110,8 @@ contains
                 ! close(22)
             endif
         endif ! xl==xmin
-        !bcast error so every process in WorLD can stop
-        call MPI_BCAST(error, 1, MPI_doUBLE_PRECISION, master, MPI_COMM_VGRID, MPI_ERR)
+        !bcast error so every process in WORLD can stop
+        call MPI_BCAST(error, 1, MPI_DOUBLE_PRECISION, master, MPI_COMM_VGRID, MPI_ERR)
     end subroutine chkConverge
 
     subroutine saveFlowField
@@ -189,7 +189,7 @@ contains
                end do
             end do
             close(unit = 12)
-        ELSE
+        else
             call memFree
             call MPI_FINALIZE(MPI_ERR)
             stop "Error: Unable to open output vtk file."
@@ -271,7 +271,7 @@ contains
             write(13, '(A)') '</ImageData>'
             write(13, '(A)') '</VTKFile>'
             close(unit = 13)
-        ELSE
+        else
             call memFree
             call MPI_FINALIZE(MPI_ERR)
             stop "Error: Unable to open output vti file."

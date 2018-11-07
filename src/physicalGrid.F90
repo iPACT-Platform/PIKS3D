@@ -29,7 +29,7 @@ integer :: Nx_base, Ny_base, Nz_base
 
 integer, parameter :: ghostLayers = 2
 integer, parameter :: translate = 0
-integer, parameter :: IMAGEfile = 20
+integer, parameter :: IMAGEFILE = 20
 
 ! need to be determined from mpi cood
 integer :: Nxtotal, Nytotal, Nztotal, Nxytotal, Nxsub, Nysub, Nzsub, Ntotal
@@ -172,12 +172,12 @@ contains
         !-----------------------------------------------------------------
         !read base digital image, NOTE that all raw image dimension are NY^3. 
         !-----------------------------------------------------------------
-        open(IMAGEfile,file=imageFileName,status='OLD', &
+        open(IMAGEFILE,file=imageFileName,status='OLD', &
             form='unformatted',ACCESS="STREAM")
         do k=1,Nz_base
             do j=1,Ny_base
                 do i=fluidlayer+1,Nx_base-fluidlayer ! may need to be modified 
-                    read(IMAGEfile) ctemp       
+                    read(IMAGEFILE) ctemp       
                     !l=(i-translate+ghostLayer)+(j-translate+ghostLayer-1)*Nxtotal+(k-translate+ghostLayer-1)*Nxytotal
                     if ((k>=1+translate).and.(k<=Nz_base+translate) &
                         .and.(j>=1+translate).and.(j<=Ny_base+translate) &
@@ -195,7 +195,7 @@ contains
                 enddo  
             enddo
         enddo
-        Close(IMAGEfile)
+        Close(IMAGEFILE)
 
         !-----------------------------------------------------------------
         ! Repeat the base block for weak scaling efficiency study. 
