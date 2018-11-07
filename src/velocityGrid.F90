@@ -7,7 +7,7 @@ use gaussHermite
 implicit none
 save
 
-!Number of fundamental molecular velocity, to be read from nml: velocityNml
+!Number of fundamental molecular velocity, to be read from NML: velocityNml
 integer :: Nc_fundamental
 logical :: halfRange
 
@@ -30,7 +30,7 @@ contains
         implicit none
         integer :: l, m, n, k
 
-        ! Nc_fundamental has been initialized from the nml
+        ! Nc_fundamental has been initialized from the NML
         allocate(xi(Nc_fundamental))
         allocate(weight1D(Nc_fundamental))
 
@@ -99,22 +99,22 @@ contains
             xi(l) = xi(l)*dsqrt(2.d0)
         enddo
         
-        do l=1,Nc_fundamental
-            do m=1,Nc_fundamental
-                do n=1,Nc_fundamental
+        Do l=1,Nc_fundamental
+            Do m=1,Nc_fundamental
+                Do n=1,Nc_fundamental
                     k=n+(m-1)*Nc_fundamental+(l-1)*Nc_fundamental**2
                     cx(k) = xi(n)
                     cy(k) = xi(m)
                     cz(k) = xi(l)
                     w(k) = weight1D(n)*weight1D(m)*weight1D(l)
-                end do
-            end do
-        end do  
+                End do
+            End do
+        End do  
         
         DiffFlux=0.d0
-        do l=1,Nc8
+        Do l=1,Nc8
             DiffFlux=DiffFlux+cz(l)*w(l)
-        enddo
+        Enddo
         DiffFlux=DiffFlux*4 !Check
 
     end subroutine setupVelocityGrid

@@ -1,22 +1,22 @@
-program main
+PROGRAM main
 !Common Variables
-use parameters
-use flow
-use MPIParams
-use solver
-use physicalGrid
+USE parameters
+USE flow
+USE MPIParams
+USE solver
+USE physicalGrid
 use output
-implicit none
+IMPLICIT NONE
 include "mpif.h"
 
 ! Local variables
-integer :: MPI_ERR, MPI_PROVIDED
+INTEGER :: MPI_ERR, MPI_PROVIDED
 double precision :: startTime, endTime
 
 ! Initialize MPI environment
-call MPI_INIT_THREAD(MPI_THREAD_FUNNELED, MPI_PROVIDED, MPI_ERR)
-call MPI_COMM_SIZE(MPI_COMM_WorLD, nprocs, MPI_ERR)
-call MPI_COMM_RANK(MPI_COMM_WorLD, proc, MPI_ERR)
+CALL MPI_INIT_THREAD(MPI_THREAD_FUNNELED, MPI_PROVIDED, MPI_ERR)
+CALL MPI_COMM_SIZE(MPI_COMM_WORLD, nprocs, MPI_ERR)
+CALL MPI_COMM_RANK(MPI_COMM_WORLD, proc, MPI_ERR)
 
 ! initialize (read) user input parmeters
 call initParams
@@ -26,15 +26,15 @@ if (proc == master) then
 endif
 
 ! setup discrete velocity grid
-call setupVelocityGrid
+CALL setupVelocityGrid
 ! read and create virtual CPU grid
-call setupVirtualProcessGrid
+CALL setupVirtualProcessGrid
 ! setup global and local grid system
-call setupPhysicalGrid
+CALL setupPhysicalGrid
 ! allocate flow data array and initialize
-call setupFlow
-call allocateBuf
-!call saveNodeCounts
+CALL setupFlow
+CALL allocateBuf
+!CALL saveNodeCounts
 
 
 
@@ -42,27 +42,27 @@ call allocateBuf
 error = 1.D0
 startTime = MPI_Wtime()
 ! Main iteration loop
-do iStep = 1, MaxStep
+DO iStep = 1, MaxStep
 ! Save data if required
-    call iterate
+    CALL iterate
     !if(proc==master) PRINT*, "STEP: ", iStep
-    if ( MOD(iStep,chkConvergeStep) == 0 ) call chkConverge
-    if ( MOD(iStep,saveStep) == 0 ) then
-        select case (saveFormat)
-            case (1) 
+    IF ( MOD(iStep,chkConvergeStep) == 0 ) CALL chkConverge
+    IF ( MOD(iStep,saveStep) == 0 ) then
+        SELECT CASE (saveFormat)
+            CASE (1) 
                 call saveFlowFieldVTI
-            case (2)
+            CASE (2)
                 call saveFlowField
-            case (3)
+            CASE (3)
                 call saveFlowFieldVTK
-        end select
+        END SELECT
     endif
 
     ! Test flow field convergence
     if ( error <= eps ) then
         exit
     endif
-end do
+END DO
 
 endTime = MPI_Wtime()
 
@@ -72,20 +72,20 @@ if(proc==master) then
 endif
 
 ! Save final data
-if ( saveLast ) then 
-    select case (saveFormat)
-        case (1) 
+IF ( saveLast ) then 
+    SELECT CASE (saveFormat)
+        CASE (1) 
             call saveFlowFieldVTI
-        case (2)
+        CASE (2)
             call saveFlowField
-        case (3)
+        CASE (3)
             call saveFlowFieldVTK
-    end select
+    END SELECT
 endif
 
 ! Free memory, close MPI environment and end program
-call memFree
-call mpiFree
-call MPI_BARRIER(MPI_COMM_WorLD, MPI_ERR)
-call MPI_FINALIZE(MPI_ERR)
-end program
+CALL memFree
+CALL mpiFree
+CALL MPI_BARRIER(MPI_COMM_WORLD, MPI_ERR)
+CALL MPI_FINALIZE(MPI_ERR)
+END PROGRAM

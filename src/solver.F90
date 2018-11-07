@@ -6,7 +6,7 @@ module solver
 
     implicit none
 
-    ! to be read from nml: solverNml
+    ! to be read from NML: solverNml
     double precision :: eps
     integer :: maxStep
     integer :: chkConvergeStep
@@ -25,16 +25,16 @@ module solver
 
         integer :: i, j, k, l, ii, jj, kk, m
         integer :: localidMsnd, localidPsnd, localidMrcv, localidPrcv, packid
-        integer :: MPI_ERR
-        integer :: MPI_REQ_X(4), MPI_REQ_Y(4), MPI_REQ_Z(4)
-        integer :: MPI_STAT(MPI_status_SIZE,6)
+        INTEGER :: MPI_ERR
+        INTEGER :: MPI_REQ_X(4), MPI_REQ_Y(4), MPI_REQ_Z(4)
+        INTEGER :: MPI_STAT(MPI_STATUS_SIZE,6)
         integer :: xfsize, yfsize, zfsize, locB
         double precision :: fEq, RhoWall, RhoWall2, RhoWall3
         double precision, dimension(Nc8,1:8) :: fwZ
         
         ! for mpi error handling
         integer :: errMsgLen, errTmp
-        character(len=MPI_MAX_ERRor_STRING) :: errMsg 
+        character(len=MPI_MAX_ERROR_STRING) :: errMsg 
 
         ! The size for storing two layers of nodes in buffer 
         xfsize = Nytotal*Nztotal*Nc*ghostLayers
@@ -54,39 +54,39 @@ module solver
 
 !$OMP SINGLE
         ! Start Recieving
-        call MPI_IRECV( f_east_rcv, eastRcvSize, MPI_doUBLE_PRECISION, east, TAG1, &
+        CALL MPI_IRECV( f_east_rcv, eastRcvSize, MPI_DOUBLE_PRECISION, east, TAG1, &
                         MPI_COMM_VGRID, MPI_REQ_X(1), MPI_ERR )
-        call MPI_IRECV( f_west_rcv, westRcvSize, MPI_doUBLE_PRECISION, west, TAG2, &
+        CALL MPI_IRECV( f_west_rcv, westRcvSize, MPI_DOUBLE_PRECISION, west, TAG2, &
                         MPI_COMM_VGRID, MPI_REQ_X(2), MPI_ERR )
-        call MPI_IRECV( f_noth_rcv, nothRcvSize, MPI_doUBLE_PRECISION, noth, TAG3, &
+        CALL MPI_IRECV( f_noth_rcv, nothRcvSize, MPI_DOUBLE_PRECISION, noth, TAG3, &
                         MPI_COMM_VGRID, MPI_REQ_Y(1), MPI_ERR )
-        call MPI_IRECV( f_suth_rcv, suthRcvSize, MPI_doUBLE_PRECISION, suth, TAG4, &
+        CALL MPI_IRECV( f_suth_rcv, suthRcvSize, MPI_DOUBLE_PRECISION, suth, TAG4, &
                         MPI_COMM_VGRID, MPI_REQ_Y(2), MPI_ERR )
-        call MPI_IRECV( f_frnt_rcv, frntRcvSize, MPI_doUBLE_PRECISION, frnt, TAG5, &
+        CALL MPI_IRECV( f_frnt_rcv, frntRcvSize, MPI_DOUBLE_PRECISION, frnt, TAG5, &
                         MPI_COMM_VGRID, MPI_REQ_Z(1), MPI_ERR )
-        call MPI_IRECV( f_back_rcv, backRcvSize, MPI_doUBLE_PRECISION, back, TAG6, &
+        CALL MPI_IRECV( f_back_rcv, backRcvSize, MPI_DOUBLE_PRECISION, back, TAG6, &
                         MPI_COMM_VGRID, MPI_REQ_Z(2), MPI_ERR )
 
-        call MPI_ISend( f_west_snd, westSndSize, MPI_doUBLE_PRECISION, west, TAG1, &
+        CALL MPI_ISEND( f_west_snd, westSndSize, MPI_DOUBLE_PRECISION, west, TAG1, &
                         MPI_COMM_VGRID, MPI_REQ_X(3), MPI_ERR )
-        call MPI_ISend( f_east_snd, eastSndSize, MPI_doUBLE_PRECISION, east, TAG2, &
+        CALL MPI_ISEND( f_east_snd, eastSndSize, MPI_DOUBLE_PRECISION, east, TAG2, &
                         MPI_COMM_VGRID, MPI_REQ_X(4), MPI_ERR )
-        call MPI_ISend( f_suth_snd, suthSndSize, MPI_doUBLE_PRECISION, suth, TAG3, &
+        CALL MPI_ISEND( f_suth_snd, suthSndSize, MPI_DOUBLE_PRECISION, suth, TAG3, &
                         MPI_COMM_VGRID, MPI_REQ_Y(3), MPI_ERR )
-        call MPI_ISend( f_noth_snd, nothSndSize, MPI_doUBLE_PRECISION, noth, TAG4, &
+        CALL MPI_ISEND( f_noth_snd, nothSndSize, MPI_DOUBLE_PRECISION, noth, TAG4, &
                         MPI_COMM_VGRID, MPI_REQ_Y(4), MPI_ERR )
-        call MPI_ISend( f_back_snd, backSndSize, MPI_doUBLE_PRECISION, back, TAG5, &
+        CALL MPI_ISEND( f_back_snd, backSndSize, MPI_DOUBLE_PRECISION, back, TAG5, &
                         MPI_COMM_VGRID, MPI_REQ_Z(3), MPI_ERR )
-        call MPI_ISend( f_frnt_snd, frntSndSize, MPI_doUBLE_PRECISION, frnt, TAG6, &
+        CALL MPI_ISEND( f_frnt_snd, frntSndSize, MPI_DOUBLE_PRECISION, frnt, TAG6, &
                         MPI_COMM_VGRID, MPI_REQ_Z(4), MPI_ERR )
-!$OMP end SINGLE NOWAIT
+!$OMP END SINGLE NOWAIT
 
 !------------------------------------------------------------------------
 !           In the 1st group of direction cx>0 & cy>0 & cz>0
 !------------------------------------------------------------------------
-!$OMP do SCHEDULE(STATIC) 
-    do l=1,Nc8
-        do i=1,Nstencil1
+!$OMP DO SCHEDULE(STATIC) 
+    Do l=1,Nc8
+        Do i=1,Nstencil1
             !k=dir1(i)
             ii = dir1(1,i)
             jj = dir1(2,i)
@@ -123,16 +123,16 @@ module solver
             &        + cz(l)*coef1(i,8)*f(k-Nxytotal,l,1) &
             &        + cz(l)*coef1(i,9)*f(k-2*Nxytotal,l,1) &
             & )/(0.5d0*mu+cx(l)*coef1(i,1)+cy(l)*coef1(i,4)+cz(l)*coef1(i,7))
-        end do
-    end do
-!$OMP end do NOWAIT
+        End do
+    End do
+!$OMP END DO NOWAIT
 
 !------------------------------------------------------------------------
 !           In the 2nd group of direction cx<0 & cy>0 & cz>0
 !------------------------------------------------------------------------
-!$OMP do SCHEDULE(STATIC)
-    do l=1,Nc8
-        do i=1,Nstencil2
+!$OMP DO SCHEDULE(STATIC)
+    Do l=1,Nc8
+        Do i=1,Nstencil2
             !k=dir1(i)
             ii = dir2(1,i)
             jj = dir2(2,i)
@@ -168,16 +168,16 @@ module solver
             &        + cz(l)*coef2(i,8)*f(k-Nxytotal,l,2) &
             &        + cz(l)*coef2(i,9)*f(k-2*Nxytotal,l,2) &
             & )/(0.5d0*mu-cx(l)*coef2(i,1)+cy(l)*coef2(i,4)+cz(l)*coef2(i,7))
-        end do
-    end do
-!$OMP end do NOWAIT
+        End do
+    End do
+!$OMP END DO NOWAIT
 
 !------------------------------------------------------------------------
 !           In the 3rd group of direction cx<0 & cy<0 & cz>0
 !------------------------------------------------------------------------
-!$OMP do SCHEDULE(STATIC)
-    do l=1,Nc8
-        do i=1,Nstencil3
+!$OMP DO SCHEDULE(STATIC)
+    Do l=1,Nc8
+        Do i=1,Nstencil3
             ii = dir3(1,i)
             jj = dir3(2,i)
             kk = dir3(3,i)
@@ -212,16 +212,16 @@ module solver
             &        + cz(l)*coef3(i,8)*f(k-Nxytotal,l,3) &
             &        + cz(l)*coef3(i,9)*f(k-2*Nxytotal,l,3) &
             & )/(0.5d0*mu-cx(l)*coef3(i,1)-cy(l)*coef3(i,4)+cz(l)*coef3(i,7))
-        end do
-    end do
-!$OMP end do NOWAIT
+        End do
+    End do
+!$OMP END DO NOWAIT
 
 !------------------------------------------------------------------------
 !           In the 4th group of direction cx>0 & cy<0 & cz>0
 !------------------------------------------------------------------------
-!$OMP do SCHEDULE(STATIC)
-    do l=1,Nc8
-        do i=1,Nstencil4
+!$OMP DO SCHEDULE(STATIC)
+    Do l=1,Nc8
+        Do i=1,Nstencil4
             ii = dir4(1,i)
             jj = dir4(2,i)
             kk = dir4(3,i)
@@ -256,16 +256,16 @@ module solver
             &        + cz(l)*coef4(i,8)*f(k-Nxytotal,l,4) &
             &        + cz(l)*coef4(i,9)*f(k-2*Nxytotal,l,4) &
             & )/(0.5d0*mu+cx(l)*coef4(i,1)-cy(l)*coef4(i,4)+cz(l)*coef4(i,7))
-        end do
-    end do
-!$OMP end do NOWAIT
+        End do
+    End do
+!$OMP END DO NOWAIT
 
 !------------------------------------------------------------------------
 !           In the 5th group of direction cx>0 & cy>0 & cz<0
 !------------------------------------------------------------------------
-!$OMP do SCHEDULE(STATIC)
-    do l=1,Nc8
-        do i=1,Nstencil5
+!$OMP DO SCHEDULE(STATIC)
+    Do l=1,Nc8
+        Do i=1,Nstencil5
             ii = dir5(1,i)
             jj = dir5(2,i)
             kk = dir5(3,i)
@@ -300,16 +300,16 @@ module solver
             &        - cz(l)*coef5(i,8)*f(k+Nxytotal,l,5) &
             &        - cz(l)*coef5(i,9)*f(k+2*Nxytotal,l,5) &
             & )/(0.5d0*mu+cx(l)*coef5(i,1)+cy(l)*coef5(i,4)-cz(l)*coef5(i,7))
-        end do
-    end do
-!$OMP end do NOWAIT
+        End do
+    End do
+!$OMP END DO NOWAIT
 
 !------------------------------------------------------------------------
 !           In the 6th group of direction cx<0 & cy>0 & cz<0
 !------------------------------------------------------------------------
-!$OMP do SCHEDULE(STATIC)
-    do l=1,Nc8
-        do i=1,Nstencil6
+!$OMP DO SCHEDULE(STATIC)
+    Do l=1,Nc8
+        Do i=1,Nstencil6
             ii = dir6(1,i)
             jj = dir6(2,i)
             kk = dir6(3,i)
@@ -344,16 +344,16 @@ module solver
             &        - cz(l)*coef6(i,8)*f(k+Nxytotal,l,6) &
             &        - cz(l)*coef6(i,9)*f(k+2*Nxytotal,l,6) &
             & )/(0.5d0*mu-cx(l)*coef6(i,1)+cy(l)*coef6(i,4)-cz(l)*coef6(i,7))
-        end do
-    end do
-!$OMP end do NOWAIT
+        End do
+    End do
+!$OMP END DO NOWAIT
 
 !------------------------------------------------------------------------
 !           In the 7th group of direction cx<0 & cy<0 & cz<0
 !------------------------------------------------------------------------
-!$OMP do SCHEDULE(STATIC)
-    do l=1,Nc8
-        do i=1,Nstencil7
+!$OMP DO SCHEDULE(STATIC)
+    Do l=1,Nc8
+        Do i=1,Nstencil7
             ii = dir7(1,i)
             jj = dir7(2,i)
             kk = dir7(3,i) 
@@ -388,16 +388,16 @@ module solver
             &        - cz(l)*coef7(i,8)*f(k+Nxytotal,l,7) &
             &        - cz(l)*coef7(i,9)*f(k+2*Nxytotal,l,7) &
             & )/(0.5d0*mu-cx(l)*coef7(i,1)-cy(l)*coef7(i,4)-cz(l)*coef7(i,7))
-        end do
-    end do
-!$OMP end do NOWAIT
+        End do
+    End do
+!$OMP END DO NOWAIT
 
 !------------------------------------------------------------------------
 !           In the 8th group of direction cx>0 & cy<0 & cz<0
 !------------------------------------------------------------------------
-!$OMP do SCHEDULE(STATIC)
-    do l=1,Nc8
-        do i=1,Nstencil8
+!$OMP DO SCHEDULE(STATIC)
+    Do l=1,Nc8
+        Do i=1,Nstencil8
             ii = dir8(1,i)
             jj = dir8(2,i)
             kk = dir8(3,i)
@@ -432,18 +432,18 @@ module solver
             &        - cz(l)*coef8(i,8)*f(k+Nxytotal,l,8) &
             &        - cz(l)*coef8(i,9)*f(k+2*Nxytotal,l,8) &
             & )/(0.5d0*mu+cx(l)*coef8(i,1)-cy(l)*coef8(i,4)-cz(l)*coef8(i,7))
-        end do
-    end do
-!$OMP end do 
+        End do
+    End do
+!$OMP END DO 
 
 !$OMP SINGLE
         ! Wait until send and recv done
-        call MPI_WAITALL(4, MPI_REQ_X, MPI_STAT, MPI_ERR)
-        call MPI_WAITALL(4, MPI_REQ_Y, MPI_STAT, MPI_ERR)
-        call MPI_WAITALL(4, MPI_REQ_Z, MPI_STAT, MPI_ERR)
-!$OMP end SINGLE 
+        CALL MPI_WAITALL(4, MPI_REQ_X, MPI_STAT, MPI_ERR)
+        CALL MPI_WAITALL(4, MPI_REQ_Y, MPI_STAT, MPI_ERR)
+        CALL MPI_WAITALL(4, MPI_REQ_Z, MPI_STAT, MPI_ERR)
+!$OMP END SINGLE 
 
-!$OMP do COLLAPSE(3)
+!$OMP DO COLLAPSE(3)
     ! pack/unpack X dir buffer
     do k = 1,Nztotal
         do j = 1, Nytotal
@@ -468,9 +468,9 @@ module solver
             enddo !i
         enddo !j
     enddo !k
-!$OMP end do NOWAIT
+!$OMP END DO NOWAIT
 
-!$OMP do COLLAPSE(3)
+!$OMP DO COLLAPSE(3)
     ! pack/unpack Y dir buffer
     do k = 1, Nztotal
         do j = 1, ghostLayers
@@ -493,10 +493,10 @@ module solver
             enddo !i
         enddo !j
     enddo !k
-!$OMP end do NOWAIT
+!$OMP END DO NOWAIT
 
 
-!$OMP do COLLAPSE(3)
+!$OMP DO COLLAPSE(3)
     ! pack/unpack Z dir buffer
     do k = 1, ghostLayers
         do j = 1, Nytotal
@@ -520,7 +520,7 @@ module solver
             enddo !i
         enddo !j
     enddo !k
-!$OMP end do NOWAIT
+!$OMP END DO NOWAIT
 
 
 !------------------------------------------------------------------------
@@ -528,7 +528,7 @@ module solver
 !------------------------------------------------------------------------
 !$OMP SECTIONS
 !$OMP SECTION
-!!$OMP do
+!!$OMP DO
     ! pack 3-fold corners send buffer at west
     do m = 1, westN3corner_snd
         do l = 1,8
@@ -536,10 +536,10 @@ module solver
             f_west_snd(locB+1:locB+Nc8) = fw(map3CorWsnd(m),:,l)
         end do
     end do
-!!$OMP enddo NOWAIT
+!!$OMP ENDDO NOWAIT
 
 !$OMP SECTION
-!!$OMP do
+!!$OMP DO
     ! pack 3-fold corners send buffer at east
     do m = 1, eastN3corner_snd
         do l = 1,8
@@ -547,10 +547,10 @@ module solver
             f_east_snd(locB+1:locB+Nc8) = fw(map3CorEsnd(m),:,l)
         end do
     end do
-!!$OMP enddo NOWAIT
+!!$OMP ENDDO NOWAIT
 
 !$OMP SECTION
-!!$OMP do
+!!$OMP DO
     ! unpack 3-fold corners rcv buffer at west
     do m = 1, westN3corner_rcv
         do l = 1,8
@@ -558,10 +558,10 @@ module solver
             fw(map3CorWrcv(m),:,l) = f_west_rcv(locB+1:locB+Nc8)
         end do
     end do
-!!$OMP enddo NOWAIT
+!!$OMP ENDDO NOWAIT
 
 !$OMP SECTION
-!!$OMP do
+!!$OMP DO
     ! unpack 3-fold corners rcv buffer at east
     do m = 1, eastN3corner_rcv
         do l = 1,8
@@ -569,13 +569,13 @@ module solver
             fw(map3CorErcv(m),:,l) = f_east_rcv(locB+1:locB+Nc8)
         end do
     end do
-!!$OMP enddo NOWAIT
+!!$OMP ENDDO NOWAIT
 
 !------------------------------------------------------------------------
 ! pack/unpack 3-fold corners at noth/suth
 !------------------------------------------------------------------------
 !$OMP SECTION
-!!$OMP do
+!!$OMP DO
     ! pack 3-fold corners send buffer at suth
     do m = 1, suthN3corner_snd
         do l = 1,8
@@ -583,10 +583,10 @@ module solver
             f_suth_snd(locB+1:locB+Nc8) = fw(map3CorSsnd(m),:,l)
         end do
     end do
-!!$OMP enddo
+!!$OMP ENDDO
 
 !$OMP SECTION
-!!$OMP do
+!!$OMP DO
     ! pack 3-fold corners send buffer at noth
     do m = 1, nothN3corner_snd
         do l = 1,8
@@ -594,10 +594,10 @@ module solver
             f_noth_snd(locB+1:locB+Nc8) = fw(map3CorNsnd(m),:,l)
         end do
     end do
-!!$OMP enddo
+!!$OMP ENDDO
 
 !$OMP SECTION
-!!$OMP do
+!!$OMP DO
     ! unpack 3-fold corners rcv buffer at suth
     do m = 1, suthN3corner_rcv
         do l = 1,8
@@ -605,10 +605,10 @@ module solver
             fw(map3CorSrcv(m),:,l) = f_suth_rcv(locB+1:locB+Nc8)
         end do
     end do
-!!$OMP enddo
+!!$OMP ENDDO
 
 !$OMP SECTION
-!!$OMP do
+!!$OMP DO
     ! unpack 3-fold corners rcv buffer at noth
     do m = 1, nothN3corner_rcv
         do l = 1,8
@@ -616,13 +616,13 @@ module solver
             fw(map3CorNrcv(m),:,l) = f_noth_rcv(locB+1:locB+Nc8)
         end do
     end do
-!!$OMP enddo
+!!$OMP ENDDO
 
 !------------------------------------------------------------------------
 ! pack/unpack 3-fold corners at back/frnt
 !------------------------------------------------------------------------
 !$OMP SECTION
-!!$OMP do
+!!$OMP DO
     ! pack 3-fold corners send buffer at back
     do m = 1, backN3corner_snd
         do l = 1,8
@@ -630,10 +630,10 @@ module solver
             f_back_snd(locB+1:locB+Nc8) = fw(map3CorBsnd(m),:,l)
         end do
     end do
-!!$OMP enddo NOWAIT
+!!$OMP ENDDO NOWAIT
 
 !$OMP SECTION
-!!$OMP do
+!!$OMP DO
     ! pack 3-fold corners send buffer at frnt
     do m = 1, frntN3corner_snd
         do l = 1,8
@@ -641,10 +641,10 @@ module solver
             f_frnt_snd(locB+1:locB+Nc8) = fw(map3CorFsnd(m),:,l)
         end do
     end do
-!!$OMP enddo NOWAIT
+!!$OMP ENDDO NOWAIT
 
 !$OMP SECTION
-!!$OMP do
+!!$OMP DO
     ! unpack 3-fold corners rcv buffer at back
     do m = 1, backN3corner_rcv
         do l = 1,8
@@ -652,10 +652,10 @@ module solver
             fw(map3CorBrcv(m),:,l) = f_back_rcv(locB+1:locB+Nc8)
         end do
     end do
-!!$OMP enddo NOWAIT
+!!$OMP ENDDO NOWAIT
 
 !$OMP SECTION
-!!$OMP do
+!!$OMP DO
     ! unpack 3-fold corners rcv buffer at frnt
     do m = 1, frntN3corner_rcv
         do l = 1,8
@@ -663,14 +663,14 @@ module solver
             fw(map3CorFrcv(m),:,l) = f_frnt_rcv(locB+1:locB+Nc8)
         end do
     end do
-!!$OMP enddo NOWAIT
-!$OMP end SECTIONS
+!!$OMP ENDDO NOWAIT
+!$OMP END SECTIONS
 
 !=======================================================================
 !     Boundary condition on the flat wall
 !=======================================================================
-!$OMP do SCHEDULE(STATIC)
-    do i=1,nWall
+!$OMP DO SCHEDULE(STATIC)
+    Do i=1,nWall
         k=vecWall(i)
         kk = k/Nxytotal + zlg ! to be checked
         jj = (k-(kk-zlg)*Nxytotal)/Nxtotal + ylg
@@ -679,17 +679,17 @@ module solver
         RhoWall=0.d0
         RhoWall2=0.d0
         RhoWall3=0.d0
-        select case (image(ii,jj,kk))
-            case (wallE)
-                do l=1,Nc8
+        SELECT CASE (image(ii,jj,kk))
+            CASE (wallE)
+                Do l=1,Nc8
                     f(k,l,2)=extCoef(i,1)*f(k+1,l,2)+extCoef(i,2)*f(k+2,l,2)
                     f(k,l,3)=extCoef(i,1)*f(k+1,l,3)+extCoef(i,2)*f(k+2,l,3)
                     f(k,l,6)=extCoef(i,1)*f(k+1,l,6)+extCoef(i,2)*f(k+2,l,6)
                     f(k,l,7)=extCoef(i,1)*f(k+1,l,7)+extCoef(i,2)*f(k+2,l,7)
                     RhoWall=RhoWall+cx(l)*(f(k,l,2)+f(k,l,3)+f(k,l,6)+f(k,l,7))
-                enddo
+                Enddo
                 RhoWall=RhoWall/DiffFlux
-                do l=1,Nc8
+                Do l=1,Nc8
                     f(k,l,1)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,2)
                     f(k,l,4)=accom*w(l)*RhoWall &
@@ -698,17 +698,17 @@ module solver
                     &       + (1.d0-accom)*f(k,l,6)
                     f(k,l,8)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,7)
-                enddo
-            case (wallW)
-                do l=1,Nc8
+                Enddo
+            CASE (wallW)
+                Do l=1,Nc8
                     f(k,l,1)=extCoef(i,1)*f(k-1,l,1)+extCoef(i,2)*f(k-2,l,1)
                     f(k,l,4)=extCoef(i,1)*f(k-1,l,4)+extCoef(i,2)*f(k-2,l,4)
                     f(k,l,5)=extCoef(i,1)*f(k-1,l,5)+extCoef(i,2)*f(k-2,l,5)
                     f(k,l,8)=extCoef(i,1)*f(k-1,l,8)+extCoef(i,2)*f(k-2,l,8)
                     RhoWall=RhoWall+cx(l)*(f(k,l,1)+f(k,l,4)+f(k,l,5)+f(k,l,8))
-                enddo
+                Enddo
                 RhoWall=RhoWall/DiffFlux
-                do l=1,Nc8
+                Do l=1,Nc8
                     f(k,l,2)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,1)
                     f(k,l,3)=accom*w(l)*RhoWall &
@@ -717,17 +717,17 @@ module solver
                     &       + (1.d0-accom)*f(k,l,5)
                     f(k,l,7)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,8)
-                enddo
-            case (wallN)
-                do l=1,Nc8
+                Enddo
+            CASE (wallN)
+                Do l=1,Nc8
                     f(k,l,3)=extCoef(i,1)*f(k+Nxtotal,l,3)+extCoef(i,2)*f(k+2*Nxtotal,l,3)
                     f(k,l,4)=extCoef(i,1)*f(k+Nxtotal,l,4)+extCoef(i,2)*f(k+2*Nxtotal,l,4)
                     f(k,l,7)=extCoef(i,1)*f(k+Nxtotal,l,7)+extCoef(i,2)*f(k+2*Nxtotal,l,7)
                     f(k,l,8)=extCoef(i,1)*f(k+Nxtotal,l,8)+extCoef(i,2)*f(k+2*Nxtotal,l,8)
                     RhoWall=RhoWall+cy(l)*(f(k,l,3)+f(k,l,4)+f(k,l,7)+f(k,l,8))
-                enddo
+                Enddo
                 RhoWall=RhoWall/DiffFlux
-                do l=1,Nc8
+                Do l=1,Nc8
                     f(k,l,1)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,4)
                     f(k,l,2)=accom*w(l)*RhoWall &
@@ -736,17 +736,17 @@ module solver
                     &       + (1.d0-accom)*f(k,l,8)
                     f(k,l,6)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,7)
-                enddo
-            case (wallS)
-                do l=1,Nc8
+                Enddo
+            CASE (wallS)
+                Do l=1,Nc8
                     f(k,l,1)=extCoef(i,1)*f(k-Nxtotal,l,1)+extCoef(i,2)*f(k-2*Nxtotal,l,1)
                     f(k,l,2)=extCoef(i,1)*f(k-Nxtotal,l,2)+extCoef(i,2)*f(k-2*Nxtotal,l,2)
                     f(k,l,5)=extCoef(i,1)*f(k-Nxtotal,l,5)+extCoef(i,2)*f(k-2*Nxtotal,l,5)
                     f(k,l,6)=extCoef(i,1)*f(k-Nxtotal,l,6)+extCoef(i,2)*f(k-2*Nxtotal,l,6)
                     RhoWall=RhoWall+cy(l)*(f(k,l,1)+f(k,l,2)+f(k,l,5)+f(k,l,6))
-                enddo
+                Enddo
                 RhoWall=RhoWall/DiffFlux
-                do l=1,Nc8
+                Do l=1,Nc8
                     f(k,l,3)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,2)
                     f(k,l,4)=accom*w(l)*RhoWall &
@@ -755,17 +755,17 @@ module solver
                     &       + (1.d0-accom)*f(k,l,6)
                     f(k,l,8)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,5)
-                enddo
-            case (wallF)
-                do l=1,Nc8
+                Enddo
+            CASE (wallF)
+                Do l=1,Nc8
                     f(k,l,5)=extCoef(i,1)*f(k+Nxytotal,l,5)+extCoef(i,2)*f(k+2*Nxytotal,l,5)
                     f(k,l,6)=extCoef(i,1)*f(k+Nxytotal,l,6)+extCoef(i,2)*f(k+2*Nxytotal,l,6)
                     f(k,l,7)=extCoef(i,1)*f(k+Nxytotal,l,7)+extCoef(i,2)*f(k+2*Nxytotal,l,7)
                     f(k,l,8)=extCoef(i,1)*f(k+Nxytotal,l,8)+extCoef(i,2)*f(k+2*Nxytotal,l,8)
                     RhoWall=RhoWall+cz(l)*(f(k,l,5)+f(k,l,6)+f(k,l,7)+f(k,l,8))
-                enddo
+                Enddo
                 RhoWall=RhoWall/DiffFlux
-                do l=1,Nc8
+                Do l=1,Nc8
                     f(k,l,1)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,5)
                     f(k,l,2)=accom*w(l)*RhoWall &
@@ -774,17 +774,17 @@ module solver
                     &       + (1.d0-accom)*f(k,l,7)
                     f(k,l,4)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,8)
-                enddo
-            case (wallB)
-                do l=1,Nc8
+                Enddo
+            CASE (wallB)
+                Do l=1,Nc8
                     f(k,l,1)=extCoef(i,1)*f(k-Nxytotal,l,1)+extCoef(i,2)*f(k-2*Nxytotal,l,1)
                     f(k,l,2)=extCoef(i,1)*f(k-Nxytotal,l,2)+extCoef(i,2)*f(k-2*Nxytotal,l,2)
                     f(k,l,3)=extCoef(i,1)*f(k-Nxytotal,l,3)+extCoef(i,2)*f(k-2*Nxytotal,l,3)
                     f(k,l,4)=extCoef(i,1)*f(k-Nxytotal,l,4)+extCoef(i,2)*f(k-2*Nxytotal,l,4)
                     RhoWall=RhoWall+cz(l)*(f(k,l,1)+f(k,l,2)+f(k,l,3)+f(k,l,4))
-                enddo
+                Enddo
                 RhoWall=RhoWall/DiffFlux
-                do l=1,Nc8
+                Do l=1,Nc8
                     f(k,l,5)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,1)
                     f(k,l,6)=accom*w(l)*RhoWall &
@@ -793,15 +793,15 @@ module solver
                     &       + (1.d0-accom)*f(k,l,3)
                     f(k,l,8)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,4)
-                enddo
+                Enddo
 !=======================================================================
 !     Boundary condition on the 2-direction corner wall
 !=======================================================================
 !------------------------------------------------------------------------
 !           No z-direction type wall
 !------------------------------------------------------------------------
-            case (wallEN)
-                do l=1,Nc8
+            CASE (wallEN)
+                Do l=1,Nc8
                     f(k,l,2)=extCoef(i,1)*f(k+1,l,2)+extCoef(i,2)*f(k+2,l,2)
                     f(k,l,3)=extCoef(i,1)*f(k+1,l,3)+extCoef(i,2)*f(k+2,l,3)
                     f(k,l,6)=extCoef(i,1)*f(k+1,l,6)+extCoef(i,2)*f(k+2,l,6)
@@ -814,10 +814,10 @@ module solver
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,2)+f(k,l,3)+f(k,l,6)+f(k,l,7))
                     RhoWall2=RhoWall2+cy(l)*(fwZ(l,3)+fwZ(l,4)+fwZ(l,7)+fwZ(l,8))
-                enddo
+                Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
-                do l=1,Nc8
+                Do l=1,Nc8
                     ! Write x
                     f(k,l,1)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,2)
@@ -837,10 +837,10 @@ module solver
                     &       + (1.d0-accom)*fwZ(l,4)
                     f(k,l,7)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*fwZ(l,8)
-                enddo
+                Enddo
 
-            case (wallWN)
-                do l=1,Nc8
+            CASE (wallWN)
+                Do l=1,Nc8
                     f(k,l,1)=extCoef(i,1)*f(k-1,l,1)+extCoef(i,2)*f(k-2,l,1)
                     f(k,l,4)=extCoef(i,1)*f(k-1,l,4)+extCoef(i,2)*f(k-2,l,4)
                     f(k,l,5)=extCoef(i,1)*f(k-1,l,5)+extCoef(i,2)*f(k-2,l,5)
@@ -853,10 +853,10 @@ module solver
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,1)+f(k,l,4)+f(k,l,5)+f(k,l,8))
                     RhoWall2=RhoWall2+cy(l)*(fwZ(l,3)+fwZ(l,4)+fwZ(l,7)+fwZ(l,8))
-                enddo
+                Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
-                do l=1,Nc8
+                Do l=1,Nc8
 
                     ! Write x
                     f(k,l,2)=accom*w(l)*RhoWall &
@@ -877,10 +877,10 @@ module solver
                     &       + (1.d0-accom)*fwZ(l,3)
                     f(k,l,8)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*fwZ(l,7)
-                enddo
+                Enddo
 
-            case (wallES)
-                do l=1,Nc8
+            CASE (wallES)
+                Do l=1,Nc8
                     f(k,l,2)=extCoef(i,1)*f(k+1,l,2)+extCoef(i,2)*f(k+2,l,2)
                     f(k,l,3)=extCoef(i,1)*f(k+1,l,3)+extCoef(i,2)*f(k+2,l,3)
                     f(k,l,6)=extCoef(i,1)*f(k+1,l,6)+extCoef(i,2)*f(k+2,l,6)
@@ -893,10 +893,10 @@ module solver
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,2)+f(k,l,3)+f(k,l,6)+f(k,l,7))
                     RhoWall2=RhoWall2+cy(l)*(fwZ(l,1)+fwZ(l,2)+fwZ(l,5)+fwZ(l,6))
-                enddo
+                Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
-                do l=1,Nc8
+                Do l=1,Nc8
                     ! Write x
                     f(k,l,1)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,2)
@@ -916,10 +916,10 @@ module solver
                     &       + (1.d0-accom)*fwZ(l,1)
                     f(k,l,6)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*fwZ(l,5)
-                enddo
+                Enddo
 
-            case (wallWS)
-                do l=1,Nc8
+            CASE (wallWS)
+                Do l=1,Nc8
                     f(k,l,1)=extCoef(i,1)*f(k-1,l,1)+extCoef(i,2)*f(k-2,l,1)
                     f(k,l,4)=extCoef(i,1)*f(k-1,l,4)+extCoef(i,2)*f(k-2,l,4)
                     f(k,l,5)=extCoef(i,1)*f(k-1,l,5)+extCoef(i,2)*f(k-2,l,5)
@@ -932,10 +932,10 @@ module solver
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,1)+f(k,l,4)+f(k,l,5)+f(k,l,8))
                     RhoWall2=RhoWall2+cy(l)*(fwZ(l,1)+fwZ(l,2)+fwZ(l,5)+fwZ(l,6))
-                enddo
+                Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
-                do l=1,Nc8
+                Do l=1,Nc8
                     ! Write x
                     f(k,l,2)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,1)
@@ -955,13 +955,13 @@ module solver
                     &       + (1.d0-accom)*fwZ(l,2)
                     f(k,l,5)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*fwZ(l,6)
-                enddo
+                Enddo
 
 !------------------------------------------------------------------------
 !           No y-direction type wall
 !------------------------------------------------------------------------
-            case (wallEF)
-                do l=1,Nc8
+            CASE (wallEF)
+                Do l=1,Nc8
                     f(k,l,2)=extCoef(i,1)*f(k+1,l,2)+extCoef(i,2)*f(k+2,l,2)
                     f(k,l,3)=extCoef(i,1)*f(k+1,l,3)+extCoef(i,2)*f(k+2,l,3)
                     f(k,l,6)=extCoef(i,1)*f(k+1,l,6)+extCoef(i,2)*f(k+2,l,6)
@@ -974,10 +974,10 @@ module solver
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,2)+f(k,l,3)+f(k,l,6)+f(k,l,7))
                     RhoWall2=RhoWall2+cz(l)*(fwZ(l,5)+fwZ(l,6)+fwZ(l,7)+fwZ(l,8))
-                enddo
+                Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
-                do l=1,Nc8
+                Do l=1,Nc8
                     ! Write x
                     f(k,l,1)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,2)
@@ -997,10 +997,10 @@ module solver
                     &       + (1.d0-accom)*fwZ(l,5)
                     f(k,l,7)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*fwZ(l,8)
-                enddo
+                Enddo
 
-            case (wallWF)
-                do l=1,Nc8
+            CASE (wallWF)
+                Do l=1,Nc8
                     f(k,l,1)=extCoef(i,1)*f(k-1,l,1)+extCoef(i,2)*f(k-2,l,1)
                     f(k,l,4)=extCoef(i,1)*f(k-1,l,4)+extCoef(i,2)*f(k-2,l,4)
                     f(k,l,5)=extCoef(i,1)*f(k-1,l,5)+extCoef(i,2)*f(k-2,l,5)
@@ -1013,10 +1013,10 @@ module solver
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,1)+f(k,l,4)+f(k,l,5)+f(k,l,8))
                     RhoWall2=RhoWall2+cz(l)*(fwZ(l,5)+fwZ(l,6)+fwZ(l,7)+fwZ(l,8))
-                enddo
+                Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
-                do l=1,Nc8
+                Do l=1,Nc8
                     ! Write x
                     f(k,l,2)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,1)
@@ -1036,10 +1036,10 @@ module solver
                     &       + (1.d0-accom)*fwZ(l,6)
                     f(k,l,8)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*fwZ(l,7)
-                enddo
+                Enddo
 
-            case (wallEB)
-                do l=1,Nc8
+            CASE (wallEB)
+                Do l=1,Nc8
                     f(k,l,2)=extCoef(i,1)*f(k+1,l,2)+extCoef(i,2)*f(k+2,l,2)
                     f(k,l,3)=extCoef(i,1)*f(k+1,l,3)+extCoef(i,2)*f(k+2,l,3)
                     f(k,l,6)=extCoef(i,1)*f(k+1,l,6)+extCoef(i,2)*f(k+2,l,6)
@@ -1052,10 +1052,10 @@ module solver
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,2)+f(k,l,3)+f(k,l,6)+f(k,l,7))
                     RhoWall2=RhoWall2+cz(l)*(fwZ(l,1)+fwZ(l,2)+fwZ(l,3)+fwZ(l,4))
-                enddo
+                Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
-                do l=1,Nc8
+                Do l=1,Nc8
                     ! Write x
                     f(k,l,1)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,2)
@@ -1075,10 +1075,10 @@ module solver
                     &       + (1.d0-accom)*fwZ(l,1)
                     f(k,l,3)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*fwZ(l,4)
-                enddo
+                Enddo
 
-            case (wallWB)
-                do l=1,Nc8
+            CASE (wallWB)
+                Do l=1,Nc8
                     f(k,l,1)=extCoef(i,1)*f(k-1,l,1)+extCoef(i,2)*f(k-2,l,1)
                     f(k,l,4)=extCoef(i,1)*f(k-1,l,4)+extCoef(i,2)*f(k-2,l,4)
                     f(k,l,5)=extCoef(i,1)*f(k-1,l,5)+extCoef(i,2)*f(k-2,l,5)
@@ -1091,10 +1091,10 @@ module solver
 
                     RhoWall=RhoWall+cx(l)*(f(k,l,1)+f(k,l,4)+f(k,l,5)+f(k,l,8))
                     RhoWall2=RhoWall2+cz(l)*(fwZ(l,1)+fwZ(l,2)+fwZ(l,3)+fwZ(l,4))
-                enddo
+                Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
-                do l=1,Nc8
+                Do l=1,Nc8
                     ! Write x
                     f(k,l,2)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,1)
@@ -1114,12 +1114,12 @@ module solver
                     &       + (1.d0-accom)*fwZ(l,2)
                     f(k,l,4)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*fwZ(l,3)
-                enddo
+                Enddo
 !------------------------------------------------------------------------
 !           No x-direction type wall
 !------------------------------------------------------------------------
-            case (wallNF)
-                do l=1,Nc8
+            CASE (wallNF)
+                Do l=1,Nc8
                     f(k,l,3)=extCoef(i,1)*f(k+Nxtotal,l,3)+extCoef(i,2)*f(k+2*Nxtotal,l,3)
                     f(k,l,4)=extCoef(i,1)*f(k+Nxtotal,l,4)+extCoef(i,2)*f(k+2*Nxtotal,l,4)
                     f(k,l,7)=extCoef(i,1)*f(k+Nxtotal,l,7)+extCoef(i,2)*f(k+2*Nxtotal,l,7)
@@ -1132,10 +1132,10 @@ module solver
 
                     RhoWall=RhoWall+cy(l)*(f(k,l,3)+f(k,l,4)+f(k,l,7)+f(k,l,8))
                     RhoWall2=RhoWall2+cz(l)*(fwZ(l,5)+fwZ(l,6)+fwZ(l,7)+fwZ(l,8))
-                enddo
+                Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
-                do l=1,Nc8
+                Do l=1,Nc8
                     ! Write y
                     f(k,l,1)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,4)
@@ -1155,10 +1155,10 @@ module solver
                     &       + (1.d0-accom)*fwZ(l,6)
                     f(k,l,8)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*fwZ(l,5)
-                enddo
+                Enddo
 
-            case (wallSF)
-                do l=1,Nc8
+            CASE (wallSF)
+                Do l=1,Nc8
                     f(k,l,1)=extCoef(i,1)*f(k-Nxtotal,l,1)+extCoef(i,2)*f(k-2*Nxtotal,l,1)
                     f(k,l,2)=extCoef(i,1)*f(k-Nxtotal,l,2)+extCoef(i,2)*f(k-2*Nxtotal,l,2)
                     f(k,l,5)=extCoef(i,1)*f(k-Nxtotal,l,5)+extCoef(i,2)*f(k-2*Nxtotal,l,5)
@@ -1171,10 +1171,10 @@ module solver
 
                     RhoWall=RhoWall+cy(l)*(f(k,l,1)+f(k,l,2)+f(k,l,5)+f(k,l,6))
                     RhoWall2=RhoWall2+cz(l)*(fwZ(l,5)+fwZ(l,6)+fwZ(l,7)+fwZ(l,8))
-                enddo
+                Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
-                do l=1,Nc8
+                Do l=1,Nc8
                     ! Write y
                     f(k,l,3)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,2)
@@ -1194,10 +1194,10 @@ module solver
                     &       + (1.d0-accom)*fwZ(l,7)
                     f(k,l,5)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*fwZ(l,8)
-                enddo
+                Enddo
 
-            case (wallNB)
-                do l=1,Nc8
+            CASE (wallNB)
+                Do l=1,Nc8
                     f(k,l,3)=extCoef(i,1)*f(k+Nxtotal,l,3)+extCoef(i,2)*f(k+2*Nxtotal,l,3)
                     f(k,l,4)=extCoef(i,1)*f(k+Nxtotal,l,4)+extCoef(i,2)*f(k+2*Nxtotal,l,4)
                     f(k,l,7)=extCoef(i,1)*f(k+Nxtotal,l,7)+extCoef(i,2)*f(k+2*Nxtotal,l,7)
@@ -1210,10 +1210,10 @@ module solver
 
                     RhoWall=RhoWall+cy(l)*(f(k,l,3)+f(k,l,4)+f(k,l,7)+f(k,l,8))
                     RhoWall2=RhoWall2+cz(l)*(fwZ(l,1)+fwZ(l,2)+fwZ(l,3)+fwZ(l,4))
-                enddo
+                Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
-                do l=1,Nc8
+                Do l=1,Nc8
                     ! Write y
                     f(k,l,1)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,4)
@@ -1233,10 +1233,10 @@ module solver
                     &       + (1.d0-accom)*fwZ(l,1)
                     f(k,l,3)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*fwZ(l,2)
-                enddo
+                Enddo
 
-            case (wallSB)
-                do l=1,Nc8
+            CASE (wallSB)
+                Do l=1,Nc8
                     f(k,l,1)=extCoef(i,1)*f(k-Nxtotal,l,1)+extCoef(i,2)*f(k-2*Nxtotal,l,1)
                     f(k,l,2)=extCoef(i,1)*f(k-Nxtotal,l,2)+extCoef(i,2)*f(k-2*Nxtotal,l,2)
                     f(k,l,5)=extCoef(i,1)*f(k-Nxtotal,l,5)+extCoef(i,2)*f(k-2*Nxtotal,l,5)
@@ -1249,10 +1249,10 @@ module solver
 
                     RhoWall=RhoWall+cy(l)*(f(k,l,1)+f(k,l,2)+f(k,l,5)+f(k,l,6))
                     RhoWall2=RhoWall2+cz(l)*(fwZ(l,1)+fwZ(l,2)+fwZ(l,3)+fwZ(l,4))
-                enddo
+                Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
-                do l=1,Nc8
+                Do l=1,Nc8
                     ! Write y
                     f(k,l,3)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,2)
@@ -1272,12 +1272,12 @@ module solver
                     &       + (1.d0-accom)*fwZ(l,3)
                     f(k,l,1)=accom*w(l)*RhoWall2 &
                     &       + (1.d0-accom)*fwZ(l,4)
-                enddo
+                Enddo
 !=======================================================================
 !     Boundary condition on the 3-direction corner wall
 !=======================================================================
-            case (wallENF) !direction1
-                do l=1,Nc8
+            CASE (wallENF) !direction1
+                Do l=1,Nc8
                     f(k,l,2)=extCoef(i,1)*f(k+1,l,2)+extCoef(i,2)*f(k+2,l,2)
                     f(k,l,3)=extCoef(i,1)*f(k+1,l,3)+extCoef(i,2)*f(k+2,l,3)
                     f(k,l,6)=extCoef(i,1)*f(k+1,l,6)+extCoef(i,2)*f(k+2,l,6)
@@ -1296,11 +1296,11 @@ module solver
                     RhoWall=RhoWall+cx(l)*(f(k,l,2)+f(k,l,3)+f(k,l,6)+f(k,l,7))
                     RhoWall2=RhoWall2+cy(l)*(fw(j,l,3)+fw(j,l,4)+fw(j,l,7)+fw(j,l,8))
                     RhoWall3=RhoWall3+cz(l)*(fwZ(l,5)+fwZ(l,6)+fwZ(l,7)+fwZ(l,8))
-                enddo
+                Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
                 RhoWall3=RhoWall3/DiffFlux
-                do l=1,Nc8
+                Do l=1,Nc8
                     ! Write x
                     f(k,l,1)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,2)
@@ -1332,9 +1332,9 @@ module solver
                     ! Borrow the un-used variable to store z for the opposite velocity
                     f(k,l,7)=accom*w(l)*RhoWall3 &
                     &       + (1.d0-accom)*fwZ(l,5)
-                enddo
-            case (wallWNF) !direction2
-                do l=1,Nc8
+                Enddo
+            CASE (wallWNF) !direction2
+                Do l=1,Nc8
                     f(k,l,1)=extCoef(i,1)*f(k-1,l,1)+extCoef(i,2)*f(k-2,l,1)
                     f(k,l,4)=extCoef(i,1)*f(k-1,l,4)+extCoef(i,2)*f(k-2,l,4)
                     f(k,l,5)=extCoef(i,1)*f(k-1,l,5)+extCoef(i,2)*f(k-2,l,5)
@@ -1353,11 +1353,11 @@ module solver
                     RhoWall=RhoWall+cx(l)*(f(k,l,1)+f(k,l,4)+f(k,l,5)+f(k,l,8))
                     RhoWall2=RhoWall2+cy(l)*(fw(j,l,3)+fw(j,l,4)+fw(j,l,7)+fw(j,l,8))
                     RhoWall3=RhoWall3+cz(l)*(fwZ(l,5)+fwZ(l,6)+fwZ(l,7)+fwZ(l,8))
-                enddo
+                Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
                 RhoWall3=RhoWall3/DiffFlux
-                do l=1,Nc8
+                Do l=1,Nc8
                     ! Write x
                     f(k,l,2)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,1)
@@ -1389,9 +1389,9 @@ module solver
                     ! Borrow the un-used variable to store z for the opposite velocity
                     f(k,l,8)=accom*w(l)*RhoWall3 &
                     &       + (1.d0-accom)*fwZ(l,6)
-                enddo
-            case (wallWSF) !direction3
-                do l=1,Nc8
+                Enddo
+            CASE (wallWSF) !direction3
+                Do l=1,Nc8
                     f(k,l,1)=extCoef(i,1)*f(k-1,l,1)+extCoef(i,2)*f(k-2,l,1)
                     f(k,l,4)=extCoef(i,1)*f(k-1,l,4)+extCoef(i,2)*f(k-2,l,4)
                     f(k,l,5)=extCoef(i,1)*f(k-1,l,5)+extCoef(i,2)*f(k-2,l,5)
@@ -1410,11 +1410,11 @@ module solver
                     RhoWall=RhoWall+cx(l)*(f(k,l,1)+f(k,l,4)+f(k,l,5)+f(k,l,8))
                     RhoWall2=RhoWall2+cy(l)*(fw(j,l,1)+fw(j,l,2)+fw(j,l,5)+fw(j,l,6))
                     RhoWall3=RhoWall3+cz(l)*(fwZ(l,5)+fwZ(l,6)+fwZ(l,7)+fwZ(l,8))
-                enddo
+                Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
                 RhoWall3=RhoWall3/DiffFlux
-                do l=1,Nc8
+                Do l=1,Nc8
                     ! Write x
                     f(k,l,2)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,1)
@@ -1446,9 +1446,9 @@ module solver
                     ! Borrow the un-used variable to store z for the opposite velocity
                     f(k,l,5)=accom*w(l)*RhoWall3 &
                     &       + (1.d0-accom)*fwZ(l,7)
-                enddo
-            case (wallESF) !direction4
-                do l=1,Nc8
+                Enddo
+            CASE (wallESF) !direction4
+                Do l=1,Nc8
                     f(k,l,2)=extCoef(i,1)*f(k+1,l,2)+extCoef(i,2)*f(k+2,l,2)
                     f(k,l,3)=extCoef(i,1)*f(k+1,l,3)+extCoef(i,2)*f(k+2,l,3)
                     f(k,l,6)=extCoef(i,1)*f(k+1,l,6)+extCoef(i,2)*f(k+2,l,6)
@@ -1467,11 +1467,11 @@ module solver
                     RhoWall=RhoWall+cx(l)*(f(k,l,2)+f(k,l,3)+f(k,l,6)+f(k,l,7))
                     RhoWall2=RhoWall2+cy(l)*(fw(j,l,1)+fw(j,l,2)+fw(j,l,5)+fw(j,l,6))
                     RhoWall3=RhoWall3+cz(l)*(fwZ(l,5)+fwZ(l,6)+fwZ(l,7)+fwZ(l,8))
-                enddo
+                Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
                 RhoWall3=RhoWall3/DiffFlux
-                do l=1,Nc8
+                Do l=1,Nc8
                     ! Write x
                     f(k,l,1)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,2)
@@ -1503,9 +1503,9 @@ module solver
                     ! Borrow the un-used variable to store z for the opposite velocity
                     f(k,l,6)=accom*w(l)*RhoWall3 &
                     &       + (1.d0-accom)*fwZ(l,8)
-                enddo
-            case (wallENB) !direction5
-                do l=1,Nc8
+                Enddo
+            CASE (wallENB) !direction5
+                Do l=1,Nc8
                     f(k,l,2)=extCoef(i,1)*f(k+1,l,2)+extCoef(i,2)*f(k+2,l,2)
                     f(k,l,3)=extCoef(i,1)*f(k+1,l,3)+extCoef(i,2)*f(k+2,l,3)
                     f(k,l,6)=extCoef(i,1)*f(k+1,l,6)+extCoef(i,2)*f(k+2,l,6)
@@ -1524,11 +1524,11 @@ module solver
                     RhoWall=RhoWall+cx(l)*(f(k,l,2)+f(k,l,3)+f(k,l,6)+f(k,l,7))
                     RhoWall2=RhoWall2+cy(l)*(fw(j,l,3)+fw(j,l,4)+fw(j,l,7)+fw(j,l,8))
                     RhoWall3=RhoWall3+cz(l)*(fwZ(l,1)+fwZ(l,2)+fwZ(l,3)+fwZ(l,4))
-                enddo
+                Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
                 RhoWall3=RhoWall3/DiffFlux
-                do l=1,Nc8
+                Do l=1,Nc8
                     ! Write x
                     f(k,l,1)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,2)
@@ -1560,9 +1560,9 @@ module solver
                     ! Borrow the un-used variable to store z for the opposite velocity
                     f(k,l,3)=accom*w(l)*RhoWall3 &
                     &       + (1.d0-accom)*fwZ(l,1)
-                enddo
-            case (wallWNB) !direction6
-                do l=1,Nc8
+                Enddo
+            CASE (wallWNB) !direction6
+                Do l=1,Nc8
                     f(k,l,1)=extCoef(i,1)*f(k-1,l,1)+extCoef(i,2)*f(k-2,l,1)
                     f(k,l,4)=extCoef(i,1)*f(k-1,l,4)+extCoef(i,2)*f(k-2,l,4)
                     f(k,l,5)=extCoef(i,1)*f(k-1,l,5)+extCoef(i,2)*f(k-2,l,5)
@@ -1581,11 +1581,11 @@ module solver
                     RhoWall=RhoWall+cx(l)*(f(k,l,1)+f(k,l,4)+f(k,l,5)+f(k,l,8))
                     RhoWall2=RhoWall2+cy(l)*(fw(j,l,3)+fw(j,l,4)+fw(j,l,7)+fw(j,l,8))
                     RhoWall3=RhoWall3+cz(l)*(fwZ(l,1)+fwZ(l,2)+fwZ(l,3)+fwZ(l,4))
-                enddo
+                Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
                 RhoWall3=RhoWall3/DiffFlux
-                do l=1,Nc8
+                Do l=1,Nc8
                     ! Write x
                     f(k,l,2)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,1)
@@ -1617,9 +1617,9 @@ module solver
                     ! Borrow the un-used variable to store z for the opposite velocity
                     f(k,l,4)=accom*w(l)*RhoWall3 &
                     &       + (1.d0-accom)*fwZ(l,2)
-                enddo
-            case (wallWSB) !direction7
-                do l=1,Nc8
+                Enddo
+            CASE (wallWSB) !direction7
+                Do l=1,Nc8
                     f(k,l,1)=extCoef(i,1)*f(k-1,l,1)+extCoef(i,2)*f(k-2,l,1)
                     f(k,l,4)=extCoef(i,1)*f(k-1,l,4)+extCoef(i,2)*f(k-2,l,4)
                     f(k,l,5)=extCoef(i,1)*f(k-1,l,5)+extCoef(i,2)*f(k-2,l,5)
@@ -1638,11 +1638,11 @@ module solver
                     RhoWall=RhoWall+cx(l)*(f(k,l,1)+f(k,l,4)+f(k,l,5)+f(k,l,8))
                     RhoWall2=RhoWall2+cy(l)*(fw(j,l,1)+fw(j,l,2)+fw(j,l,5)+fw(j,l,6))
                     RhoWall3=RhoWall3+cz(l)*(fwZ(l,1)+fwZ(l,2)+fwZ(l,3)+fwZ(l,4))
-                enddo
+                Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
                 RhoWall3=RhoWall3/DiffFlux
-                do l=1,Nc8
+                Do l=1,Nc8
                     ! Write x
                     f(k,l,2)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,1)
@@ -1674,9 +1674,9 @@ module solver
                     ! Borrow the un-used variable to store z for the opposite velocity
                     f(k,l,1)=accom*w(l)*RhoWall3 &
                     &       + (1.d0-accom)*fwZ(l,3)
-                enddo
-            case (wallESB) !direction8
-                do l=1,Nc8
+                Enddo
+            CASE (wallESB) !direction8
+                Do l=1,Nc8
                     f(k,l,2)=extCoef(i,1)*f(k+1,l,2)+extCoef(i,2)*f(k+2,l,2)
                     f(k,l,3)=extCoef(i,1)*f(k+1,l,3)+extCoef(i,2)*f(k+2,l,3)
                     f(k,l,6)=extCoef(i,1)*f(k+1,l,6)+extCoef(i,2)*f(k+2,l,6)
@@ -1695,11 +1695,11 @@ module solver
                     RhoWall=RhoWall+cx(l)*(f(k,l,2)+f(k,l,3)+f(k,l,6)+f(k,l,7))
                     RhoWall2=RhoWall2+cy(l)*(fw(j,l,1)+fw(j,l,2)+fw(j,l,5)+fw(j,l,6))
                     RhoWall3=RhoWall3+cz(l)*(fwZ(l,1)+fwZ(l,2)+fwZ(l,3)+fwZ(l,4))
-                enddo
+                Enddo
                 RhoWall=RhoWall/DiffFlux
                 RhoWall2=RhoWall2/DiffFlux
                 RhoWall3=RhoWall3/DiffFlux
-                do l=1,Nc8
+                Do l=1,Nc8
                     ! Write x
                     f(k,l,1)=accom*w(l)*RhoWall &
                     &       + (1.d0-accom)*f(k,l,2)
@@ -1731,19 +1731,19 @@ module solver
                     ! Borrow the un-used variable to store z for the opposite velocity
                     f(k,l,2)=accom*w(l)*RhoWall3 &
                     &       + (1.d0-accom)*fwZ(l,4)
-                enddo
-        end select
-    end do
-!$OMP end do   
+                Enddo
+        END SELECT
+    End do
+!$OMP END DO   
 
 
 !--------------------------------------------------------
 !> inlet/outlet
 !--------------------------------------------------------
     if(xl==xmin) then ! inlet block (west most processor)
-!$OMP do
-        do k=zlg,zug
-            do j=ylg,yug
+!$OMP DO
+        Do k=zlg,zug
+            Do j=ylg,yug
                 i = xl
                 l = (k-zlg)*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
                 !inlet
@@ -1751,15 +1751,15 @@ module solver
                 f(l,:,4)=f(l-1,:,4) + w(:)*PressDrop
                 f(l,:,5)=f(l-1,:,5) + w(:)*PressDrop
                 f(l,:,8)=f(l-1,:,8) + w(:)*PressDrop
-            end do
-        end do
-!$OMP end do
+            End do
+        End do
+!$OMP END DO
     endif
 
     if(xu==xmax) then ! outlet block (east most processor)
-!$OMP do
-        do k=zlg,zug
-            do j=ylg,yug
+!$OMP DO
+        Do k=zlg,zug
+            Do j=ylg,yug
                 i = xu
                 l = (k-zlg)*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
                 !outlet
@@ -1767,86 +1767,86 @@ module solver
                 f(l,:,3)=f(l+1,:,3) - w(:)*PressDrop
                 f(l,:,6)=f(l+1,:,6) - w(:)*PressDrop
                 f(l,:,7)=f(l+1,:,7) - w(:)*PressDrop
-            enddo
-        end do
-!$OMP end do            
+            Enddo
+        End do
+!$OMP END DO            
     endif
 
 !----------------------------------------------------
 !> Symmetric BC
 !----------------------------------------------------
     if(yl==ymin) then ! south sym BC
-!$OMP do
-        do k=zl,zu
-            do i=xl,xu
+!$OMP DO
+        Do k=zl,zu
+            Do i=xl,xu
                 l = (k-zlg)*Nxytotal + ghostLayers*Nxtotal + i-xlg+1
                 f(l,:,2)=f(l,:,3)
                 f(l,:,1)=f(l,:,4)
                 f(l,:,6)=f(l,:,7)
                 f(l,:,5)=f(l,:,8)
             enddo
-        end do
-!$OMP end do 
+        End do
+!$OMP END DO 
     endif
     if(yu==ymax) then ! north sym BC
-!$OMP do
-        do k=zl,zu
-            do i=xl,xu
+!$OMP DO
+        Do k=zl,zu
+            Do i=xl,xu
                 l = (k-zlg)*Nxytotal + (ghostLayers+Nysub-1)*Nxtotal + i-xlg+1
                 f(l,:,3)=f(l,:,2)
                 f(l,:,4)=f(l,:,1)
                 f(l,:,7)=f(l,:,6)
                 f(l,:,8)=f(l,:,5)
-            end do
-        end do
-!$OMP end do
+            End do
+        End do
+!$OMP END DO
     endif
     if(zl==zmin) then ! back sym BC
-!$OMP do
-        do j=yl,yu
-            do i=xl,xu
+!$OMP DO
+        Do j=yl,yu
+            Do i=xl,xu
                 l = ghostLayers*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
                 f(l,:,1)=f(l,:,5)
                 f(l,:,2)=f(l,:,6)
                 f(l,:,3)=f(l,:,7)
                 f(l,:,4)=f(l,:,8)
             enddo
-        end do
-!$OMP end do 
+        End do
+!$OMP END DO 
     endif
     if(zu==zmax) then ! front sym BC
-!$OMP do
-        do j=yl,yu
-            do i=xl,xu
+!$OMP DO
+        Do j=yl,yu
+            Do i=xl,xu
                 l = (ghostLayers+Nzsub-1)*Nxytotal + (j-ylg)*Nxtotal + i-xlg+1
                 f(l,:,5)=f(l,:,1)
                 f(l,:,6)=f(l,:,2)
                 f(l,:,7)=f(l,:,3)
                 f(l,:,8)=f(l,:,4)
-            end do
-        end do
-!$OMP end do
+            End do
+        End do
+!$OMP END DO
     endif
 
 !----------------------------------------------------
 !> Update Macro
 !----------------------------------------------------
-!$OMP do SCHEDULE(STATIC) 
-    !do k=1,Ntotal
-    do i=1,Nfluid
+!$OMP DO SCHEDULE(STATIC) 
+    !Do k=1,Ntotal
+    Do i=1,Nfluid
         k=mapF(i)
         Rho(k)=0.d0
         Ux(k)=0.d0
         Uy(k)=0.d0
         Uz(k)=0.d0
-        do l=1,Nc8
+        Do l=1,Nc8
             Rho(k)=Rho(k)+f(k,l,1)+f(k,l,2)+f(k,l,3)+f(k,l,4)+f(k,l,5)+f(k,l,6)+f(k,l,7)+f(k,l,8)
             Ux(k)=Ux(k)+cx(l)*(f(k,l,1)-f(k,l,2)-f(k,l,3)+f(k,l,4)+f(k,l,5)-f(k,l,6)-f(k,l,7)+f(k,l,8))
             Uy(k)=Uy(k)+cy(l)*(f(k,l,1)+f(k,l,2)-f(k,l,3)-f(k,l,4)+f(k,l,5)+f(k,l,6)-f(k,l,7)-f(k,l,8))
             Uz(k)=Uz(k)+cz(l)*(f(k,l,1)+f(k,l,2)+f(k,l,3)+f(k,l,4)-f(k,l,5)-f(k,l,6)-f(k,l,7)-f(k,l,8))
-        end do
-    end do
-!$OMP end do 
-!$OMP end PARALLEL  
+        End do
+    End do
+!$OMP END DO 
+!$OMP END PARALLEL  
     end subroutine iterate
 end module solver

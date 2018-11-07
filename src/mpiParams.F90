@@ -6,35 +6,35 @@
 !! @param vproc   : processor ID in virtual grid
 !! @param mpi_dim : virtual grid partition scheme (1->stripes, 2->boxes, 3->cubes)
 !----------------------------------------------------------------------
-module mpiParams
-implicit none
-save
+MODULE mpiParams
+IMPLICIT NONE
+SAVE
 
-!domain decomposition defs, to be read from nml: mpiNml
+!domain decomposition defs, to be read from NML: mpiNml
 integer :: mpi_xdim, mpi_ydim, mpi_zdim
 
 ! Constant tags used in the mpi exchanges
-integer, PARAMETER :: TAG1 = 1, TAG2 = 2, TAG3 = 3, TAG4 = 4, TAG5=5, TAG6=6
+INTEGER, PARAMETER :: TAG1 = 1, TAG2 = 2, TAG3 = 3, TAG4 = 4, TAG5=5, TAG6=6
 
 ! Communication parameters
-integer :: nprocs, proc, vproc
+INTEGER :: nprocs, proc, vproc
 
-integer :: east, west, noth, suth, frnt, back, MPI_COMM_VGRID
-integer, PARAMETER :: master  = 0
-integer, PARAMETER :: mpi_dim = 3
+INTEGER :: east, west, noth, suth, frnt, back, MPI_COMM_VGRID
+INTEGER, PARAMETER :: master  = 0
+INTEGER, PARAMETER :: mpi_dim = 3
 
 
 ! Information exchange buffers (x direction)
-double precision, allocatable, dimension(:) :: f_west_snd,  f_east_snd
-double precision, allocatable, dimension(:) :: f_west_rcv,  f_east_rcv
+double precision, ALLOCATABLE, DIMENSION(:) :: f_west_snd,  f_east_snd
+double precision, ALLOCATABLE, DIMENSION(:) :: f_west_rcv,  f_east_rcv
 
 ! Information exchange buffers (y direction)
-double precision, allocatable, dimension(:) :: f_suth_snd, f_noth_snd
-double precision, allocatable, dimension(:) :: f_suth_rcv, f_noth_rcv
+double precision, ALLOCATABLE, DIMENSION(:) :: f_suth_snd, f_noth_snd
+double precision, ALLOCATABLE, DIMENSION(:) :: f_suth_rcv, f_noth_rcv
 
 ! Information exchange buffers (z direction)
-double precision, allocatable, dimension(:) :: f_back_snd, f_frnt_snd
-double precision, allocatable, dimension(:) :: f_back_rcv, f_frnt_rcv
+double precision, ALLOCATABLE, DIMENSION(:) :: f_back_snd, f_frnt_snd
+double precision, ALLOCATABLE, DIMENSION(:) :: f_back_rcv, f_frnt_rcv
 
 ! Buffer size
 integer :: westSndSize, westRcvSize, eastSndSize, eastRcvSize
@@ -44,10 +44,10 @@ integer :: backSndSize, backRcvSize, frntSndSize, frntRcvSize
 ! gather the sub-domain extent for writing .pvti file
 integer, allocatable, dimension(:,:) :: sub_ext
 !
-integer :: mpi_group_inlet
-integer :: mpi_group_global
-integer :: mpi_comm_inlet
-integer, allocatable, dimension(:):: inlet_rank
+INTEGER :: mpi_group_inlet
+INTEGER :: mpi_group_global
+INTEGER :: mpi_comm_inlet
+INTEGER, allocatable, dimension(:):: inlet_rank
 contains
 !-------------------------------------------------------------------------------
 ! Subroutine : setupVirtualProcessGrid
@@ -64,24 +64,24 @@ contains
 !! Some MPI implementations do not reorder correctly. This may affect the
 !! performance but not the results.
 !! @warning
-!! if you use openMPI (v1.2.5) you may have to comment out 'use MPI' and use
-!! instead 'INCLUDE "mpif.h"' because a current bug in openMPI prevents the
+!! If you use OpenMPI (v1.2.5) you may have to comment out 'USE MPI' and use
+!! instead 'INCLUDE "mpif.h"' because a current bug in OpenMPI prevents the
 !! command MPI_CART_CREATE() from being recognized.
     subroutine setupVirtualProcessGrid    
         !Variables to be set
         use physicalGrid, only : xl, xlg, xmax, xmin, xu, xug, &
                                  yl, ylg, ymax, ymin, yu, yug, &
                                  zl, zlg, zmax, zmin, zu, zug, ghostLayers
-        implicit none
+        IMPLICIT NONE
         include "mpif.h"
         
         !Local variables
-        integer :: complete, direction, partial, shift
-        integer :: MPI_ERR
-        integer, dimension(1:mpi_dim) :: dims, mpi_coords
-        LOGICAL, dimension(1:mpi_dim) :: periodic
+        INTEGER :: complete, direction, partial, shift
+        INTEGER :: MPI_ERR
+        INTEGER, DIMENSION(1:mpi_dim) :: dims, mpi_coords
+        LOGICAL, DIMENSION(1:mpi_dim) :: periodic
         LOGICAL :: reorder
-        integer :: j, k
+        INTEGER :: j, k
         integer, dimension(6) :: my_ext
         
         !Initialize data for domain partitioning. Defaults are:
@@ -96,51 +96,51 @@ contains
         reorder     = .true.
         
         !Create the new virtual connectivity grid
-        call MPI_CART_CREATE(MPI_COMM_WorLD, mpi_dim, dims, periodic, reorder, MPI_COMM_VGRID, MPI_ERR)
+        CALL MPI_CART_CREATE(MPI_COMM_WORLD, mpi_dim, dims, periodic, reorder, MPI_COMM_VGRID, MPI_ERR)
         
         !Get this processor ID within the virtual grid
-        call MPI_COMM_RANK(MPI_COMM_VGRID, vproc, MPI_ERR)
+        CALL MPI_COMM_RANK(MPI_COMM_VGRID, vproc, MPI_ERR)
         !write(*,*) "vproc = ",  vproc
 
-        call MPI_CART_COorDS(MPI_COMM_VGRID, vproc, mpi_dim, mpi_coords, MPI_ERR)
+        CALL MPI_CART_COORDS(MPI_COMM_VGRID, vproc, mpi_dim, mpi_coords, MPI_ERR)
         
         !------- Compute the limits [(xl,xu),(yl,yu)] assigned to this processor ------
         !Partitioning in the x direction
         complete = (xmax - xmin) / dims(1)
         partial  = (xmax - xmin) - complete*dims(1)
-        if(mpi_coords(1) + 1 <= partial) then
+        IF(mpi_coords(1) + 1 <= partial) THEN
           xl = xmin + (complete + 1)*mpi_coords(1)
           xu = xmin + (complete + 1)*(mpi_coords(1) + 1) - 1
         ELSE
           xl = xmin + complete*mpi_coords(1) + partial
           xu = xmin + complete*(mpi_coords(1) + 1) + partial - 1
-        end if
-        if(MOD(mpi_coords(1) + 1,dims(1)) == 0) xu = xu + 1
+        END IF
+        IF(MOD(mpi_coords(1) + 1,dims(1)) == 0) xu = xu + 1
         
         !Partitioning in the y direction
         complete = (ymax - ymin) / dims(2)
         partial  = (ymax - ymin) - complete*dims(2)
-        if(mpi_coords(2) + 1 <= partial) then
+        IF(mpi_coords(2) + 1 <= partial) THEN
           yl = ymin + (complete + 1)*mpi_coords(2)
           yu = ymin + (complete + 1)*(mpi_coords(2) + 1) - 1
         ELSE
           yl = ymin + complete*mpi_coords(2) + partial
           yu = ymin + complete*(mpi_coords(2) + 1) + partial - 1
-        end if
-        if(MOD(mpi_coords(2) + 1,dims(2)) == 0) yu = yu + 1
+        END IF
+        IF(MOD(mpi_coords(2) + 1,dims(2)) == 0) yu = yu + 1
 
 
         !  Partitioning in the y direction
         complete = (zmax - zmin) / dims(3)
         partial  = (zmax - zmin) - complete*dims(3)
-        if(mpi_coords(3) + 1 <= partial) then
+        IF(mpi_coords(3) + 1 <= partial) THEN
           zl = zmin + (complete + 1)*mpi_coords(3)
           zu = zmin + (complete + 1)*(mpi_coords(3) + 1) - 1
         ELSE
           zl = zmin + complete*mpi_coords(3) + partial
           zu = zmin + complete*(mpi_coords(3) + 1) + partial - 1
-        end if
-        if(MOD(mpi_coords(3) + 1,dims(3)) == 0) zu = zu + 1
+        END IF
+        IF(MOD(mpi_coords(3) + 1,dims(3)) == 0) zu = zu + 1
             
         !Ghost layers
         xlg = xl - ghostLayers
@@ -161,7 +161,7 @@ contains
          !gahter sub-domain extnet to sub_ext
         allocate(sub_ext(6,nprocs))
 
-        call MPI_GATHER(my_ext, 6, MPI_INT, sub_ext, 6, MPI_INT, master, MPI_COMM_WorLD, MPI_ERR)
+        CALL MPI_GATHER(my_ext, 6, MPI_INT, sub_ext, 6, MPI_INT, master, MPI_COMM_WORLD, MPI_ERR)
 
         !------- Determine neighbours of this processor -------------------------------
         !MPI_CART counts dimensions using 0-based arithmetic so that
@@ -169,28 +169,28 @@ contains
         !Ranks of neighbours of this processor in the x and y directions
         shift     = 1
         direction = 0
-        call MPI_CART_SHifT(MPI_COMM_VGRID, direction, shift, west, east, MPI_ERR)
+        CALL MPI_CART_SHIFT(MPI_COMM_VGRID, direction, shift, west, east, MPI_ERR)
         direction = 1
-        call MPI_CART_SHifT(MPI_COMM_VGRID, direction, shift, suth, noth, MPI_ERR)
+        CALL MPI_CART_SHIFT(MPI_COMM_VGRID, direction, shift, suth, noth, MPI_ERR)
         direction = 2
-        call MPI_CART_SHifT(MPI_COMM_VGRID, direction, shift, back, frnt, MPI_ERR)
+        CALL MPI_CART_SHIFT(MPI_COMM_VGRID, direction, shift, back, frnt, MPI_ERR)
 
         allocate(inlet_rank(mpi_ydim*mpi_zdim))
 
         ! Create inlet processor group
-        call MPI_COMM_GROUP(MPI_COMM_VGRID, mpi_group_global, MPI_ERR)
+        CALL MPI_COMM_GROUP(MPI_COMM_VGRID, mpi_group_global, MPI_ERR)
         do k = 1, mpi_zdim
            do j = 1, mpi_ydim
                inlet_rank(j+(k-1)*mpi_ydim) = (k-1)*mpi_ydim + j-1
            enddo
        enddo
 
-        call MPI_GROUP_INCL(mpi_group_global, mpi_ydim*mpi_zdim, inlet_rank, mpi_group_inlet, MPI_ERR)
-        call MPI_COMM_CREATE(MPI_COMM_VGRID, mpi_group_inlet, mpi_comm_inlet, MPI_ERR)
+        CALL MPI_GROUP_INCL(mpi_group_global, mpi_ydim*mpi_zdim, inlet_rank, mpi_group_inlet, MPI_ERR)
+        CALL MPI_COMM_CREATE(MPI_COMM_VGRID, mpi_group_inlet, mpi_comm_inlet, MPI_ERR)
 
     end subroutine setupVirtualProcessGrid
 
     subroutine mpiFree
-        ! do NOTHING
+        ! DO NOTHING
     end subroutine mpiFree
 end module mpiParams
