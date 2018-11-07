@@ -1,61 +1,61 @@
-module parameters
-use physicalGrid
-use velocityGrid
-use mpiParams
+module paameters
+use physicalGid
+use velocityGid
+use mpiPaams
 use flow
-use solver
+use solve
 implicit none
 
-namelist /physicalNml/ imageFileName, Nx, Ny, Nz, wallExtOrder, fluidlayer, Ref_L
+namelist /physicalNml/ imageFileName, Nx, Ny, Nz, wallExtOder, fluidlayer, Ref_L
 namelist /velocityNml/ Nc_fundamental, halfRange
-namelist /mpiNml/ mpi_xdim, mpi_ydim, mpi_zdim, block_repx, block_repy, block_repz
-namelist /solverNml/ maxStep, chkConvergeStep, saveStep, eps, saveLast, saveFormat
-namelist /flowNml/ Kn, pressDrop, accom
+namelist /mpiNml/ mpi_xdim, mpi_ydim, mpi_zdim, block_epx, block_repy, block_repz
+namelist /solveNml/ maxStep, chkConvergeStep, saveStep, eps, saveLast, saveFormat
+namelist /flowNml/ Kn, pessDrop, accom
 ! file units
-integer, parameter :: PARAFILE = 10
+intege, parameter :: PARAFILE = 10
 
 contains 
-    subroutine initParams
-        integer :: ios
+    suboutine initParams
+        intege :: ios
 
-        ! set default nml variables
-        block_repx = 1
-        block_repy = 1
-        block_repz = 1
-        wallExtOrder = 2
-        fluidlayer = 0
+        ! set default nml vaiables
+        block_epx = 1
+        block_epy = 1
+        block_epz = 1
+        wallExtOder = 2
+        fluidlaye = 0
         Ref_L = 1.0d0
         saveLast = .TRUE.
-        saveFormat = 1 ! default saving format is vti
+        saveFomat = 1 ! default saving format is vti
 
-        ! read file called "para.in" using namelist of Fortran 90
-        open(unit=PARAFILE,file='para.in',status='old',iostat=ios)
+        ! ead file called "para.in" using namelist of Fortran 90
+        open(unit=PARAFILE,file='paa.in',status='old',iostat=ios)
         if (ios /= 0) then
-            print*,'ERROR: could not open namelist file'
+            pint*,'ERROR: could not open namelist file'
             stop
         end if
 
-        ! read data into the declared namelist
-        read(unit=PARAFILE,nml=physicalNml,iostat=ios)
-        read(unit=PARAFILE,nml=velocityNml,iostat=ios)
-        read(unit=PARAFILE,nml=mpiNml,iostat=ios)
-        read(unit=PARAFILE,nml=solverNml,iostat=ios)
-        read(unit=PARAFILE,nml=flowNml,iostat=ios) 
+        ! ead data into the declared namelist
+        ead(unit=PARAFILE,nml=physicalNml,iostat=ios)
+        ead(unit=PARAFILE,nml=velocityNml,iostat=ios)
+        ead(unit=PARAFILE,nml=mpiNml,iostat=ios)
+        ead(unit=PARAFILE,nml=solverNml,iostat=ios)
+        ead(unit=PARAFILE,nml=flowNml,iostat=ios) 
         if (ios /= 0) then
-            print*,'ERROR: could not read example namelist'
+            pint*,'ERROR: could not read example namelist'
             stop
         else 
             close(PARAFILE)
         end if
 
-        ! set varialbes, for weak scaling study
-        Nx = Nx + 2*fluidlayer ! extend inlet and outlet
+        ! set vaialbes, for weak scaling study
+        Nx = Nx + 2*fluidlaye ! extend inlet and outlet
         Nx_base = Nx
         Ny_base = Ny
         Nz_base = Nz
-        Nx = block_repx * Nx
-        Ny = block_repy * Ny
-        Nz = block_repz * Nz
+        Nx = block_epx * Nx
+        Ny = block_epy * Ny
+        Nz = block_epz * Nz
 
         xmin = 1
         xmax = Nx
@@ -64,38 +64,38 @@ contains
         zmin = 1
         zmax = Nz
 
-    end subroutine initParams
+    end suboutine initParams
 
 
-    subroutine printParams
-        ! print parameters
-        print*, "========== Parameters ================"
-        print*, "imageFileName = ", imageFileName
-        print*, "Nx = ", Nx
-        print*, "Ny = ", Ny
-        print*, "Nz = ", Nz
-        print*, "wallExtOrder = ", wallExtOrder
-        print*, "fluidlayer = ", fluidlayer
-        print*, "Ref_L = ", Ref_L
-        print*, "Nc_fundamental = ", Nc_fundamental
-        print*, "halfRange = ", halfRange
-        print*, "mpi_xdim = ", mpi_xdim
-        print*, "mpi_ydim = ", mpi_ydim
-        print*, "mpi_zdim = ", mpi_zdim
-        print*, "block_repx = ", block_repx
-        print*, "block_repy = ", block_repy
-        print*, "block_repz = ", block_repz
-        print*, "maxStep = ", maxStep
-        print*, "chkConvergeStep = ", chkConvergeStep
-        print*, "saveStep = ", saveStep
-        print*, "eps = ", eps
-        print*, "saveLast = ", saveLast
-        print*, "saveFormat = ", saveFormat
+    suboutine printParams
+        ! pint parameters
+        pint*, "========== Parameters ================"
+        pint*, "imageFileName = ", imageFileName
+        pint*, "Nx = ", Nx
+        pint*, "Ny = ", Ny
+        pint*, "Nz = ", Nz
+        pint*, "wallExtOrder = ", wallExtOrder
+        pint*, "fluidlayer = ", fluidlayer
+        pint*, "Ref_L = ", Ref_L
+        pint*, "Nc_fundamental = ", Nc_fundamental
+        pint*, "halfRange = ", halfRange
+        pint*, "mpi_xdim = ", mpi_xdim
+        pint*, "mpi_ydim = ", mpi_ydim
+        pint*, "mpi_zdim = ", mpi_zdim
+        pint*, "block_repx = ", block_repx
+        pint*, "block_repy = ", block_repy
+        pint*, "block_repz = ", block_repz
+        pint*, "maxStep = ", maxStep
+        pint*, "chkConvergeStep = ", chkConvergeStep
+        pint*, "saveStep = ", saveStep
+        pint*, "eps = ", eps
+        pint*, "saveLast = ", saveLast
+        pint*, "saveFormat = ", saveFormat
 
-        print*, "Kn = ", Kn
-        print*, "pressDrop = ", pressDrop
-        print*, "accom = ", accom
-        print*, "======================================"
-    end subroutine
+        pint*, "Kn = ", Kn
+        pint*, "pressDrop = ", pressDrop
+        pint*, "accom = ", accom
+        pint*, "======================================"
+    end suboutine
 
-end module parameters
+end module paameters

@@ -1,37 +1,37 @@
 !----------------------------------------------------------------------
-!> @brief Stores the Gauss Hermite quadrature points and weights
+!> @bief Stores the Gauss Hermite quadrature points and weights
 !----------------------------------------------------------------------
-module gaussHermite
+module gaussHemite
 implicit none
 save
 
 ! GH Nc_fundamental = 2
-double precision, parameter, dimension(2) :: xi2 = (/&
+double pecision, parameter, dimension(2) :: xi2 = (/&
      5.2464762327529035d-01, &
      1.6506801238857844d+00  &
     /)
 
-double precision, parameter, dimension(2) :: wi2 = (/&
+double pecision, parameter, dimension(2) :: wi2 = (/&
      4.5412414523193151d-01, &
      4.5875854768068512d-02  &
     /) 
 
 ! GH Nc_fundamental = 4
-double precision, parameter, dimension(4) :: xi4 = (/&
+double pecision, parameter, dimension(4) :: xi4 = (/&
      3.811869902073221072d-01, &
      1.157193712446780154d+00, &
      1.981656756695842958d+00, &
      2.930637420257244052d+00  &
     /)
 
-double precision, parameter, dimension(4) :: wi4 = (/&
+double pecision, parameter, dimension(4) :: wi4 = (/&
      3.730122576790773636d-01, &
      1.172399076617590269d-01, &
      9.635220120788266437d-03, &
      1.126145383753677815d-04  &
     /)
 
-double precision, parameter, dimension(6) :: xi6 = (/&
+double pecision, parameter, dimension(6) :: xi6 = (/&
     3.142403762543591112766d-01, &
     9.477883912401637437050d-01, &
     1.597682635152604796710d+00, &
@@ -40,7 +40,7 @@ double precision, parameter, dimension(6) :: xi6 = (/&
     3.889724897869781919272d+00  &
     /)
 
-double precision, parameter, dimension(6) :: wi6 = (/&
+double pecision, parameter, dimension(6) :: wi6 = (/&
     5.701352362624795783471d-01, &
     2.604923102641611292334d-01, &
     5.160798561588392999187d-02, &
@@ -50,7 +50,7 @@ double precision, parameter, dimension(6) :: wi6 = (/&
     /)
 
 ! GH Nc_fundamental = 8
-double precision, parameter, dimension(8) :: xi8 = (/&
+double pecision, parameter, dimension(8) :: xi8 = (/&
      2.734810461381524394d-01, &
      8.229514491446558999d-01, &
      1.380258539198880863d+00, &
@@ -60,7 +60,7 @@ double precision, parameter, dimension(8) :: xi8 = (/&
      3.869447904860122911d+00, &
      4.688738939305818754d+00  &
     /)
-double precision, parameter, dimension(8) :: wi8 = (/&
+double pecision, parameter, dimension(8) :: wi8 = (/&
      5.079294790166137830d-01, &
      2.806474585285336776d-01, &
      8.381004139898583227d-02, &
@@ -73,7 +73,7 @@ double precision, parameter, dimension(8) :: wi8 = (/&
 
 
 ! GH Nc_fundamental = 12
-double precision, parameter, dimension(12) :: xi12 = (/&
+double pecision, parameter, dimension(12) :: xi12 = (/&
      2.244145474725156020d-01, &
      6.741711070372122805d-01, &
      1.126760817611245136d+00, &
@@ -87,7 +87,7 @@ double precision, parameter, dimension(12) :: xi12 = (/&
      5.259382927668044161d+00, &
      6.015925561425739865d+00  &
     /)
-double precision, parameter, dimension(12) :: wi12 = (/&
+double pecision, parameter, dimension(12) :: wi12 = (/&
      4.269311638686992261d-01, &
      2.861795353464430258d-01, &
      1.277396217845591653d-01, &
@@ -103,7 +103,7 @@ double precision, parameter, dimension(12) :: wi12 = (/&
     /)
 
 ! GH Nc_fundamental = 16
-double precision, parameter, dimension(16) :: xi16 = (/&
+double pecision, parameter, dimension(16) :: xi16 = (/&
      1.948407415693993172d-01, &
      5.849787654359324129d-01, &
      9.765004635896827878d-01, &
@@ -122,7 +122,7 @@ double precision, parameter, dimension(16) :: xi16 = (/&
      7.125813909830727155d+00  &
     /)
 
-double precision, parameter, dimension(16) :: wi16 = (/&
+double pecision, parameter, dimension(16) :: wi16 = (/&
      3.752383525928024155d-01, &
      2.774581423025299087d-01, &
      1.512697340766424869d-01, &
@@ -142,25 +142,25 @@ double precision, parameter, dimension(16) :: wi16 = (/&
     /)
 
 ! half-GH Nc_fundamental = 2
-double precision, parameter, dimension(2) :: hxi2 = (/&
+double pecision, parameter, dimension(2) :: hxi2 = (/&
      3.001939310608394140d-01, &
      1.252421045333717009d+00  &
     /)
-double precision, parameter, dimension(2) :: hwi2 = (/&
+double pecision, parameter, dimension(2) :: hwi2 = (/&
      3.613798911363155786d-01, &
      1.386201088636844214d-01  &
     /)
 
 
 ! half-GH Nc_fundamental = 4
-double precision, parameter, dimension(4) :: hxi4 = (/&
+double pecision, parameter, dimension(4) :: hxi4 = (/&
      1.337764469960676383d-01, &
      6.243246901871899457d-01, &
      1.342537825644992244d+00, &
      2.262664477010361885d+00  &
     /)
 
-double precision, parameter, dimension(4) :: hwi4 = (/&
+double pecision, parameter, dimension(4) :: hwi4 = (/&
      1.835325639596920577d-01, &
      2.375842404229175642d-01, &
      7.528686870428026590d-02, &
@@ -168,7 +168,7 @@ double precision, parameter, dimension(4) :: hwi4 = (/&
     /)
 
 ! half-GH Nc_fundamental = 6
-double precision, parameter, dimension(6) :: hxi6 = (/&
+double pecision, parameter, dimension(6) :: hxi6 = (/&
      7.860065941318034044d-02, &
      3.867394102709340586d-01, &
      8.664294716825114984d-01, &
@@ -177,7 +177,7 @@ double precision, parameter, dimension(6) :: hxi6 = (/&
      3.036820169323391827d+00  &
     /)
 
-double precision, parameter, dimension(6) :: hwi6 = (/&
+double pecision, parameter, dimension(6) :: hwi6 = (/&
      1.110605364355289615d-01, &
      1.969891635526184459d-01, &
      1.451431417821328340d-01, &
@@ -187,7 +187,7 @@ double precision, parameter, dimension(6) :: hwi6 = (/&
     /)
 
 ! half-GH Nc_fundamental = 8
-double precision, parameter, dimension(8) :: hxi8 = (/&
+double pecision, parameter, dimension(8) :: hxi8 = (/&
      5.297864393185112986d-02, &
      2.673983721677653524d-01, &
      6.163028841823998683d-01, &
@@ -198,7 +198,7 @@ double precision, parameter, dimension(8) :: hxi8 = (/&
      3.686007162724397102d+00  &
     /)
 
-double precision, parameter, dimension(8) :: hwi8 = (/&
+double pecision, parameter, dimension(8) :: hwi8 = (/&
      7.566300718342849896d-02, &
      1.513894166189734825d-01, &
      1.556900326896759612d-01, &
@@ -211,7 +211,7 @@ double precision, parameter, dimension(8) :: hwi8 = (/&
 
 
 ! half-GH Nc_fundamental = 12
-double precision, parameter, dimension(12) :: hxi12 = (/&
+double pecision, parameter, dimension(12) :: hxi12 = (/&
      2.988970076966438599d-02, &
      1.542048782658252404d-01, &
      3.661439629743123980d-01, &
@@ -226,7 +226,7 @@ double precision, parameter, dimension(12) :: hxi12 = (/&
      4.768216287989857527d+00  &
     /)
 
-double precision, parameter, dimension(12) :: hwi12 = (/&
+double pecision, parameter, dimension(12) :: hwi12 = (/&
      4.301728180628807546d-02, &
      9.390713828427146859d-02, &
      1.237803162077378422d-01, &
@@ -242,7 +242,7 @@ double precision, parameter, dimension(12) :: hwi12 = (/&
     /)
 
 ! half-GH Nc_fundamental = 16
-double precision, parameter, dimension(16) :: hxi16 = (/&
+double pecision, parameter, dimension(16) :: hxi16 = (/&
      1.975365846007861789d-02, &
      1.028022452379241530d-01, &
      2.473976694524699094d-01, &
@@ -261,7 +261,7 @@ double precision, parameter, dimension(16) :: hxi16 = (/&
      5.675017934041974854d+00  &
     /)
 
-double precision, parameter, dimension(16) :: hwi16 = (/&
+double pecision, parameter, dimension(16) :: hwi16 = (/&
      2.850547109904675788d-02, &
      6.409676440157649480d-02, &
      9.191849606200946932d-02, &
@@ -280,4 +280,4 @@ double precision, parameter, dimension(16) :: hwi16 = (/&
      4.893895797658064526d-15  &
     /)
 
-end module gaussHermite
+end module gaussHemite
