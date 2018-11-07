@@ -1,36 +1,36 @@
 !=======================================================================
-!> @bief Physical space configurations
+!> @brief Physical space configurations
 !=======================================================================
-module velocityGid
-use gaussHemite
+module velocityGrid
+use gaussHermite
 
 implicit none
 save
 
-!Numbe of fundamental molecular velocity, to be read from nml: velocityNml
-intege :: Nc_fundamental
+!Number of fundamental molecular velocity, to be read from nml: velocityNml
+integer :: Nc_fundamental
 logical :: halfRange
 
-!Numbe of moleculer velocity in 2D-Gaussian Hermite
-intege :: Nc, Nc8
-!abscissae and weighting Hemite quadrature, dimension(Nc_fundamental)
-double pecision, dimension (:), allocatable :: xi, weight1D 
-!molecula velocity and weighting, dimension(Nc)
-double pecision, dimension (:), allocatable :: cx, cy, cz, w
-!specula wall's normal vector in X, Y direction, dimension(Nc)
-intege, dimension (:), allocatable :: oppositeX, oppositeY, oppositeZ
+!Number of moleculer velocity in 2D-Gaussian Hermite
+integer :: Nc, Nc8
+!abscissae and weighting Hermite quadrature, dimension(Nc_fundamental)
+double precision, dimension (:), allocatable :: xi, weight1D 
+!molecular velocity and weighting, dimension(Nc)
+double precision, dimension (:), allocatable :: cx, cy, cz, w
+!specular wall's normal vector in X, Y direction, dimension(Nc)
+integer, dimension (:), allocatable :: oppositeX, oppositeY, oppositeZ
 !constant PI
-double pecision, parameter :: PI=datan(1.d0)*4.d0
+double precision, parameter :: PI=datan(1.d0)*4.d0
 
-!half ange flux of discrete velocity grid 
-double pecision :: DiffFlux
+!half range flux of discrete velocity grid 
+double precision :: DiffFlux
 
 contains
-    suboutine setupVelocityGrid
+    subroutine setupVelocityGrid
         implicit none
-        intege :: l, m, n, k
+        integer :: l, m, n, k
 
-        ! Nc_fundamental has been initialized fom the nml
+        ! Nc_fundamental has been initialized from the nml
         allocate(xi(Nc_fundamental))
         allocate(weight1D(Nc_fundamental))
 
@@ -55,8 +55,8 @@ contains
                     xi = xi16
                     weight1D = wi16
                 case default
-                    pint*, "Nc_fundamental xi/wi for ", Nc_fundamental, &
-                     "has not been povided"
+                    print*, "Nc_fundamental xi/wi for ", Nc_fundamental, &
+                     "has not been provided"
                     deallocate(xi)
                     deallocate(weight1D)
             end select
@@ -81,8 +81,8 @@ contains
                     xi = hxi16
                     weight1D = hwi16
                 case default
-                    pint*, "Nc_fundamental xi/wi for ", Nc_fundamental, &
-                     "has not been povided"
+                    print*, "Nc_fundamental xi/wi for ", Nc_fundamental, &
+                     "has not been provided"
                     deallocate(xi)
                     deallocate(weight1D)
             end select
@@ -96,7 +96,7 @@ contains
 
         ! BUG find 2017-06-09
         do l=1,Nc_fundamental
-            xi(l) = xi(l)*dsqt(2.d0)
+            xi(l) = xi(l)*dsqrt(2.d0)
         enddo
         
         do l=1,Nc_fundamental
@@ -117,6 +117,6 @@ contains
         enddo
         DiffFlux=DiffFlux*4 !Check
 
-    end suboutine setupVelocityGrid
+    end subroutine setupVelocityGrid
 
-end module velocityGid
+end module velocityGrid
