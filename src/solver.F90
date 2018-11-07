@@ -1,4 +1,4 @@
-module solver
+Module solver
     use flow
     use velocityGrid
     use physicalGrid
