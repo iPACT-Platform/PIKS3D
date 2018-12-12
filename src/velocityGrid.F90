@@ -1,7 +1,15 @@
-!> @brief Physical space configurations module
-!!
-!! This is a detailed overall documenttion of this module.
-!! 
+!-------------------------------------------------------------------------------
+! module    : velocityGrid
+!-------------------------------------------------------------------------------
+! This is a module for velocity space configurations of 3D DVM parallel solver. 
+! For details:
+!
+! [1]   M.T. Ho, L. Zhu, L. Wu, P. Wang, Z. Guo, Z.-H. Li, Y. Zhang
+!       "A multi-level parallel solver for rarefied gas flows in porous media"
+! 		Computer Physics Communications, 234 (2019), pp. 14-25
+!
+!	See Section 2.2 of Ref.[1]
+!-------------------------------------------------------------------------------
 
 module velocityGrid
 use gaussHermite
@@ -9,8 +17,10 @@ use gaussHermite
 implicit none
 save
 
-! Number of fundamental molecular velocity in half of an axis,
-! to be read from NML: velocityNml
+! 2*Nc_fundamental is the number of the discrete velocities in one axis,
+! or the order of the quadrature.
+! The total number of discrete velocities is Nv=(2*Nc_fundamental)^3
+! Nc_fundamental to be read from NML: velocityNml
 integer :: Nc_fundamental
 
 ! Whether to use the half-range variant of Gauss-Hermite quadrature
@@ -40,10 +50,7 @@ contains
     !! Use Nc_fundamental[integer] and halfRange[logical],
     !! to construct the discrete velocity set and weight coefficients.
     !! If halfRange = true, then use half-range Gauss-Hermite quadrature
-    !! points as discrete velocities, otherwise use the Gauss-Hermite quadrature.
-    !! Nc_fundamental is the number of the discrete velocities in one axis,
-    !! or the order of the quadrature.
-
+    !! points as discrete velocities, otherwise use the full-range Gauss-Hermite quadrature.
     subroutine setupVelocityGrid
         implicit none
         ! index used later
@@ -111,9 +118,9 @@ contains
             endselect
         endif
 
-        ! Nunmber of the discrete velocity in 3-dimesions
+        ! Number of the discrete velocity in 3-dimesions
         Nc=(2*Nc_fundamental)**3
-        ! Nunmber of dimcrete velocities in one quadrants
+        ! Number of dimcrete velocities in one quadrants
         Nc8 = Nc/8
 
         ! The discrete velocities components
@@ -126,7 +133,7 @@ contains
             xi(l) = xi(l)*dsqrt(2.d0)
         enddo
         
-        ! Set the components of the dsicrete velocities and the togal weights
+        ! Set the components of the discrete velocities and the total weights
         do l=1,Nc_fundamental
             do m=1,Nc_fundamental
                 do n=1,Nc_fundamental
@@ -139,7 +146,7 @@ contains
             enddo
         enddo  
         
-        ! diffFlux is a velocity-set related constant
+        ! diffFlux is a velocity-set related constant, see denominator of Eq.(9) in Ref.[1]
         diffFlux=0.d0
         do l=1,Nc8
             DiffFlux=DiffFlux+cz(l)*w(l)

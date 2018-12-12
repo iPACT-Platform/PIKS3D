@@ -5,6 +5,7 @@
 *.out
 *.swp
 *.vtk
+*~
 build
 debug
 run

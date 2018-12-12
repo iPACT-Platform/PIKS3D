@@ -1,3 +1,16 @@
+!-------------------------------------------------------------------------------
+! module    : output
+!-------------------------------------------------------------------------------
+! This is a module saving simulation data of 3D DVM parallel solver. 
+! For details:
+!
+! [1]   M.T. Ho, L. Zhu, L. Wu, P. Wang, Z. Guo, Z.-H. Li, Y. Zhang
+!       "A multi-level parallel solver for rarefied gas flows in porous media"
+! 		Computer Physics Communications, 234 (2019), pp. 14-25
+!
+! Flow fields and evolution of key parameters are written in output files
+!-------------------------------------------------------------------------------
+
 module output
 use flow
 use physicalGrid

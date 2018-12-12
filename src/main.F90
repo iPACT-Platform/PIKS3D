@@ -1,3 +1,18 @@
+!-------------------------------------------------------------------------------
+! Program    : main
+!-------------------------------------------------------------------------------
+! This is the main file of 3D DVM parallel solver. 
+! For details:
+!
+! [1]   M.T. Ho, L. Zhu, L. Wu, P. Wang, Z. Guo, Z.-H. Li, Y. Zhang
+!       "A multi-level parallel solver for rarefied gas flows in porous media"
+! 		Computer Physics Communications, 234 (2019), pp. 14-25
+!
+! A digital image (3D array of binary data) of porous medium will be read.
+! Linearized BGK kinetic model of Boltzmann equation will be solved to find
+! gas apparent permeability as a function of Knudsen number.
+!-------------------------------------------------------------------------------
+
 PROGRAM main
 !Common Variables
 USE parameters
@@ -38,7 +53,7 @@ CALL allocateBuf
 
 
 
-! set error
+! set initial residual
 error = 1.D0
 startTime = MPI_Wtime()
 ! Main iteration loop
@@ -58,7 +73,7 @@ DO iStep = 1, MaxStep
         END SELECT
     endif
 
-    ! Test flow field convergence
+    ! Test flow field convergence Eq.(18) of [1]
     if ( error <= eps ) then
         exit
     endif

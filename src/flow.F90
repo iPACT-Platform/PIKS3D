@@ -1,14 +1,27 @@
-!----------------------------------------------------------------------
-!> @brief Flow field array and physical simualtion parameters
-!----------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+! module    : flow
+!-------------------------------------------------------------------------------
+! This is a module for the flow parameters of 3D DVM parallel solver. 
+! For details:
+!
+! [1]   M.T. Ho, L. Zhu, L. Wu, P. Wang, Z. Guo, Z.-H. Li, Y. Zhang
+!       "A multi-level parallel solver for rarefied gas flows in porous media"
+! 		Comput. Phys. Commun., 234 (2019), pp. 14-25
+!
+!	Initial conditions for velocity distribution function, velocity are set.
+!-------------------------------------------------------------------------------
+
 module flow
 use velocityGrid, only: PI
 implicit none
 save
 
 ! flow parameters, to be read from NML: flowNml
+! Kn : Knudsen number defined in Eq.(1) of [1]
+! pressDrop : pressure drop applied at inlet/outlet Eq.(10) of [1]
+! accom : tangential momentum accommodation coefficient (TMAC)  Eq.(8) of [1]
 double precision :: Kn, pressDrop, accom
-
+! mu : coefficient associated with collision frequency in RHS of Eq.(4) of [1]
 double precision :: mu
 
 ! double precision, parameter :: Kn = 1.0d0
@@ -16,7 +29,10 @@ double precision :: mu
 ! double precision, parameter :: PressDrop=1.0d-1
 ! double precision, parameter :: accom = 1.d0
 
+! f(spatial_id,velocity_id,sweeppath_id) : velocity distribution function in Eq.(5) of [1]
 double precision, DIMENSION(:,:,:), ALLOCATABLE :: f
+! Rho : number density in Eq.(6) of [1]
+! Ux, Uy, Uz : three component of velocity vector U in Eq.(6) of [1]
 double precision, DIMENSION(:), ALLOCATABLE :: Rho, Ux, Uy, Uz
 double precision :: mass
 
