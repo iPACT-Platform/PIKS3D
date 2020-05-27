@@ -55,10 +55,10 @@ double precision :: mu
 ! double precision, parameter :: accom = 1.d0
 
 ! f(spatial_id,velocity_id,sweeppath_id) : velocity distribution function in Eq.(5) of [1]
-double precision, DIMENSION(:,:,:), ALLOCATABLE :: f
+double precision, dimension(:,:,:), allocatable :: f
 ! Rho : number density in Eq.(6) of [1]
 ! Ux, Uy, Uz : three component of velocity vector U in Eq.(6) of [1]
-double precision, DIMENSION(:), ALLOCATABLE :: Rho, Ux, Uy, Uz
+double precision, dimension(:), allocatable :: Rho, Ux, Uy, Uz
 double precision :: mass
 
 contains
@@ -71,10 +71,10 @@ contains
         implicit none
         integer :: i, j, k, l, ll
 
-        ALLOCATE(f(Ntotal,Nc8,1:8))
+        allocate(f(Ntotal,Nc8,1:8))
 
 
-        ALLOCATE(Rho(Ntotal), Ux(Ntotal), Uy(Ntotal), Uz(Ntotal))
+        allocate(Rho(Ntotal), Ux(Ntotal), Uy(Ntotal), Uz(Ntotal))
 
         mu = dsqrt(PI/2.d0)/Kn
 
@@ -85,21 +85,20 @@ contains
         Uz = 0.d0
         mass = 1.d0
 
-
-        Do k=zlg,zug
-            Do j=ylg,yug
-                Do i=xlg,xug
+        do k=zlg,zug
+            do j=ylg,yug
+                do i=xlg,xug
                     l=(i-xlg+1)+(j-ylg)*Nxtotal+(k-zlg)*Nxytotal
                     if (image(i,j,k)/=solid) then
             !           Rho(l)=pressDrop*(i/2.d0-Nx)/Nx
                         Rho(l)= 0.d0
-                    end if
+                    endif
                     do ll=1,8
                         f(l,:,ll)=w(:)*Rho(l) !Check
                     enddo
-                 Enddo
-            Enddo
-        Enddo
+                 enddo
+            enddo
+        enddo
     end subroutine setupFlow
 
     subroutine allocateBuf
