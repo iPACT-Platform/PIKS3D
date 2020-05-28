@@ -27,4 +27,4 @@ set(CMAKE_Fortran_COMPILER ${MPI_Fortran_COMPILER})
 
 file(GLOB_RECURSE sources  src/*.F90)
 
-add_executable(dvm3d.x ${sources})
+add_executable(piks3d ${sources})

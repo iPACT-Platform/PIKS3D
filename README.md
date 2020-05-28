@@ -1,98 +1,39 @@
-### Short cuts (alias)
+ ```
 
-Put add this line on your ~/.bashrc
+$$$$$$$\ $$$$$$\ $$\   $$\  $$$$$$\   $$$$$$\  $$$$$$$\  
+$$  __$$\\_$$  _|$$ | $$  |$$  __$$\ $$ ___$$\ $$  __$$\ 
+$$ |  $$ | $$ |  $$ |$$  / $$ /  \__|\_/   $$ |$$ |  $$ |
+$$$$$$$  | $$ |  $$$$$  /  \$$$$$$\    $$$$$ / $$ |  $$ |
+$$  ____/  $$ |  $$  $$<    \____$$\   \___$$\ $$ |  $$ |
+$$ |       $$ |  $$ |\$$\  $$\   $$ |$$\   $$ |$$ |  $$ |
+$$ |     $$$$$$\ $$ | \$$\ \$$$$$$  |\$$$$$$  |$$$$$$$  |
+\__|     \______|\__|  \__| \______/  \______/ \_______/ 
 
-```bash
-alias dvm3d='export PRJ=${HOME}/mpi_dvm3d; source ${PRJ}/conf/bashrc singleSphere'
-```
-NOTE: the singleSphere it the deafult run case.
-
-Any time your login and needs to work on the project, type `dvm`. 
-Then the aliases and related environments are set for you. 
-For the compelete list of environment and aliases see `conf/bashrc`
-
-### How to compile for the first time and the re-compilation
-
-Supposing your are current in the project directory (the one with src and config direcories in it)
-
-#### For the Release mode compilation
-
-```bash
-mkdir build
-cd build
-cmake ..
-make -j 6
+     Parallel Image-based Kinetic Solver (3D)
 ```
 
-This will do the Release mode compilation. 
-Anytime you make some modification on the source code, and you want to re-compile, just cd to the `build` directory, and make:
+## What is PIKS3D?
 
-```
-cd $BUILD
-make -j 6
-```
+PIKS3D is an open-source 3D parallel pore-scale rarefied gas-flow simulator. 
+It solves the linearized gas-kinetic equation on a uniform cartesian grid using the Discrete
+Velocity Method (DVM). It can be run in parallel both OpenMP and MPI. The porous
+structure can be arbitrary complex and and is input into the simulator as an binary
+images of '0' (fluid) and '1' (solid).
 
-or simplely,
+## How do I use PIKS3D?
 
-```bash
-make -j 6 -C $BUILD
-```
+See the [wiki](https://github.com/iPACT-Platform/PIKS3D/wiki) pages for installation and tutorials.
+See the reference below for the theory and numerical method. The full-text PDFs are provided in the directory `reference`.
 
-or even more simply using the alias we have set,
+## How do I cite PIKS3D?
 
-```bash
-mb
-```
-which means make for build. The actural command mb issues can be seen by `alias mb`. 
+* Minh Tuan Ho, Lianhua Zhu, Lei Wu, Peng Wang, Zhaoli Guo, Zhi-Hui Li, and Yonghao Zhang. “A Multi-Level Parallel Solver for Rarefied Gas Flows in Porous Media.” Computer Physics Communications 234 (January 1, 2019): 14–25. [DOI: 10.1016/j.cpc.2018.08.009](https://doi.org/10.1016/j.cpc.2018.08.009).
+* Minh Tuan Ho, Lianhua Zhu, Lei Wu, Peng Wang, Zhaoli Guo, Jingsheng Ma, and Yonghao Zhang. “Pore-Scale Simulations of Rarefied Gas Flows in Ultra-Tight Porous Media.” Fuel 249 (August 1, 2019): 341–51. [DOI: 10.1016/j.fuel.2019.03.106](https://doi.org/10.1016/j.fuel.2019.03.106).
 
-To disable use of OpenMP, you can add the flag `-DDVM_OPENMP=OFF` to the
-CMake command.
 
-#### For the Debug mode compilation
-For Debug build, similarly, start from the project directory
+## License
 
-```bash
-mkdir debug
-cmake .. -DCMAKE_BUILD_TYPE=Debug
-make
-```
-Anytime you make some modifications on the source code, and you want to re-compile for the Debug mode, just cd to the `debug` directory,
-```
-cd $DEBUG
-make -j 6
-```
+The PIKS3D is licensed under the MIT license, see the file `LICENSE`.
 
-or
-
-```bash
-make -j 6 -C $DEBUG
-```
-
-or using the alias
-
-```bash
-md
-```
-
-### How to run it
-
-```bash
-mkdir -p run/yourCase
-cd run/yourCase
-cp $CONF/para.in .
-# do some adjusting in para.in
-# then prepare the iamge data file in the current case direcory
-# set the num of OMP threads via the environment
-export OMP_NUM_THREADS=2
-# run the release mode exe.:
-mpirun -np 8 $BUILD/dvm3d.x 
-# or run the debug mode exe.:
-mpirun -np 8 $DEBUG/dmv3d.x
-```
-
-### About serial version code (v14) in the conf/
-
-This file is `conf/linearised_BGK_D3Q64_v14.f90`.
-This code is used as validation comparing purpose. 
-For a serial run, always copy this file to the run case directory, and modify and compile then run.
-If there is something need to change permnently, e.g., redefine the absicss/equlibrium, please change this file and commit also.
+## Who is funding PIKS3D
+Development of PIKS3D is supported by the Engineering and Physical Sciences Research Council, European Union’s Horizon 2020 Marie Skłodowska-Curie Individual Fellowship.

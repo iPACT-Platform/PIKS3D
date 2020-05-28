@@ -1,9 +1,6 @@
 ! The MIT License (MIT)
 
-! Copyright (c) 2017-2020 
-!   Lianhua Zhu <zhulianhua121@gmail.com> 
-!   and Minh-Tuan Ho <minhtuanho.vn@gmail.com>
-!   and Yonghao Zhang <y.h.zhang168@gmail.com>
+! Copyright (c) 2017-2020 Lianhua Zhu, Minh Tuan Ho and Yonghao Zhang
 
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -22,4 +19,3 @@
 ! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 ! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ! SOFTWARE.
-
