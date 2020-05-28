@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.2)
 
-project(mpi_dvm LANGUAGES Fortran)
+project(piks3d LANGUAGES Fortran)
 
 option(DVM_OPENMP "Enable OpenMP" ON)
 

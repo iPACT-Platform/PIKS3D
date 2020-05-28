@@ -192,7 +192,7 @@ contains
     end subroutine saveFlowField
 
 
-    SUBROUTINE saveFlowFieldVTK
+    subroutine saveFlowFieldVTK
         implicit none
         integer :: i, j, k, l,MPI_ERR, IO_ERR
         character(13) fname
@@ -248,9 +248,9 @@ contains
         endif
 
         return
-    END SUBROUTINE saveFlowFieldVTK
+    end subroutine saveFlowFieldVTK
 
-    SUBROUTINE saveFlowFieldVTI
+    subroutine saveFlowFieldVTI
         INTEGER :: i, j, k, l,MPI_ERR, IO_ERR
         character(13) fname
         character(10) pfname

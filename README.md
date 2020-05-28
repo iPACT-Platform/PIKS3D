@@ -9,7 +9,7 @@ $$ |       $$ |  $$ |\$$\  $$\   $$ |$$\   $$ |$$ |  $$ |
 $$ |     $$$$$$\ $$ | \$$\ \$$$$$$  |\$$$$$$  |$$$$$$$  |
 \__|     \______|\__|  \__| \______/  \______/ \_______/ 
 
-     Parallel Image-based Kinetic Solver (3D)
+        Parallel Image-based Kinetic Solver (3D)
 ```
 
 ## What is PIKS3D?
@@ -23,7 +23,7 @@ images of '0' (fluid) and '1' (solid).
 ## How do I use PIKS3D?
 
 See the [wiki](https://github.com/iPACT-Platform/PIKS3D/wiki) pages for installation and tutorials.
-See the reference below for the theory and numerical method. The full-text PDFs are provided in the directory `reference`.
+See the reference below for the theory and numerical method. The full-text PDFs are provided in the PIKS2D's directory [reference](https://github.com/iPACT-Platform/PIKS2D/reference).
 
 ## How do I cite PIKS3D?
 
@@ -35,5 +35,5 @@ See the reference below for the theory and numerical method. The full-text PDFs 
 
 The PIKS3D is licensed under the MIT license, see the file `LICENSE`.
 
-## Who is funding PIKS3D
+## Who have funded PIKS3D
 Development of PIKS3D is supported by the Engineering and Physical Sciences Research Council, European Union’s Horizon 2020 Marie Skłodowska-Curie Individual Fellowship.

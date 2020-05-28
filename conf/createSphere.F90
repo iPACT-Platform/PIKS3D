@@ -1,6 +1,16 @@
+!-----------------------------------------------------------
+! This program creates an simple binary geometry flag file 
+! which can used as the `rawImageFile` for the program PIKS3D.
+! It create a solid sphere in a box of dimension 100^3 such 
+! that the sphere locates on the center of the box, and the 
+! void space takes 75% of the box's total volume.
+! From this program, the users of PIKS3D will find out the 
+! format of the binary image file definging a geometry
+!-----------------------------------------------------------
+
 program main
 implicit none
-integer, parameter :: NX = 200
+integer, parameter :: NX = 100
 integer, parameter :: NY = 100
 integer, parameter :: NZ = 100
 double precision, parameter :: porosity = 0.75d0
