@@ -248,7 +248,7 @@ contains
     end subroutine saveFlowFieldVTK
 
     subroutine saveFlowFieldVTI
-        INTEGER :: i, j, k, l,MPI_ERR, IO_ERR
+        integer :: i, j, k, l,MPI_ERR, IO_ERR
         character(13) fname
         character(10) pfname
         integer :: exl, exu, eyl, eyu, ezl, ezu
