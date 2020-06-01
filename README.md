@@ -20,7 +20,7 @@ PIKS3D is an open-source 3D parallel pore-scale rarefied gas-flow simulator.
 It solves the linearized gas-kinetic equation on a uniform cartesian grid using the Discrete
 Velocity Method (DVM). It can be run in parallel both OpenMP and MPI. The porous
 structure can be arbitrary complex and and is input into the simulator as an binary
-images of '0' (fluid) and '1' (solid). Below is an example showingg the flow field in a sandstone obtained by the solver.
+images of '0' (fluid) and '1' (solid). Below is an example showing the flow field in a sandstone simulated by the solver.
 
 <p align="center"><a href="https://ibb.co/6yVgGFJ"><img src="https://i.ibb.co/GdBcGR3/gas-porous-media.png" alt="gas-porous-media" border="0" width="480"></a></p>
 
