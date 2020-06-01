@@ -36,4 +36,4 @@ See the reference below for the theory and numerical method. The full-text PDFs 
 The PIKS3D is licensed under the MIT license, see the file `LICENSE`.
 
 ## Who have funded PIKS3D
-Development of PIKS3D is supported by the Engineering and Physical Sciences Research Council, European Union’s Horizon 2020 Marie Skłodowska-Curie Individual Fellowship.
+Development of PIKS3D received funding from Engineering and Physical Sciences Research Council, European Union’s Horizon 2020 Marie Skłodowska-Curie Individual Fellowship and the “Advanced Hybrid Method for Post-Scale Simulation of Shale Gas Flows”, a global partnership project grant funded by [KFUPM](http://www.kfupm.edu.sa).
