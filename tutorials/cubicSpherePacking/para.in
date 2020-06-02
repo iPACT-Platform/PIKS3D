@@ -1,0 +1,35 @@
+&physicalNml
+imageFileName = 'singleSphere100^3.raw'
+Nx = 100
+Ny = 100
+Nz = 100
+wallExtOrder = 1
+fluidLayer = 0
+Ref_L = 1.d0
+/
+
+&velocityNml
+Nc_fundamental = 4
+halfRange = T
+/
+
+&mpiNml
+mpi_xdim = 2
+mpi_ydim = 2
+mpi_zdim = 1
+/
+
+&solverNml
+maxStep = 100
+chkConvergeStep = 10
+saveStep = 50
+eps = 1.0d-7
+saveLast = T
+saveFormat = 1
+/
+
+&flowNml
+Kn = 1.0d-1
+pressDrop = 1.0d-1
+accom = 1.d0
+/

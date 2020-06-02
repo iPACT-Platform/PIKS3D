@@ -14,15 +14,15 @@ halfRange = T
 /
 
 &mpiNml
-mpi_xdim = 8
-mpi_ydim = 8
-mpi_zdim = 8
+mpi_xdim = 2
+mpi_ydim = 2
+mpi_zdim = 1
 /
 
 &solverNml
-maxStep = 50000
-chkConvergeStep = 100
-saveStep = 5000000
+maxStep = 100
+chkConvergeStep = 10
+saveStep = 50
 eps = 1.0d-7
 saveLast = T
 saveFormat = 1
