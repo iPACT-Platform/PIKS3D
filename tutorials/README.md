@@ -1,6 +1,17 @@
+
+
+
+> Written with This tutorial simulates the rarefied gas flow in a fractal model, which described by the level-3 Sierpinski carpet.
+
+<p align="center"> <a href="https://ibb.co/p2kG22Z"><img src="https://i.ibb.co/0qz8qqZ/sandPack.png" alt="sandPack" border="0" width="360"> </a> </p>
+
+The black and white regions represent the fluid and solid parts respectively.
+
+
+
 ### 1. Compile the source codes
 
-Suppose that your are currently in the project directory (the one with `src/`, `conf/`, `references/`, `tutorials/` directories in it) and a MPI environment is ready:
+Suppose that your are currently in the project directory (the one with `src/`, `conf/`, `references/`, `tutorials/` directories in it) and a MPI environment is ready
 
 ```bash
 cd src/
@@ -91,9 +102,11 @@ where
 * `saveFormat` the format to save data, can be [1|2|3]. 1 means in .pvti format, 2 means in Tecplot format, 3 means in vtk format.
 * `eps` is value for the convergence criterion. The simulation will stop either the `eps` or the `maxSteps` is achieved, whichever comes first. Therefore, to achieve a reasonable `eps`, the maximum number of iterations `maxSteps` normally should be much larger than 100 as in this example.
 * `saveLast` do we save the flow field after finishing running? Can be [T|F].
-* `Kn` Knudsen number.
+* `Kn` is Knudsen number.
 * `pressDrop` is the non-dimensional pressure drop between the inlet and outlet. With the current linearized formulation and nondimensionalization, the dimensionless permeability are independent of positive`pressDrop`.  
 * `accom` is the accommodation coefficient in the diffuse-specular model for the gas-solid interaction.
 
 **Note**: 
 More details on the simulation parameters can be found in Reference articles in the `references/` directory. 
+
+
