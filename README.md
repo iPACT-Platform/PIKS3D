@@ -12,13 +12,18 @@ $$ |     $$$$$$\ $$ | \$$\ \$$$$$$  |\$$$$$$  |$$$$$$$  |
         Parallel Image-based Kinetic Solver (3D)
 ```
 
+
+
 ## What is PIKS3D?
 
 PIKS3D is an open-source 3D parallel pore-scale rarefied gas-flow simulator. 
 It solves the linearized gas-kinetic equation on a uniform cartesian grid using the Discrete
 Velocity Method (DVM). It can be run in parallel both OpenMP and MPI. The porous
 structure can be arbitrary complex and and is input into the simulator as an binary
-images of '0' (fluid) and '1' (solid).
+images of '0' (fluid) and '1' (solid). Below is an example showing the flow field in a sandstone simulated by the solver.
+
+<p align="center"><a href="https://ibb.co/6yVgGFJ"><img src="https://i.ibb.co/GdBcGR3/gas-porous-media.png" alt="gas-porous-media" border="0" width="480"></a></p>
+
 
 ## How do I use PIKS3D?
 
@@ -36,4 +41,4 @@ See the reference below for the theory and numerical method. The full-text PDFs 
 The PIKS3D is licensed under the MIT license, see the file `LICENSE`.
 
 ## Who have funded PIKS3D
-Development of PIKS3D received funding from Engineering and Physical Sciences Research Council, European Union’s Horizon 2020 Marie Skłodowska-Curie Individual Fellowship and the “Advanced Hybrid Method for Post-Scale Simulation of Shale Gas Flows”, a global partnership project grant funded by [KFUPM](http://www.kfupm.edu.sa).
+Development of PIKS3D received funding from Engineering and Physical Sciences Research Council, European Union’s Horizon 2020 Marie Skłodowska-Curie Individual Fellowship and the “Advanced Hybrid Method for Pore-Scale Simulation of Shale Gas Flows”, a global partnership project grant funded by [KFUPM](http://www.kfupm.edu.sa).
