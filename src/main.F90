@@ -113,6 +113,9 @@ do iStep = 1, MaxStep
 
     ! Test flow field convergence Eq.(18) of [1]
     if ( error <= eps ) then
+        if (iStep < chkConvergeStep) then
+            call chkConverge
+        endif
         exit
     endif
 enddo
