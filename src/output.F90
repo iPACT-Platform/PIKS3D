@@ -154,9 +154,9 @@ contains
             if (proc == master) then           
                 permeability=mass*Kn*sqrt(4.d0/PI)  
                 write(*,"( 1I10, 3ES15.6)")  iStep,  mass,  permeability, error
-                ! open(22,file='Results.dat', position="append")
-                ! write(22,'(4ES15.6, 1I15)') Kn, mass, permeability, error, iStep
-                ! close(22)
+                open(22,file='Results.dat', position="append")
+                write(22,'(4ES15.6, 1I15)') Kn, mass, permeability, error, iStep
+                close(22)
             endif
         endif ! xl==xmin
         !bcast error so every process in WORLD can stop
